@@ -392,20 +392,51 @@ export const handleSubmitInterests = async (
     return;
   }
 
+  let chanelsLinks = channelInfo?.youtubeLinks.filter((c) => c !== "");
+  // Assuming channelsLinks is an array of YouTube links
+try {
+  for (const link of chanelsLinks) {
+    const { data, error } = await supabase.rpc("check_youtube_link_exists", {
+      link,
+    });
+
+    if (error) {
+      console.error("Error validating channel:", error);
+      throw new Error("Failed to validate channel");
+    }
+
+    if (data) {
+      showUniqueToast(
+        `${link} is already linked!`,
+        "error",
+        "youtube-required"
+      );
+      return; // Exit the entire function if any link exists
+    }
+  }
+} catch (error) {
+  console.error("Error in channel validation:", error);
+  showUniqueToast(
+    "Error validating channels. Please try again.",
+    "error",
+    "validation-error"
+  );
+  return;
+}
   // Check if all channels are verified
   // if (interests.channelManagement || interests.musicPartnerProgram) {
   //   const unverifiedChannels = channelInfo.youtubeLinks.filter(
   //     (link) => link.trim() && !channelInfo.verifiedChannels[link]
   //   );
 
-    // if (unverifiedChannels.length > 0) {
-    //   showUniqueToast(
-    //     "Please verify all YouTube channels before continuing",
-    //     "error",
-    //     "unverified-channels"
-    //   );
-    //   return;
-    // }
+  // if (unverifiedChannels.length > 0) {
+  //   showUniqueToast(
+  //     "Please verify all YouTube channels before continuing",
+  //     "error",
+  //     "unverified-channels"
+  //   );
+  //   return;
+  // }
   // }
 
   // Validate Digital Rights fields if selected
