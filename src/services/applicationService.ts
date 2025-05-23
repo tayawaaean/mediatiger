@@ -27,13 +27,19 @@ export const handleApplicationStatus = async ({
 }: ApplicationStatusHandlerProps) => {
   try {
     if (activeTab === "applications") {
+      console.log({
+        admin_id: adminId,
+        application_id: id,
+        new_status: status,
+        reason: status === "rejected" ? reason : `Application ${status}`,
+      });
       const { error } = await supabase.rpc("update_application_status_with_admin", {
         admin_id: adminId,
         application_id: id,
         new_status: status,
         reason: status === "rejected" ? reason : `Application ${status}`,
       });
-
+      console.log("another one")
       if (error) throw error;
       toast.success(`Application ${status} successfully`);
       // Handle success callbacks

@@ -97,6 +97,7 @@ export default function AdminPanel(): JSX.Element {
                 });
 
             if (error) throw error;
+            console.log(data)
             setApplications(data || []);
         } catch (err) {
             console.error("Error loading applications:", err);
