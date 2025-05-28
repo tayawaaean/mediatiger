@@ -32,47 +32,104 @@ export default function Messages() {
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
   const currentPath = location.pathname;
+
+  // Check if current user is admin
+  const isAdmin = user?.user_metadata?.role === "admin";
+
   const fetchUsers = async () => {
     if (!user || !isAdmin) return;
 
     try {
+      // First, get all messages involving the admin
       const { data: messages, error: messagesError } = await supabase
         .from("messages")
         .select("*")
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order("created_at", { ascending: false });
 
-      if (messagesError) throw messagesError;
+      if (messagesError) {
+        console.error("Error fetching messages:", messagesError);
+        return;
+      }
 
-      const { data: allUsers, error: usersError } = await supabase
-        .from("profiles")
-        .select("*");
-      if (usersError) throw usersError;
+      console.log("Admin messages:", messages);
+      console.log("Admin ID:", user.id);
 
+      // Get all user IDs that have messaged with admin (excluding admin themselves)
       const messageUserIds = [
-        ...new Set(messages?.flatMap((m) => [m.sender_id, m.receiver_id])),
+        ...new Set(
+          messages
+            ?.flatMap((m) => [m.sender_id, m.receiver_id])
+            .filter((id) => id !== user.id) // Exclude admin's own ID
+        ),
       ];
 
-      const nonAdminUsers = allUsers.filter(
-        (u) =>
-          u.user_metadata?.role !== "admin" && messageUserIds.includes(u.id)
+      console.log("Message user IDs:", messageUserIds);
+
+      if (messageUserIds.length === 0) {
+        console.log("No users found with messages");
+        setUsers([]);
+        return;
+      }
+
+      // Get user data from auth.users using RPC function
+      const { data: authUsers, error: authError } = await supabase.rpc(
+        "get_users_by_ids",
+        { user_ids: messageUserIds }
       );
 
-      const usersWithMessages = nonAdminUsers.map((u) => {
-        const lastMessage = messages?.find(
-          (m) => m.sender_id === u.id || m.receiver_id === u.id
-        );
+      if (authError) {
+        console.error("Error fetching auth users:", authError);
+        console.error("Auth error details:", authError);
+        return;
+      }
+
+      console.log("Auth users:", authUsers);
+
+      // Create user objects with data from auth.users
+      const usersWithMessages = messageUserIds.map((userId) => {
+        const authUser = authUsers?.find((u) => u.id === userId);
+
+        // Find the most recent message for this user
+        const userMessages =
+          messages?.filter(
+            (m) => m.sender_id === userId || m.receiver_id === userId
+          ) || [];
+
+        const lastMessage = userMessages[0]; // Already sorted by created_at desc
+
+        console.log(`User ${userId} auth data:`, authUser);
+        console.log(`Raw meta data:`, authUser?.raw_user_meta_data);
+
+        // Create user object from auth data
+        const userObject = {
+          id: userId,
+          email: authUser?.email || `user-${userId.slice(0, 8)}`,
+          full_name:
+            authUser?.raw_user_meta_data?.fullname ||
+            authUser?.raw_user_meta_data?.full_name ||
+            authUser?.email?.split("@")[0] ||
+            `User ${userId.slice(0, 8)}`,
+          user_metadata: authUser?.raw_user_meta_data || { role: "user" },
+        };
+
+        console.log(`Final user object for ${userId}:`, userObject);
+
         return {
-          ...u,
+          ...userObject,
           last_message: lastMessage?.content || "",
           last_message_time: lastMessage?.created_at || "",
         };
       });
 
+      // Sort by most recent message
       const sortedUsers = usersWithMessages.sort(
         (a, b) =>
           new Date(b.last_message_time).getTime() -
           new Date(a.last_message_time).getTime()
       );
+
+      console.log("Final sorted users:", sortedUsers);
 
       setUsers(sortedUsers);
       if (!selectedUser && sortedUsers.length > 0) {
@@ -83,25 +140,55 @@ export default function Messages() {
     }
   };
 
-  useEffect(() => {
-    const loadAdminUser = async () => {
-      if (!user) return;
+  const fetchMessages = async () => {
+    if (!user) {
+      console.log("No user found");
+      return;
+    }
 
-      try {
-        fetchUsers();
-      } catch (error) {
-        console.error("Error loading admin user:", error);
-      } finally {
-        setIsLoading(false);
+    try {
+      let query;
+
+      if (isAdmin && selectedUser) {
+        // Admin viewing conversation with specific user
+        query = supabase
+          .from("messages")
+          .select("*")
+          .or(
+            `and(sender_id.eq.${selectedUser.id},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${selectedUser.id})`
+          )
+          .order("created_at", { ascending: true });
+      } else {
+        // Regular user or admin without selected user - conversation with admin
+        query = supabase
+          .from("messages")
+          .select("*")
+          .or(
+            `and(sender_id.eq.${user.id},receiver_id.eq.${adminId}),and(sender_id.eq.${adminId},receiver_id.eq.${user.id})`
+          )
+          .order("created_at", { ascending: true });
       }
-    };
 
-    loadAdminUser();
-  }, [user]);
+      console.log("Fetching messages for:", {
+        userId: user.id,
+        isAdmin,
+        selectedUser: selectedUser?.id,
+        adminId,
+      });
 
-  if (!user) return null;
+      const { data: messages, error } = await query;
 
-  const isAdmin = user.user_metadata.role === "admin";
+      if (error) {
+        console.error("Error fetching messages:", error);
+        return;
+      }
+
+      console.log("Fetched messages:", messages);
+      setMessages(messages || []);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -110,7 +197,10 @@ export default function Messages() {
   };
 
   const handleSendMessage = async () => {
-    if (!user) return;
+    if (!user || (!newMessage.trim() && !selectedFile)) {
+      console.log("Cannot send message: no user or empty message");
+      return;
+    }
 
     try {
       let fileUrl = "";
@@ -123,7 +213,10 @@ export default function Messages() {
           .from("message-images")
           .upload(filePath, selectedFile);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          throw uploadError;
+        }
 
         const {
           data: { publicUrl },
@@ -131,92 +224,140 @@ export default function Messages() {
 
         fileUrl = publicUrl;
       }
-      const { error } = await supabase.from("messages").insert([
-        {
-          sender_id: user.id,
-          receiver_id: isAdmin ? selectedUser?.id : adminId,
-          content: newMessage.trim(),
-          image_url: fileUrl || null,
-          created_at: new Date().toISOString(),
-        },
-      ]);
 
-      if (error) throw error;
+      const messageData = {
+        sender_id: user.id,
+        receiver_id: isAdmin ? selectedUser?.id : adminId,
+        content: newMessage.trim(),
+        image_url: fileUrl || null,
+        created_at: new Date().toISOString(),
+      };
+
+      console.log("Sending message:", messageData);
+
+      const { error } = await supabase.from("messages").insert([messageData]);
+
+      if (error) {
+        console.error("Error inserting message:", error);
+        throw error;
+      }
+
       setNewMessage("");
       setSelectedFile(null);
       setIsModalOpen(false);
+
+      // Fetch messages again to update the UI
       await fetchMessages();
+
+      // If admin, also refresh users list to update last message
+      if (isAdmin) {
+        await fetchUsers();
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
-  const fetchMessages = async () => {
+  // Initial load
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Loading data for user:", user);
+
+      try {
+        if (isAdmin) {
+          await fetchUsers();
+        }
+        // Always fetch messages
+        await fetchMessages();
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user, isAdmin]); // Added isAdmin dependency
+
+  // Fetch messages when selectedUser changes (for admin)
+  useEffect(() => {
+    if (user && isAdmin && selectedUser) {
+      console.log("Selected user changed, fetching messages");
+      fetchMessages();
+    }
+  }, [selectedUser]);
+
+  // Real-time subscription
+  useEffect(() => {
     if (!user) return;
 
-    try {
-      const { data: messages, error } = await supabase
-        .from("messages")
-        .select("*")
-        .or(
-          isAdmin && selectedUser
-            ? `and(sender_id.eq.${selectedUser.id},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${selectedUser.id})`
-            : `and(sender_id.eq.${user.id},receiver_id.eq.${adminId}),and(sender_id.eq.${adminId},receiver_id.eq.${user.id})`
-        )
-        .order("created_at", { ascending: true });
+    console.log("Setting up real-time subscription");
 
-      if (error) throw error;
-      setMessages(messages || []);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
+    const channel = supabase.channel("messages");
+
+    let filter;
+    if (isAdmin && selectedUser) {
+      filter = `sender_id=eq.${selectedUser.id} AND receiver_id=eq.${user.id} OR sender_id=eq.${user.id} AND receiver_id=eq.${selectedUser.id}`;
+    } else {
+      filter = `sender_id=eq.${user.id} AND receiver_id=eq.${adminId} OR sender_id=eq.${adminId} AND receiver_id=eq.${user.id}`;
     }
-  };
 
-  useEffect(() => {
-    fetchMessages();
-
-    const subscription = supabase
-      .channel("messages")
+    const subscription = channel
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "messages",
-          filter:
-            isAdmin && selectedUser
-              ? `(sender_id=eq.${selectedUser.id} AND receiver_id=eq.${user.id}) OR (sender_id=eq.${user.id} AND receiver_id=eq.${selectedUser.id})`
-              : `(sender_id=eq.${user.id} AND receiver_id=eq.${adminId}) OR (sender_id=eq.${adminId} AND receiver_id=eq.${user.id})`,
         },
-        () => {
+        (payload) => {
+          console.log("Real-time message update:", payload);
           fetchMessages();
+          if (isAdmin) {
+            fetchUsers(); // Update users list to show new last message
+          }
         }
       )
       .subscribe();
 
     return () => {
+      console.log("Unsubscribing from real-time updates");
       subscription.unsubscribe();
     };
-  }, [user, selectedUser]);
+  }, [user, selectedUser, isAdmin]);
+
+  // Early returns
+  if (!user) {
+    console.log("No user, returning null");
+    return null;
+  }
 
   // Group messages helper function
   const getGroupedMessages = () => {
     if (!messages.length) return [];
-    
+
     return messages.map((message, index) => {
       // Check if this message should be grouped with the previous one
       const prevMessage = index > 0 ? messages[index - 1] : null;
-      
+
       // Group messages if:
       // 1. Same sender
       // 2. Within 5 minutes of each other
-      const shouldGroup = prevMessage && 
+      const shouldGroup =
+        prevMessage &&
         prevMessage.sender_id === message.sender_id &&
-        (new Date(message.created_at).getTime() - new Date(prevMessage.created_at).getTime() < 5 * 60 * 1000);
-      
+        new Date(message.created_at).getTime() -
+          new Date(prevMessage.created_at).getTime() <
+          5 * 60 * 1000;
+
       return {
         ...message,
-        shouldGroup
+        shouldGroup,
       };
     });
   };
@@ -224,20 +365,20 @@ export default function Messages() {
   const renderMessage = (message: any) => {
     const isCurrentUser = message.sender_id === user?.id;
     const messageTime = new Date(message.created_at);
-    const formattedTime = messageTime.toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit'
+    const formattedTime = messageTime.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
     });
-    
+
     // Use the shouldGroup property from our enhanced message object
     const shouldGroup = message.shouldGroup;
-    
+
     return (
       <div
         key={message.id}
-        className={`flex ${
-          isCurrentUser ? "justify-end" : "justify-start"
-        } ${shouldGroup ? "mt-1" : "mt-3"}`}
+        className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} ${
+          shouldGroup ? "mt-1" : "mt-3"
+        }`}
       >
         {!isCurrentUser && !shouldGroup && (
           <div className="h-8 w-8 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0 mr-2">
@@ -245,34 +386,52 @@ export default function Messages() {
           </div>
         )}
         {!isCurrentUser && shouldGroup && <div className="w-8 mr-2"></div>}
-        
-        <div className={`max-w-[85%] sm:max-w-[70%] flex flex-col ${isCurrentUser ? "items-end" : "items-start"}`}>
+
+        <div
+          className={`max-w-[85%] sm:max-w-[70%] flex flex-col ${
+            isCurrentUser ? "items-end" : "items-start"
+          }`}
+        >
           {!shouldGroup && (
-            <div className={`flex items-center mb-1 ${isCurrentUser ? "justify-end" : "justify-start"}`}>
+            <div
+              className={`flex items-center mb-1 ${
+                isCurrentUser ? "justify-end" : "justify-start"
+              }`}
+            >
               {!isCurrentUser && (
                 <span className="text-xs sm:text-sm font-medium text-indigo-400 mr-2">
-                  {isAdmin ? selectedUser?.full_name || selectedUser?.email : "Support Team"}
+                  {isAdmin
+                    ? selectedUser?.full_name || selectedUser?.email
+                    : "Support Team"}
                 </span>
               )}
               <span className="text-xs text-slate-500">{formattedTime}</span>
             </div>
           )}
-          
+
           <div
             className={`rounded-lg px-3 py-2 ${
               isCurrentUser
                 ? "bg-indigo-600 text-white"
                 : "bg-slate-700/80 text-slate-200"
-            } ${!shouldGroup && isCurrentUser ? "rounded-tr-sm" : ""} ${!shouldGroup && !isCurrentUser ? "rounded-tl-sm" : ""} hover:shadow-md transition-colors duration-200`}
+            } ${!shouldGroup && isCurrentUser ? "rounded-tr-sm" : ""} ${
+              !shouldGroup && !isCurrentUser ? "rounded-tl-sm" : ""
+            } hover:shadow-md transition-colors duration-200`}
           >
-            <p className="text-xs sm:text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            <p className="text-xs sm:text-sm whitespace-pre-wrap break-words">
+              {message.content}
+            </p>
             {message.image_url && (
               <div className="mt-2 overflow-hidden">
                 <img
                   src={message.image_url}
                   alt="Message attachment"
                   className="max-w-full rounded-md cursor-pointer hover:opacity-90 transition-colors"
-                  style={{ maxWidth: "250px", maxHeight: "200px", objectFit: "contain" }}
+                  style={{
+                    maxWidth: "250px",
+                    maxHeight: "200px",
+                    objectFit: "contain",
+                  }}
                   onClick={() => setPreviewImage(message.image_url)}
                 />
               </div>
@@ -288,6 +447,7 @@ export default function Messages() {
     );
   };
 
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (messages.length > 0) {
       const messageContainer = document.querySelector(".messages-container");
@@ -298,6 +458,14 @@ export default function Messages() {
       }
     }
   }, [messages]);
+
+  // Debug logging
+  console.log("Component render:", {
+    isAdmin,
+    selectedUser: selectedUser?.id,
+    messagesCount: messages.length,
+    isLoading,
+  });
 
   if (isAdmin) {
     // Filter users based on search term
