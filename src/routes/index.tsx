@@ -4,6 +4,7 @@ import HomePage from "../pages/HomePage";
 import ProtectedRoutes from "./protectedRoutes";
 import PublicRoutes from "./publicRoutes";
 import { ROUTES } from "./routeConstants";
+import MusicReferal from "../components/refferalMusic";
 
 const AppRoutes = () => {
   const { user } = useAuth();
@@ -12,7 +13,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Home route */}
       <Route path={ROUTES.HOME} element={<HomePage />} />
-
+      <Route path={ROUTES.MUSIC} element={<MusicReferal/>} />
       {/* Choose between protected and public routes based on authentication status */}
       {user ? (
         <Route path="/*" element={<ProtectedRoutes />} />

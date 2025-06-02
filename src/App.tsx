@@ -24,6 +24,7 @@ function App() {
       [ROUTES.GLOBAL_DISTRIBUTION]: "Global Distribution",
       [ROUTES.UPDATE_NAME]: "Update Name",
       [ROUTES.CHANGE_PASSWORD]: "Change Password",
+      [ROUTES.MUSIC]: "Affiliate Music",
       [ROUTES.TWO_FACTOR]: "2FA Verification", // ✅ Add this line
     };
 

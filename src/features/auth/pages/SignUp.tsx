@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { supabase } from "../../../lib/supabase";
 import { validateEmail, validatePassword } from "../../../utils/validation";
-
+import { useLocation } from 'react-router-dom';
 // Utility to prevent duplicate toasts
 const shownToasts = new Set<string>();
 const showUniqueToast = (
@@ -31,6 +31,10 @@ const showUniqueToast = (
 };
 
 export default function SignUp() {
+  const locals = useLocation()
+  const searchParams = new URLSearchParams(location.search);
+  const paramValue = searchParams.get('referal'); 
+  const isReferal = paramValue === "true" 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -99,7 +103,15 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      await signUp(email, password, name);
+     let userId = await signUp(email, password, name);
+      if (isReferal) {
+        let {data,error} = await supabase.from("referrals").insert({
+          user_id:userId
+        })
+        console.log("data", data)
+        console.log("error" , error)
+      }
+
       setIsSignupComplete(true);
       // Toast is handled in signUp function to avoid duplicates
     } catch (error: any) {

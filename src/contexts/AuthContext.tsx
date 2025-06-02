@@ -116,13 +116,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string, name: string, refferal?:boolean) => {
     const currentOrigin = window.location.origin;
     const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: name, onboarding_complete: false, role: "user" },
+        data: { full_name: name, onboarding_complete: false, role: "user", isReferal:refferal },
         emailRedirectTo: `${currentOrigin}/welcome`,
       },
     });
@@ -130,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data.user && !data.user.confirmed_at) {
       showUniqueToast("Check your email to confirm your registration.", "success", "signup-email-sent");
     }
+    return data.user?.id
   };
 
   // context/AuthProvider.tsx - updated signIn function
