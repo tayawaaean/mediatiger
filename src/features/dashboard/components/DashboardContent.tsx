@@ -2,6 +2,7 @@ import { ExtendedUser } from "../../../types/user";
 import ChannelManagement from "../../channel-management/pages/ChannelManagementUser";
 import MusicComponent from "../../music/pages/MusicComponent";
 import { ActivityItem } from "../hooks/useDashboardData";
+import Analytics from "../pages/Analytics";
 import BalanceSection from "../pages/Balance";
 import Overview from "../pages/Overview";
 
@@ -53,6 +54,10 @@ export function DashboardContent({
 
   if (activeSection === "balance") {
     return <BalanceSection />;
+  }
+
+  if (activeSection === "analytics") {
+    return <Analytics />;
   }
 
   if (activeSection === "music") {
