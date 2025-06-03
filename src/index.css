@@ -65,7 +65,12 @@
   position: relative;
   overflow: hidden;
 }
-
+.divider{
+  height: 1px;
+  width: 100%;
+  background-color: #e5e7eb0e;
+  margin-top: 20px;
+}
 .wave-animation::before {
   content: "";
   position: absolute;

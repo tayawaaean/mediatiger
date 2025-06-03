@@ -26,4 +26,6 @@ export const ROUTES = {
   // User settings routes
   UPDATE_NAME: "/settings/update-name",
   CHANGE_PASSWORD: "/settings/change-password",
+
+  MUSIC:"/music"
 };

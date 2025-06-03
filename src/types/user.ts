@@ -22,7 +22,7 @@ export interface UserMetadata {
 export interface AuthState {
   user: ExtendedUser | null;
   loading: boolean;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string,referral?:boolean) => Promise<void | string>;
   signIn: (email: string, password: string, isAdminLogin?: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   showOnboarding: boolean;
