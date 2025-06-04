@@ -1,5 +1,5 @@
+import { MusicItem } from '@/utils/data';
 import React from 'react';
-import { MusicItem } from '../data';
 
 interface MusicListProps {
   items: MusicItem[];
