@@ -1,4 +1,4 @@
-import { BarChart3, Eye, Music, Play, Wallet } from "lucide-react";
+import { BarChart3, Eye, Music, Play, Wallet, PersonStanding } from "lucide-react";
 import { useLanguage } from "../../../contexts/LanguageContext"; // Update the path based on your project structure
 
 // Create a custom hook that returns the navigation items with translations
@@ -32,6 +32,11 @@ const useNavigationItems = () => {
       section: "balance",
       icon: <Wallet className="h-5 w-5" />,
     },
+    {
+      name: translate("guides"),
+      section: "guides",
+      icon: <PersonStanding className="h-5 w-5" />,
+    }
   ];
 };
 
@@ -63,6 +68,11 @@ const navigationItems = [
     name: "Balance",
     section: "balance",
     icon: <Wallet className="h-5 w-5" />,
+  },
+  {
+    name: "Guides",
+    section: "guides",
+    icon: <PersonStanding className="h-5 w-5" />,
   },
 ];
 

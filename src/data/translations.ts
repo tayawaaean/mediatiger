@@ -453,6 +453,21 @@ export const translations: Translations = {
     ko: '잔액',
     zh: '余额',
   },
+  guides: {
+    en: 'Guide',
+    es: 'Guía',
+    de: 'Leitfaden',
+    nl: 'Gids',
+    pt: 'Guia',
+    fr: 'Guide',
+    it: 'Guida',
+    no: 'Veiledning',
+    da: 'Vejledning',
+    ja: 'ガイド',
+    ko: '가이드',
+    zh: '指南',
+  },
+  
 
   "dashboard.section.overview": {
     en: 'Dashboard',
@@ -537,6 +552,20 @@ export const translations: Translations = {
     ja: '残高と収益',
     ko: '잔액 및 수익',
     zh: '余额和收入',
+  },
+  "dashboard.section.guides": {
+    "en": "Guides",
+    "es": "Guías",
+    "de": "Anleitungen",
+    "nl": "Gidsen",
+    "pt": "Guias",
+    "fr": "Guides",
+    "it": "Guide",
+    "no": "Guider",
+    "da": "Guider",
+    "ja": "ガイド",
+    "ko": "가이드",
+    "zh": "指南"
   },
   "dashboard.section.globalDistribution": {
     en: 'Global Distribution',
