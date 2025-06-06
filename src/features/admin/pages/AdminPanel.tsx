@@ -9,6 +9,7 @@ import { getAccessLogs } from "../../../services/adminService";
 import { handleApplicationStatus } from "../../../services/applicationService";
 import { ApplicationData } from "../../../types/admin";
 import { AnnouncementManager } from "../../AnnouncementAdmin";
+import { MusicManager } from "../../MusicAdmin";
 import UsersPanel from "../../usersPanel";
 // Import the hook directly - no need to import the provider here
 import { useNotifications } from '../../../hooks/useNotifications';
@@ -269,6 +270,7 @@ export default function AdminPanel(): JSX.Element {
                             {activeTab == "users" && <UsersPanel/>}
                             {activeTab == "messages" && <Messages/>}
                             {activeTab == "announcement" && <AnnouncementManager/>}
+                            {activeTab == "music" && <MusicManager/>}
                         </div>
                     </div>
                 </div>
