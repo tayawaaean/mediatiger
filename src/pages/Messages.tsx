@@ -1,27 +1,21 @@
 import { MessageSquare } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { AdminMessagesView } from "../components/messages/AdminMessagesView";
 import { NormalMessagesView } from "../components/messages/NormalMessagesView";
 import { useAuth } from "../contexts/AuthContext";
 import { adminId } from "../features/admin/pages/AdminPanel";
 import { supabase } from "../lib/supabase";
-
-interface AdminUser {
-  id: string;
-  email: string;
-  user_metadata: {
-    full_name: string;
-  };
-}
+import { Message, MessageInput } from "@/components/chat/ChatPage";
 
 export default function Messages() {
   const { user } = useAuth();
-  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState<MessageInput>({
+    content: "",
+    replyTo: "",
+    isPinned: false,
+  });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -30,8 +24,6 @@ export default function Messages() {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const location = useLocation();
-  const currentPath = location.pathname;
 
   // Check if current user is admin
   const isAdmin = user?.user_metadata?.role === "admin";
@@ -197,7 +189,7 @@ export default function Messages() {
   };
 
   const handleSendMessage = async () => {
-    if (!user || (!newMessage.trim() && !selectedFile)) {
+    if (!user || (!newMessage.content.trim() && !selectedFile)) {
       console.log("Cannot send message: no user or empty message");
       return;
     }
@@ -209,7 +201,7 @@ export default function Messages() {
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from("message-images")
           .upload(filePath, selectedFile);
 
@@ -228,7 +220,10 @@ export default function Messages() {
       const messageData = {
         sender_id: user.id,
         receiver_id: isAdmin ? selectedUser?.id : adminId,
-        content: newMessage.trim(),
+        content: newMessage.content.trim(),
+        sender: isAdmin ? "other" : "user",
+        isPinned: false,
+        replyTo: newMessage.replyTo,
         image_url: fileUrl || null,
         created_at: new Date().toISOString(),
       };
@@ -242,9 +237,11 @@ export default function Messages() {
         throw error;
       }
 
-      setNewMessage("");
+      setNewMessage({
+        content: "",
+        replyTo: "",
+      });
       setSelectedFile(null);
-      setIsModalOpen(false);
 
       // Fetch messages again to update the UI
       await fetchMessages();
@@ -255,6 +252,114 @@ export default function Messages() {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+    }
+  };
+
+  const handleTogglePin = async (messageId: string) => {
+    if (!user) {
+      console.log("Cannot toggle pin: no user");
+      return;
+    }
+
+    // Optimistically update the UI
+    setMessages((prevMessages) =>
+      prevMessages.map((m) =>
+        m.id === messageId ? { ...m, isPinned: !m.isPinned } : m
+      )
+    );
+
+    try {
+      // Find the message to toggle
+      const message = messages.find((m) => m.id === messageId);
+      if (!message) {
+        console.error("Message not found");
+        return;
+      }
+
+      // Update the message in the database
+      const { error } = await supabase
+        .from("messages")
+        .update({ isPinned: !message.isPinned })
+        .eq("id", messageId);
+
+      if (error) {
+        // Revert the optimistic update if error
+        setMessages((prevMessages) =>
+          prevMessages.map((m) =>
+            m.id === messageId ? { ...m, isPinned: message.isPinned } : m
+          )
+        );
+        console.error("Error toggling pin:", error);
+        throw error;
+      }
+
+      // Optionally, fetch messages again to ensure sync
+      // await fetchMessages();
+      // if (isAdmin) await fetchUsers();
+    } catch (error) {
+      // Already reverted above
+    }
+  };
+
+  // Add this function to handle reactions
+  const handleAddReaction = async (messageId: string, emoji: string) => {
+    if (!user) return;
+
+    // Find the message
+    const message = messages.find((m) => m.id === messageId);
+    if (!message) return;
+
+    // Initialize reactions array if it doesn't exist
+    const currentReactions = message.reactions || [];
+
+    // Check if user already has a reaction
+    const userReactionIndex = currentReactions.findIndex(
+      (reaction: { userId: string; emoji: string }) =>
+        reaction.userId === user.id
+    );
+
+    let newReactions = [...currentReactions];
+
+    if (userReactionIndex !== -1) {
+      // User has an existing reaction
+      const existingReaction = currentReactions[userReactionIndex];
+
+      if (existingReaction.emoji === emoji) {
+        // If clicking the same emoji, remove it (toggle off)
+        newReactions = newReactions.filter(
+          (reaction: { userId: string; emoji: string }) =>
+            reaction.userId !== user.id
+        );
+      } else {
+        // If clicking a different emoji, replace the old one with the new one
+        newReactions[userReactionIndex] = { userId: user.id, emoji };
+      }
+    } else {
+      // User doesn't have a reaction - add new one
+      newReactions.push({ userId: user.id, emoji });
+    }
+
+    // Optimistically update the UI
+    setMessages((prevMessages) =>
+      prevMessages.map((m) =>
+        m.id === messageId ? { ...m, reactions: newReactions } : m
+      )
+    );
+
+    // Update in Supabase
+    const { error } = await supabase
+      .from("messages")
+      .update({ reactions: newReactions })
+      .eq("id", messageId);
+
+    if (error) {
+      // Revert optimistic update if error
+      setMessages((prevMessages) =>
+        prevMessages.map((m) =>
+          m.id === messageId ? { ...m, reactions: currentReactions } : m
+        )
+      );
+      console.error("Error updating reactions:", error);
     }
   };
 
@@ -291,6 +396,18 @@ export default function Messages() {
       fetchMessages();
     }
   }, [selectedUser]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      const messageContainer = document.querySelector(".messages-container");
+      if (messageContainer) {
+        setTimeout(() => {
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        }, 100);
+      }
+    }
+  }, [messages]);
 
   // Real-time subscription
   useEffect(() => {
@@ -362,7 +479,7 @@ export default function Messages() {
     });
   };
 
-  const renderMessage = (message: any) => {
+  const renderMessage = (message: Message) => {
     const isCurrentUser = message.sender_id === user?.id;
     const messageTime = new Date(message.created_at);
     const formattedTime = messageTime.toLocaleTimeString([], {
@@ -447,26 +564,6 @@ export default function Messages() {
     );
   };
 
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    if (messages.length > 0) {
-      const messageContainer = document.querySelector(".messages-container");
-      if (messageContainer) {
-        setTimeout(() => {
-          messageContainer.scrollTop = messageContainer.scrollHeight;
-        }, 100);
-      }
-    }
-  }, [messages]);
-
-  // Debug logging
-  console.log("Component render:", {
-    isAdmin,
-    selectedUser: selectedUser?.id,
-    messagesCount: messages.length,
-    isLoading,
-  });
-
   if (isAdmin) {
     // Filter users based on search term
     const filteredUsers = users.filter(
@@ -499,6 +596,7 @@ export default function Messages() {
           setPreviewImage={setPreviewImage}
           renderMessage={renderMessage}
           messagesEndRef={messagesEndRef}
+          onAddReaction={handleAddReaction}
         />
       </div>
     );
@@ -521,6 +619,8 @@ export default function Messages() {
       selectedFile={selectedFile}
       handleFileSelect={handleFileSelect}
       setSelectedFile={setSelectedFile}
+      onTogglePin={handleTogglePin}
+      onAddReaction={handleAddReaction}
     />
   );
 }

@@ -29,7 +29,7 @@ const MusicComponent: React.FC = () => {
       duration: "2:09",
       bpm: 92,
       image:
-          "https://images.pexels.com/photos/1547813/pexels-photo-1547813.jpeg",
+        "https://images.pexels.com/photos/1547813/pexels-photo-1547813.jpeg",
       genres: ["Boom Bap"],
       moods: ["happy"],
     },
@@ -40,7 +40,7 @@ const MusicComponent: React.FC = () => {
       duration: "3:15",
       bpm: 85,
       image:
-          "https://images.pexels.com/photos/1834407/pexels-photo-1834407.jpeg",
+        "https://images.pexels.com/photos/1834407/pexels-photo-1834407.jpeg",
       genres: ["Ambient"],
       moods: ["dreamy"],
     },
@@ -50,7 +50,7 @@ const MusicComponent: React.FC = () => {
   const toggleLikedSong = (track: Track) => {
     setLikedSongs((prevLikedSongs) => {
       const isAlreadyLiked = prevLikedSongs.some(
-          (song) => song.id === track.id
+        (song) => song.id === track.id
       );
 
       if (isAlreadyLiked) {
@@ -66,49 +66,52 @@ const MusicComponent: React.FC = () => {
   console.log("[MusicComponent] Liked songs:", likedSongs);
 
   return (
-      <div className="w-full h-full flex">
-        <div className="bg-[#242B3D] rounded-lg p-8 flex-1 overflow-y-auto">
-          {showLikedSongs ? (
-              <LikedSongs
-                  onBack={() => setShowLikedSongs(false)}
-                  likedTracks={likedSongs}
-                  toggleLikedSong={toggleLikedSong}
-              />
-          ) : selectedMood ? (
-              <PlaylistView
-                  mood={selectedMood}
-                  onBack={() => setSelectedMood(null)}
-                  likedSongs={likedSongs}
-                  toggleLikedSong={toggleLikedSong}
-              />
-          ) : (
-              <>
-                <div className="mb-12">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold">{translate('music.likedSongs')}</h2>
-                    <button
-                        onClick={() => setShowLikedSongs(true)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                    >
-                      {translate('music.viewAllLikedSongs')}
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-1">
-                    {likedSongs.slice(0, 2).map((track) => (
-                        <TrackRow
-                            key={track.id}
-                            track={track}
-                            isLiked={true}
-                            onLikeToggle={() => toggleLikedSong(track)}
-                        />
-                    ))}
-                  </div>
-                </div>
-                <MoodSection onMoodSelect={setSelectedMood} />
-              </>
-          )}
-        </div>
+    <div className="w-full h-full flex">
+      <div className="bg-[#242B3D] rounded-lg p-8 flex-1 overflow-y-auto">
+        zzzs
+        {showLikedSongs ? (
+          <LikedSongs
+            onBack={() => setShowLikedSongs(false)}
+            likedTracks={likedSongs}
+            toggleLikedSong={toggleLikedSong}
+          />
+        ) : selectedMood ? (
+          <PlaylistView
+            mood={selectedMood}
+            onBack={() => setSelectedMood(null)}
+            likedSongs={likedSongs}
+            toggleLikedSong={toggleLikedSong}
+          />
+        ) : (
+          <>
+            <div className="mb-12">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">
+                  {translate("music.likedSongs")}
+                </h2>
+                <button
+                  onClick={() => setShowLikedSongs(true)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  {translate("music.viewAllLikedSongs")}
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-1">
+                {likedSongs.slice(0, 2).map((track) => (
+                  <TrackRow
+                    key={track.id}
+                    track={track}
+                    isLiked={true}
+                    onLikeToggle={() => toggleLikedSong(track)}
+                  />
+                ))}
+              </div>
+            </div>
+            <MoodSection onMoodSelect={setSelectedMood} />
+          </>
+        )}
       </div>
+    </div>
   );
 };
 

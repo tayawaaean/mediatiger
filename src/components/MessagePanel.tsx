@@ -312,6 +312,9 @@ export function MessagePanel({
         sender_id: userId,
         receiver_id: otherUserId,
         content: newMessage.trim(),
+        sender: isAdmin ? "other" : "user",
+        isPinned: false,
+        replyTo: "",
         image_url: imageUrl || null,
       });
 
