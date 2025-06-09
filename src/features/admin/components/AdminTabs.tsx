@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   Database,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 interface AdminTabsProps {
   activeTab: string;
@@ -30,21 +29,6 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
     { id: "users", icon: User2, label: "Users" },
     { id: "announcement", icon: FlagIcon, label: "Announcement" },
   ];
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0 },
-  };
 
   return (
     <>
@@ -67,17 +51,10 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
           </button>
         </div>
       </div>
-
-      <motion.div
-        className="flex flex-wrap gap-2 border-b border-slate-700/50 mb-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-      >
+      <div className="flex flex-wrap gap-2 border-b border-slate-700/50 mb-6">
         {tabs.map(({ id, icon: Icon, label }) => (
-          <motion.button
+          <button
             key={id}
-            variants={itemVariants}
             onClick={() => setActiveTab(id)}
             className={`py-2 px-4 md:py-3 md:px-6 font-medium text-sm flex items-center transition-colors relative ${
               activeTab === id
@@ -89,9 +66,9 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
               <Icon className="h-4 w-4 mr-1" />
               {label}
             </div>
-          </motion.button>
+          </button>
         ))}
-      </motion.div>
+      </div>
     </>
   );
 };
