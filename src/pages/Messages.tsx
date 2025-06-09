@@ -577,7 +577,7 @@ export default function Messages() {
     const groupedMessages = getGroupedMessages();
 
     return (
-      <div className="h-full">
+      <div className="h-full p-4 bg-slate-900">
         <AdminMessagesView
           filteredUsers={filteredUsers}
           selectedUser={selectedUser}
@@ -597,6 +597,7 @@ export default function Messages() {
           renderMessage={renderMessage}
           messagesEndRef={messagesEndRef}
           onAddReaction={handleAddReaction}
+          onTogglePin={handleTogglePin}
         />
       </div>
     );

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, Dispatch, SetStateAction } from "react";
 import { Reply, Pin, Smile, Shield } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Message, MessageInput } from "./ChatPage";
+import { User } from "../messages/AdminMessagesView";
 
 // Custom date utility functions
 const formatDistanceToNow = (date: Date | string) => {
@@ -90,13 +91,15 @@ const isSameDay = (date1: Date | string, date2: Date | string) => {
 
 // Avatar component
 const Avatar = ({
-  letter,
+  letter = "U",
   size = "sm",
   className = "",
+  imageUrl,
 }: {
-  letter: string;
+  letter?: string;
   size?: "sm" | "md" | "lg";
   className?: string;
+  imageUrl?: string;
 }) => {
   const sizeClasses = {
     sm: "w-8 h-8 text-sm",
@@ -106,9 +109,22 @@ const Avatar = ({
 
   return (
     <div
-      className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-medium ${className}`}
+      className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-medium overflow-hidden ${className}`}
     >
-      {letter}
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={`${letter}'s avatar`}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // If image fails to load, show the letter instead
+            e.currentTarget.style.display = "none";
+            e.currentTarget.parentElement?.classList.remove("overflow-hidden");
+          }}
+        />
+      ) : (
+        letter
+      )}
     </div>
   );
 };
@@ -147,6 +163,7 @@ interface MessageListProps {
   onTogglePin: (messageId: string) => void;
   onAddReaction: (messageId: string, emoji: string) => void;
   setNewMessage: Dispatch<SetStateAction<MessageInput>>;
+  selectedUser?: User;
 }
 
 type groupedMsg = Message & { sender: "user" | "other" };
@@ -163,21 +180,14 @@ const MessageList = ({
   onTogglePin,
   onAddReaction,
   setNewMessage,
+  selectedUser,
 }: MessageListProps) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const messageGroups: MessageGroup[] = messages
-    // .map((msg) => {
-    //   console.log("msssg", msg);
-    //   const isUser = msg.sender_id === user?.id;
-
-    //   return {
-    //     ...msg,
-    //     sender: isUser ? "user" : "other",
-    //   };
-    // })
     .reduce((groups, message) => {
       // Safe date handling - use created_at directly from your database
       let messageDate = new Date(message.created_at);
@@ -202,15 +212,14 @@ const MessageList = ({
     }, [] as MessageGroup[])
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    if (messagesEndRef.current) {
+      const container = messagesEndRef.current.parentElement;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
   }, [messages]);
-
-  console.log("messageGroups", messageGroups);
 
   return (
     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
@@ -250,14 +259,35 @@ const MessageList = ({
                   }`}
                 >
                   {/* Avatar */}
-                  <Avatar
-                    letter={message.sender === "other" ? "S" : "U"}
-                    size="sm"
-                    className="flex-shrink-0 mt-1"
-                  />
+                  {message.sender === "user" && (
+                    <Avatar
+                      letter={
+                        selectedUser
+                          ? selectedUser?.user_metadata?.full_name?.[0]?.toUpperCase()
+                          : user?.user_metadata?.full_name?.[0]?.toUpperCase()
+                      }
+                      size="sm"
+                      className="flex-shrink-0 mt-1"
+                      imageUrl={
+                        !isAdmin && message.sender === "user"
+                          ? user?.user_metadata.avatar_url
+                          : isAdmin && message.sender === "user"
+                          ? selectedUser?.user_metadata.avatar_url
+                          : undefined
+                      }
+                    />
+                  )}
 
                   {/* Message content */}
-                  <div className="flex flex-col min-w-0 max-w-[65%]">
+                  <div
+                    className={`flex flex-col min-w-0 ${
+                      (message.sender === "other" && isAdmin) ||
+                      (message.sender === "user" && !isAdmin)
+                        ? "items-end"
+                        : ""
+                    }
+                    `}
+                  >
                     <div
                       className={`
                         group relative rounded-2xl px-4 py-2.5 
@@ -404,15 +434,18 @@ const MessageList = ({
                       </div>
 
                       {/* Message text */}
-                      <div className="text-base leading-relaxed whitespace-pre-wrap">
+                      <div className="text-base leading-relaxed whitespace-pre-wrap text-center">
                         {highlightText(message.content, searchQuery)}
                         {message.image_url && (
                           <div className="mt-3">
                             <img
                               src={message.image_url}
                               alt="Message attachment"
-                              className="max-w-full h-auto rounded-lg shadow-lg"
+                              className="max-w-full h-auto rounded-lg shadow-lg mx-auto cursor-pointer transition-transform duration-200 hover:scale-105"
                               style={{ maxWidth: "300px" }}
+                              onClick={() =>
+                                setSelectedImage(message.image_url)
+                              }
                               onError={(
                                 e: React.SyntheticEvent<HTMLImageElement, Event>
                               ) => {
@@ -435,15 +468,31 @@ const MessageList = ({
                         } px-2 -mt-3`}
                       >
                         <div className="flex flex-wrap gap-1.5 px-2 py-1">
-                          {message.reactions.map((reaction, index) => (
+                          {/* Group reactions by emoji and count them */}
+                          {Object.entries(
+                            message.reactions.reduce(
+                              (
+                                acc: Record<string, number>,
+                                reaction: { emoji: string }
+                              ) => {
+                                acc[reaction.emoji] =
+                                  (acc[reaction.emoji] || 0) + 1;
+                                return acc;
+                              },
+                              {}
+                            )
+                          ).map(([emoji, count], index) => (
                             <span
-                              key={`${reaction.emoji}-${index}`}
+                              key={`${emoji}-${index}`}
                               className="inline-flex items-center text-lg cursor-pointer px-1.5 z-10"
-                              onClick={() =>
-                                onAddReaction?.(message.id, reaction.emoji)
-                              }
+                              onClick={() => onAddReaction?.(message.id, emoji)}
                             >
-                              {reaction.emoji}
+                              {emoji}
+                              {count > 1 && (
+                                <span className="ml-1 text-xs text-slate-400 font-semibold">
+                                  {count}
+                                </span>
+                              )}
                             </span>
                           ))}
                         </div>
@@ -459,28 +508,11 @@ const MessageList = ({
                           : "justify-start"
                       }`}
                     >
-                      {/* Show user info for other person's messages or when in admin view */}
-                      {((!isAdmin && message.sender === "other") ||
-                        (isAdmin && message.sender === "user")) && (
-                        <>
-                          <span className="font-medium text-slate-300">
-                            {message.sender === "other"
-                              ? "Support Agent"
-                              : "User"}
-                          </span>
-                          <span className="text-slate-500/50">•</span>
-                          <span className="text-xs text-slate-500">
-                            {message.sender === "other" ? "@support" : "@user"}
-                          </span>
-                          <span className="text-slate-500/50">•</span>
-                        </>
-                      )}
-
                       {/* Timestamp - now using created_at directly */}
                       <span>{formatDistanceToNow(message.created_at)}</span>
 
                       {/* Support agent badge */}
-                      {message.sender === "other" && (
+                      {message.sender === "other" && !isAdmin && (
                         <>
                           <span className="text-slate-500/50">•</span>
                           <span className="text-emerald-400 font-medium flex items-center gap-1">
@@ -498,6 +530,30 @@ const MessageList = ({
         );
       })}
       <div ref={messagesEndRef} />
+      {/* Image Lightbox Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div
+            className="relative max-w-3xl w-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={selectedImage}
+              alt="Full preview"
+              className="rounded-lg shadow-2xl max-h-[80vh] max-w-full"
+            />
+            <button
+              className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-2 hover:bg-black/80 transition-colors"
+              onClick={() => setSelectedImage(null)}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

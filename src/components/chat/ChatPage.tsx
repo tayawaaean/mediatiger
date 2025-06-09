@@ -5,6 +5,7 @@ import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { useAuth } from "../../contexts/AuthContext";
 import { adminId } from "../../features/admin/pages/AdminPanel";
+import { User } from "../messages/AdminMessagesView";
 
 export interface MessageInput {
   content: string;
@@ -47,6 +48,7 @@ interface ChatPageProps {
   setSelectedFile?: (file: File | null) => void;
   onTogglePin?: (messageId: string) => void;
   onAddReaction: (messageId: string, emoji: string) => void;
+  selectedUser?: User;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = ({
@@ -65,6 +67,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({
   setSelectedFile,
   onTogglePin,
   onAddReaction,
+  selectedUser,
 }) => {
   const { user } = useAuth();
 
@@ -155,10 +158,9 @@ export const ChatPage: React.FC<ChatPageProps> = ({
       message.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  console.log("newMessage", newMessage);
   return (
-    <div className="container mx-auto py-4 px-4 relative">
-      <ChatContainer>
+    <div className="container mx-auto px-4 relative">
+      <ChatContainer isAdmin>
         <ChatHeader
           recipientName={isAdmin ? "Chat" : "Live Support"}
           onSearch={setSearchQuery}
@@ -221,6 +223,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({
           onTogglePin={handleTogglePin}
           onAddReaction={onAddReaction}
           setNewMessage={setNewMessage}
+          selectedUser={selectedUser}
         />
 
         <MessageInput
@@ -248,7 +251,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
           onClick={() => setPreviewImage?.(null)}
         >
-          <div className="max-w-4xl max-h-4xl p-4">
+          <div className="max-w-5xl max-h-5xl p-4">
             <img
               src={previewImage}
               alt="Preview"

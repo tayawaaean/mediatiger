@@ -33,6 +33,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     replyTo: "",
   });
   const [internalImageFile, setInternalImageFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   // Use external props if provided, otherwise use internal state
@@ -90,6 +91,37 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
+  // Drag and drop handlers
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      if (file.type.startsWith("image/")) {
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error("Image size should be less than 5MB");
+          return;
+        }
+        handleFileChange(file);
+      } else {
+        toast.error("Please drop an image file");
+      }
+    }
+  };
+
   const removeImage = () => {
     handleFileChange(null);
     if (inputRef.current) {
@@ -129,7 +161,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form
+      onSubmit={handleSubmit}
+      className="relative"
+      onDragEnter={handleDrag}
+      onDragLeave={handleDrag}
+      onDragOver={handleDrag}
+      onDrop={handleDrop}
+    >
       {message.replyTo && (
         <div className="px-4 py-2 bg-slate-800/50 border-t border-slate-700/50">
           <div className="flex items-center justify-between">
@@ -178,7 +217,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           onChange={(e) => setMessage({ ...message, content: e.target.value })}
           onKeyDown={handleKeyPress}
           placeholder="Type a message..."
-          className="flex-1 bg-slate-700/50 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none min-h-[40px] max-h-32"
+          className={`flex-1 bg-slate-700/50 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none min-h-[40px] max-h-32 ${
+            dragActive ? "ring-2 ring-indigo-500 border-indigo-500" : ""
+          }`}
           rows={1}
         />
         <button

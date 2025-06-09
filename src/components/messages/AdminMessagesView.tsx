@@ -1,18 +1,27 @@
 import React from "react";
 import { MessageSquare, Search, Send, Paperclip, X } from "lucide-react";
 import { ImagePreview } from "../ImagePreview";
-import type { Message, MessageInput } from "../chat/ChatPage";
+import { ChatPage, Message } from "../chat/ChatPage";
 
-interface User {
+export interface User {
   id: string;
   email: string;
   full_name: string;
   user_metadata: {
+    avatar_url: string;
+    email: string;
+    email_verification_notification: boolean;
+    email_verified: boolean;
+    full_name: string;
+    onboarding_complete: boolean;
+    phone_verified: boolean;
     role: string;
+    show_tutorial: boolean;
+    sub: string;
+    username: string;
   };
   last_message: string;
   last_message_time: string;
-  avatar_url?: string;
   unread_count?: number;
   online?: boolean;
 }
@@ -57,37 +66,67 @@ export const AdminMessagesView: React.FC<AdminMessagesViewProps> = ({
   renderMessage,
   messagesEndRef,
   onAddReaction,
+  onTogglePin,
 }) => {
+  const handleFileSelectForChat = (file: File) => {
+    // Create a synthetic event that matches the expected type
+    const syntheticEvent = {
+      target: {
+        files: [file],
+      },
+      currentTarget: document.createElement("input"),
+      nativeEvent: new Event("change"),
+      bubbles: true,
+      cancelable: true,
+      defaultPrevented: false,
+      eventPhase: 0,
+      isTrusted: true,
+      preventDefault: () => {},
+      stopPropagation: () => {},
+      isDefaultPrevented: () => false,
+      isPropagationStopped: () => false,
+      persist: () => {},
+      timeStamp: Date.now(),
+      type: "change",
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    handleFileSelect(syntheticEvent);
+  };
+
+  console.log("selectedUser", selectedUser);
+
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col">
       <ImagePreview
         previewImage={previewImage}
         setPreviewImage={setPreviewImage}
       />
-      <div className="flex-1 h-full overflow-hidden">
-        <div className="h-full bg-slate-900 rounded-md shadow-md border border-slate-700/50 flex overflow-hidden">
-          <UsersList
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filteredUsers={filteredUsers}
-            selectedUser={selectedUser}
-            setSelectedUser={setSelectedUser}
-          />
-          <ChatArea
-            selectedUser={selectedUser}
-            isLoading={isLoading}
-            messages={messages}
-            renderMessage={renderMessage}
-            messagesEndRef={messagesEndRef}
-            newMessage={newMessage}
-            setNewMessage={setNewMessage}
-            handleSendMessage={handleSendMessage}
-            selectedFile={selectedFile}
-            handleFileSelect={handleFileSelect}
-            setSelectedFile={setSelectedFile}
-            onAddReaction={onAddReaction}
-          />
-        </div>
+      <div className="flex">
+        <UsersList
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          filteredUsers={filteredUsers}
+          selectedUser={selectedUser}
+          setSelectedUser={setSelectedUser}
+        />
+
+        <ChatPage
+          previewImage={previewImage}
+          setPreviewImage={setPreviewImage}
+          isLoading={isLoading}
+          messages={messages}
+          renderMessage={renderMessage}
+          messagesEndRef={messagesEndRef}
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+          handleSendMessage={handleSendMessage}
+          selectedFile={selectedFile}
+          handleFileSelect={handleFileSelectForChat}
+          setSelectedFile={setSelectedFile}
+          isAdmin={true}
+          onTogglePin={onTogglePin}
+          onAddReaction={onAddReaction}
+          selectedUser={selectedUser}
+        />
       </div>
     </div>
   );
@@ -109,38 +148,71 @@ const UsersList: React.FC<UsersListProps> = ({
   setSelectedUser,
 }) => {
   return (
-    <div className="w-72 md:w-80 border-r border-slate-800/80 flex flex-col">
-      <div className="p-3 border-b border-slate-800/80 bg-slate-800/40">
+    <div className="bg-slate-800/60 backdrop-blur-lg rounded-xl shadow-xl border border-slate-700/50 overflow-hidden w-96 md:w-[28rem] flex flex-col">
+      <div className="p-4 border-b border-slate-700/50">
         <div className="relative">
           <input
             type="text"
             placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-slate-700/80 text-white rounded-md pl-8 pr-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+            className="w-full bg-[#232b3a] border border-slate-500/30 text-white placeholder-slate-400 rounded-lg pl-10 pr-3 py-2 text-base focus:outline-none focus:border-indigo-400 focus:ring-0 transition-all shadow-none"
           />
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 hover:text-white transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 hover:text-white transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
-        <div className="p-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-          User Conversations
-        </div>
+      <div className="flex flex-col gap-2 p-4 max-h-[600px] overflow-y-auto">
         {filteredUsers.map((u) => (
-          <UserListItem
+          <div
             key={u.id}
-            user={u}
-            isSelected={selectedUser?.id === u.id}
-            onSelect={() => setSelectedUser(u)}
-          />
+            className={`
+              p-3 flex items-center gap-3 rounded-lg cursor-pointer transition-all
+              ${
+                selectedUser?.id === u.id
+                  ? "bg-slate-700/50"
+                  : "hover:bg-slate-700/30"
+              }
+            `}
+            onClick={() => setSelectedUser(u)}
+          >
+            <div className="relative flex-shrink-0 w-10 h-10">
+              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-medium overflow-hidden">
+                {u.user_metadata.avatar_url ? (
+                  <img
+                    src={u.user_metadata.avatar_url}
+                    alt={u.full_name}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  u.full_name.charAt(0).toUpperCase()
+                )}
+              </div>
+              {u.online && (
+                <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 border-2 border-slate-800"></div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-slate-200 truncate">
+                {u.full_name}
+              </h3>
+              <p className="text-sm text-slate-400 truncate">
+                {u.user_metadata.username}
+              </p>
+            </div>
+            {u.unread_count && u.unread_count > 0 && (
+              <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-indigo-600 text-white rounded-full">
+                {u.unread_count}
+              </span>
+            )}
+          </div>
         ))}
         {filteredUsers.length === 0 && (
           <div className="text-center py-6 text-slate-400 text-sm">
@@ -151,55 +223,6 @@ const UsersList: React.FC<UsersListProps> = ({
     </div>
   );
 };
-
-interface UserListItemProps {
-  user: User;
-  isSelected: boolean;
-  onSelect: () => void;
-}
-
-const UserListItem: React.FC<UserListItemProps> = ({
-  user,
-  isSelected,
-  onSelect,
-}) => (
-  <button
-    onClick={onSelect}
-    className={`w-full p-3 flex items-center gap-3 hover:bg-slate-700/50 transition-colors ${
-      isSelected ? "bg-slate-700/80" : ""
-    }`}
-  >
-    <div className="relative">
-      <div className="h-10 w-10 rounded-full bg-indigo-600/20 flex items-center justify-center">
-        {user.avatar_url ? (
-          <img
-            src={user.avatar_url}
-            alt={user.full_name}
-            className="h-full w-full rounded-full object-cover"
-          />
-        ) : (
-          <span className="text-indigo-400 font-medium">
-            {user.full_name.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </div>
-      {user.online && (
-        <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 border-2 border-slate-800"></div>
-      )}
-    </div>
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center justify-between">
-        <p className="font-medium text-slate-200 truncate">{user.full_name}</p>
-        {user.unread_count && user.unread_count > 0 && (
-          <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-indigo-600 text-white rounded-full">
-            {user.unread_count}
-          </span>
-        )}
-      </div>
-      <p className="text-sm text-slate-400 truncate">{user.last_message}</p>
-    </div>
-  </button>
-);
 
 interface ChatAreaProps {
   selectedUser: User | null;
@@ -215,57 +238,6 @@ interface ChatAreaProps {
   setSelectedFile: (file: File | null) => void;
   onAddReaction?: (messageId: string, emoji: string) => void;
 }
-
-// const ChatArea: React.FC<ChatAreaProps> = ({
-//   selectedUser,
-//   isLoading,
-//   messages,
-//   renderMessage,
-//   messagesEndRef,
-//   newMessage,
-//   setNewMessage,
-//   handleSendMessage,
-//   selectedFile,
-//   handleFileSelect,
-//   setSelectedFile,
-// }) => {
-//   if (!selectedUser) {
-//     return (
-//       <div className="flex-1 flex items-center justify-center bg-slate-900">
-//         <div className="text-center text-slate-400">
-//           <MessageSquare className="h-12 w-12 mx-auto mb-4 text-slate-600" />
-//           <p className="text-lg font-medium">Select a user to start chatting</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <>
-//       <ChatHeader user={selectedUser} />
-//       <div className="flex-1 overflow-y-auto">
-//         {isLoading ? (
-//           <div className="flex items-center justify-center h-full">
-//             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-//           </div>
-//         ) : (
-//           <div className="messages-container h-full overflow-y-auto">
-//             {messages.map((message) => renderMessage(message))}
-//             <div ref={messagesEndRef} />
-//           </div>
-//         )}
-//       </div>
-//       <MessageInput
-//         onSendMessage={handleSendMessage}
-//         newMessage={newMessage}
-//         setNewMessage={setNewMessage}
-//         selectedFile={selectedFile}
-//         onFileSelect={handleFileSelect}
-//         onClearFile={() => setSelectedFile(null)}
-//       />
-//     </>
-//   );
-// };
 
 const ChatArea: React.FC<ChatAreaProps> = ({
   selectedUser,
