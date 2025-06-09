@@ -5,6 +5,7 @@ import { ActivityItem } from "../hooks/useDashboardData";
 import Analytics from "../pages/Analytics";
 import BalanceSection from "../pages/Balance";
 import Overview from "../pages/Overview";
+import Guide from '../../guide/pages/Guide';
 
 interface DashboardContentProps {
   activeSection: string;
@@ -65,6 +66,12 @@ export function DashboardContent({
       <div className="h-full w-full">
         <MusicComponent />
       </div>
+    );
+  }
+
+  if (activeSection === "guides") {
+    return (
+        <Guide />
     );
   }
 
