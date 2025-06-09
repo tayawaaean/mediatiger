@@ -18,12 +18,6 @@ export default {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        'card-bg': '#1C1C3B',
-        'border-hover': 'rgba(99, 102, 241, 0.3)',
-        'accent-light': 'rgba(99, 102, 241, 0.1)',
-        'accent-border-hover': 'rgba(99, 102, 241, 0.3)',
-        'accent-icon': 'rgb(129, 140, 248)',
-        secondary: 'rgb(148 163 184)',
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
