@@ -188,16 +188,16 @@ const PayoutDashboard: React.FC<PayoutDashboardProps> = ({
   };
 
   // Available payment methods array with translations
-  // const paymentMethods = [
-  //   safeTranslate('achUS', "ACH (US)"),
-  //   safeTranslate('localBank', "Local Bank Transfer"),
-  //   safeTranslate('internationalACH', "International ACH (eCheck)"),
-  //   safeTranslate('paperCheck', "Paper Check"),
-  //   safeTranslate('usWire', "US Wire Transfer (Domestic)"),
-  //   safeTranslate('intWireLocal', "International Wire in Local Currency"),
-  //   safeTranslate('intWireUSD', "International Wire in USD"),
-  //   safeTranslate('paypal', "PayPal"),
-  // ];
+  const paymentMethods = [
+    safeTranslate('achUS', "ACH (US)"),
+    safeTranslate('localBank', "Local Bank Transfer"),
+    safeTranslate('internationalACH', "International ACH (eCheck)"),
+    safeTranslate('paperCheck', "Paper Check"),
+    safeTranslate('usWire', "US Wire Transfer (Domestic)"),
+    safeTranslate('intWireLocal', "International Wire in Local Currency"),
+    safeTranslate('intWireUSD', "International Wire in USD"),
+    safeTranslate('paypal', "PayPal"),
+  ];
 
   return (
       <div className="flex-1 p-6">
@@ -246,6 +246,19 @@ const PayoutDashboard: React.FC<PayoutDashboardProps> = ({
             </div>
           </div>
         </div>
+        <div className="bg-gray-800 rounded-lg p-6 mt-3">
+          <h3 className="text-lg font-medium mb-4 text-white">
+            {safeTranslate('availablePaymentMethods', "Available Payment Methods")}
+          </h3>
+          <ul className="space-y-3 text-white">
+            {paymentMethods.map((method, index) => (
+                <li key={index} className="flex items-center">
+                  <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                  <span>{method}</span>
+                </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Payout History Section */}
         <div className="bg-slate-800 rounded-lg p-6 mt-6">
@@ -284,42 +297,27 @@ const PayoutDashboard: React.FC<PayoutDashboardProps> = ({
 
               {/* Terms Modal */}
               {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                  <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
-                    <h2 className="text-xl font-bold text-white mb-4">
-                      {safeTranslate('termsAndConditions', "MediaTiger Terms and Conditions")}
-                    </h2>
-                    <div className="max-h-96 overflow-y-auto text-gray-300 text-sm space-y-4 mb-4">
-                      {/* 1. Introduction */}
-                      <div>
-                        <h3 className="text-white font-semibold">1. {safeTranslate('introductionTitle', "Introduction")}</h3>
-                        <p className="mt-2">
-                          {safeTranslate('introPara1', "Thank you for your interest in MediaTiger! We empower creators to maximize revenue and enhance content creation through innovative tools and partnerships.")}
-                        </p>
-                        <p className="mt-2">
-                          {safeTranslate('introPara2', 'These Terms of Service ("Terms") govern your registration, participation, and use of MediaTiger\'s services. By submitting your information through our platform, you agree to comply with these Terms.')}
-                        </p>
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
+                      <h2 className="text-xl font-bold text-white mb-4">
+                        {safeTranslate('termsAndConditions', "Terms and Conditions")}
+                      </h2>
+                      <div className="max-h-96 overflow-y-auto text-gray-300 text-sm mb-4">
+                        <div className="space-y-4">
+                          <h3 className="font-semibold">{safeTranslate('introduction', "1. Introduction")}</h3>
+                          <p>
+                            {safeTranslate('introText', "Thank you for your interest in MediaTiger! We empower creators to maximize revenue and enhance content creation through innovative tools and partnerships.")}
+                          </p>
+                        </div>
                       </div>
-
-                      {/* 2. Registration Process */}
-                      <div>
-                        <h3 className="text-white font-semibold">2. {safeTranslate('registrationProcessTitle', "Registration Process")}</h3>
-
-                        {/* 2.1 Eligibility */}
-                        <h4 className="mt-2 font-semibold">2.1 {safeTranslate('eligibilityTitle', "Eligibility")}</h4>
-                        <p className="mt-1">
-                          {safeTranslate('eligibilityText', "You represent that you have the legal authority to enter into agreements and that the information provided is accurate.")}
-                        </p>
-                      </div>
+                      <button
+                          onClick={() => setIsModalOpen(false)}
+                          className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                      >
+                        {safeTranslate('close', "Close")}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                    >
-                      {safeTranslate('close', "Close")}
-                    </button>
                   </div>
-                </div>
               )}
             </div>
         )}
