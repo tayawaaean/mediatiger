@@ -8,7 +8,6 @@ import {
   FlagIcon,
   ArrowLeft,
   Database,
-  Music
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -30,7 +29,6 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
     { id: "messages", icon: MessageSquare, label: "Messages" },
     { id: "users", icon: User2, label: "Users" },
     { id: "announcement", icon: FlagIcon, label: "Announcement" },
-    { id: "music", icon: Music, label: "Music" },
   ];
 
   const containerVariants = {
