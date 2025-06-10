@@ -202,3 +202,14 @@
   transition: color 0.2s, background-color 0.2s !important;
 }
 
+@layer components {
+  .nav-item {
+    @apply flex items-center gap-4 px-6 py-4 rounded-xl text-slate-400 transition-all duration-200;
+  }
+
+  .nav-item:hover {
+    @apply bg-accent-light border-accent-border-hover;
+  }
+}
+
+
