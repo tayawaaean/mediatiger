@@ -10,6 +10,7 @@ import {
   Database,
   Music
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface AdminTabsProps {
   activeTab: string;
@@ -32,6 +33,21 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
     { id: "music", icon: Music, label: "Music" },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 },
+  };
+
   return (
     <>
       <div className="flex items-center mb-6">
@@ -53,10 +69,17 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
           </button>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2 border-b border-slate-700/50 mb-6">
+
+      <motion.div
+        className="flex flex-wrap gap-2 border-b border-slate-700/50 mb-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
         {tabs.map(({ id, icon: Icon, label }) => (
-          <button
+          <motion.button
             key={id}
+            variants={itemVariants}
             onClick={() => setActiveTab(id)}
             className={`py-2 px-4 md:py-3 md:px-6 font-medium text-sm flex items-center transition-colors relative ${
               activeTab === id
@@ -68,9 +91,9 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
               <Icon className="h-4 w-4 mr-1" />
               {label}
             </div>
-          </button>
+          </motion.button>
         ))}
-      </div>
+      </motion.div>
     </>
   );
 };
