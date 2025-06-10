@@ -105,6 +105,8 @@ export function DashboardHeader({
                 return translate("dashboard.section.music");
             case "balance":
                 return translate("dashboard.section.balance");
+            case "guides":
+                return translate("dashboard.section.guides");   
             default:
                 return translate("dashboard.section.globalDistribution");
         }
