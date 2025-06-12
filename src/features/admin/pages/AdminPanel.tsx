@@ -181,11 +181,10 @@ export default function AdminPanel(): JSX.Element {
                     <div className="max-w-7xl mx-auto">
                         <AdminHeader handleSignOut={handleSignOut}/>      
                         <div
-                            className={`bg-slate-800/90 backdrop-blur-sm rounded-xl ${
-                                activeTab !== "messages" ? "p-6 md:p-8" : "p-0"
-                            } shadow-xl border border-slate-700/50 relative overflow-hidden ${
+                            className={`bg-slate-800/90 backdrop-blur-sm rounded-xl 
+                            shadow-xl border border-slate-700/50 relative overflow-hidden ${
                                 activeTab == "users" ? "min-h-[90vh]" : ""
-                            } ${activeTab == "messages" ? "h-[calc(100vh-7rem)]" : ""}`}
+                            } `}
                         >
                             {/* Background gradient effects */}
                             <div
@@ -202,9 +201,8 @@ export default function AdminPanel(): JSX.Element {
                                 }`}
                             >
                                 <div
-                                    className={activeTab == "messages" ? "p-4 bg-slate-800/80" : ""}
+                                    className={`p-4 ${activeTab == "messages" ? "bg-slate-800/80" : ""}`}
                                 >
-                                    
                                     <AdminTabs
                                         navigate={navigate}
                                         activeTab={activeTab}
