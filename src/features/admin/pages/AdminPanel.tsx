@@ -180,13 +180,6 @@ export default function AdminPanel(): JSX.Element {
                 <div className="min-h-screen bg-slate-900 p-2 md:p-8">
                     <div className="max-w-7xl mx-auto">
                         <AdminHeader handleSignOut={handleSignOut}/>      
-                        {/* <div
-                            className={`bg-slate-800/90 backdrop-blur-sm rounded-xl ${
-                                activeTab !== "messages" ? "p-6 md:p-8" : "p-0"
-                            } shadow-xl border border-slate-700/50 relative overflow-hidden ${
-                                activeTab == "users" ? "min-h-[90vh]" : ""
-                            } ${activeTab == "messages" ? "h-[calc(100vh-7rem)]" : ""}`}
-                        > */}
                         <div
                             className={`bg-slate-800/90 backdrop-blur-sm rounded-xl 
                             shadow-xl border border-slate-700/50 relative overflow-hidden ${
