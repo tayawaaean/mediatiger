@@ -1,4 +1,4 @@
-import { MusicItem } from '@/utils/data';
+import { MusicItem } from '../../../utils/data';
 import React from 'react';
 
 interface FavoritesListProps {

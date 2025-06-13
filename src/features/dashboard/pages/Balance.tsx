@@ -10,20 +10,11 @@ import PayoutDashboard from "../components/PayoutDashboard";
 const BalanceSection = () => {
   const [signatureMethod, setSignatureMethod] = useState("type");
   const [signatureImage, setSignatureImage] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const signaturePadRef = useRef(null);
-  const [checked, setChecked] = useState(false);
   const [hasContract, setHasContract] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const clearSignature = () => {
-    setSignatureImage("");
-    if (signaturePadRef.current) {
-      signaturePadRef.current.clear();
-    }
-  };
 
   const [formData, setFormData] = useState({
     legalName: "",
@@ -64,12 +55,6 @@ const BalanceSection = () => {
     }
   };
 
-  const saveSignature = () => {
-    if (signaturePadRef.current && !signaturePadRef.current.isEmpty()) {
-      const dataUrl = signaturePadRef.current.toDataURL();
-      setSignatureImage(dataUrl);
-    }
-  };
 
   const validateForm = () => {
     const errors = {};
@@ -125,7 +110,7 @@ const BalanceSection = () => {
       const fileName = `signatures/${user?.id}_${new Date().getTime()}.png`;
 
       // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from("signatures")
         .upload(fileName, blob, {
           upsert: true,
@@ -216,31 +201,8 @@ const BalanceSection = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear validation error for this field if it exists
-    if (validationErrors[name]) {
-      setValidationErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
 
   // Check if user has a valid signature based on current method
-  const hasValidSignature = () => {
-    if (signatureMethod === "type") {
-      return formData.signature_text && formData.signature_text.trim() !== "";
-    } else {
-      return signatureImage && signatureImage !== "";
-    }
-  };
 
   useEffect(() => {
     getContractDetails().then((res) => {
