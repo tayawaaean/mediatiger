@@ -78,26 +78,24 @@ export const AffiliateProgram = () => {
         <h2 className="text-white text-lg font-medium mr-3">
           Affiliate Program
         </h2>
-        {affiliateChannels.length > 0 && (
-          <>
-            <button
-              onClick={() => setShowAffiliateInfo(!showAffiliateInfo)}
-              className="flex items-center mr-3"
-            >
-              {!showAffiliateInfo ? (
-                <ToggleRight size={24} className="text-purple-500" />
-              ) : (
-                <ToggleLeft size={24} className="text-gray-500" />
-              )}
-            </button>
-            <div className="flex items-center">
-              <ArrowLeft size={18} className="text-purple-500 mr-1" />
-              <span className="text-purple-500 font-medium">
-                {!showAffiliateInfo ? "View Program Info" : "Back to Channels"}
-              </span>
-            </div>
-          </>
-        )}
+        <>
+          <button
+            onClick={() => setShowAffiliateInfo(!showAffiliateInfo)}
+            className="flex items-center mr-3"
+          >
+            {!showAffiliateInfo ? (
+              <ToggleRight size={24} className="text-purple-500" />
+            ) : (
+              <ToggleLeft size={24} className="text-gray-500" />
+            )}
+          </button>
+          <div className="flex items-center">
+            <ArrowLeft size={18} className="text-purple-500 mr-1" />
+            <span className="text-purple-500 font-medium">
+              {!showAffiliateInfo ? "View Program Info" : "Back to Channels"}
+            </span>
+          </div>
+        </>
       </div>
 
       {showAffiliateInfo ? (
