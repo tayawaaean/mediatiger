@@ -388,81 +388,128 @@ const UsersPanel: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-6 bg-slate-700/30 rounded-lg backdrop-blur-sm">
-                    <h4 className="text-sm font-medium text-slate-400 mb-4">
-                      Basic Information
-                    </h4>
-                    <div className="space-y-3">
-                      <p className="text-sm text-slate-300">
-                        <span className="text-slate-400">Email:</span>{" "}
-                        {selectedUser.email}
-                      </p>
-                      <p className="text-sm text-slate-300">
-                        <span className="text-slate-400">User ID:</span>{" "}
-                        {selectedUser.user_id}
-                      </p>
-                      <p className="text-sm text-slate-300">
-                        <span className="text-slate-400">Role:</span>{" "}
-                        {selectedUser.raw_app_meta_data?.role}
-                      </p>
-                    </div>
-                  </div>
+                    <div className="p-6 bg-slate-700/30 rounded-xl backdrop-blur-sm">
+                        <h4 className="mb-4 text-lg font-medium text-gray-300">
+                            Summary
+                        </h4>
+                        <div className="space-y-3">
+                            <p className="text-sm text-slate-300">
+                            <span className="text-slate-400">Account Status:</span>{" "}
+                            {selectedUser.email}
 
-                  <div className="p-6 bg-slate-700/30 rounded-lg backdrop-blur-sm">
-                    <h4 className="text-sm font-medium text-slate-400 mb-4">
-                      Verification Status
-                    </h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center">
-                        <span
-                          className={`w-3 h-3 rounded-full mr-3 ${
-                            selectedUser.raw_user_meta_data?.email_verified
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          }`}
-                        ></span>
-                        <span className="text-sm text-slate-300">
-                          Email Verification
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <span
-                          className={`w-3 h-3 rounded-full mr-3 ${
-                            selectedUser.raw_user_meta_data?.phone_verified
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          }`}
-                        ></span>
-                        <span className="text-sm text-slate-300">
-                          Phone Verification
-                        </span>
-                      </div>
+                            <span
+                                className={`w-3 h-3 rounded-full mr-3 ${
+                                selectedUser.raw_user_meta_data?.payment_enabled
+                                    ? "bg-green-500"
+                                    : "bg-red-500"
+                                }`}
+                            />
+                            
+                            </p>
+                            <p className="text-sm text-slate-300">
+                            <span className="text-slate-400">Member Since:</span>{" "}
+                            {selectedUser.user_id}
+                            </p>
+                            <p className="text-sm text-slate-300">
+                            <span className="text-slate-400">Last Active:</span>{" "}
+                            {selectedUser.raw_app_meta_data?.role}
+                            </p>
+                            <p className="text-sm text-slate-300">
+                            <span className="text-slate-400">Total Channels:</span>{" "}
+                            {selectedUser.raw_app_meta_data?.role}
+                            </p>
+                        </div>
                     </div>
-                  </div>
 
-                  <div className="p-6 bg-slate-700/30 rounded-lg backdrop-blur-sm">
-                    <h4 className="text-sm font-medium text-slate-400 mb-4">
-                      Payment Information
-                    </h4>
-                    <div className="space-y-3">
-                      <p className="text-sm text-slate-300">
-                        <span className="text-slate-400">Tipalti ID:</span>{" "}
-                        {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}
-                      </p>
-                      <div className="flex items-center">
-                        <span
-                          className={`w-3 h-3 rounded-full mr-3 ${
-                            selectedUser.raw_user_meta_data?.payment_enabled
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          }`}
-                        ></span>
-                        <span className="text-sm text-slate-300">
-                          Payment Enabled
-                        </span>
-                      </div>
+                    {/* <span
+                        className={`w-3 h-3 rounded-full mr-3 ${
+                        selectedUser.raw_user_meta_data?.payment_enabled
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                            : "bg-yellow-500"
+                        }`}
+                    /> */}
+
+                    <div className="p-6 bg-slate-700/30 rounded-xl backdrop-blur-sm">
+                        <h4 className="mb-4 text-lg font-medium text-gray-300">
+                            Payment Information
+                        </h4>
+                        <div className="space-y-3">
+                            <p className="text-sm text-slate-300">
+                                <span className="text-slate-400">Total Earnings:</span>{" "}
+                                {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}
+                            </p>
+
+                            <p className="text-sm text-slate-300">
+                                <span className="text-slate-400">This Month:</span>{" "}
+                                {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}
+
+                                channel earnings
+                                affiliate channel earnings
+                            </p>
+
+                            <p className="text-sm text-slate-300">
+                                <span className="text-slate-400">Tiplati ID:</span>{" "}
+                                {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}
+                            </p>
+
+                            <div className="mb-2 text-gray-400 text-center">Recent Payouts</div>
+                            <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
+                                <div className="flex justify-between">
+                                    <span>Mar 1, 2024</span>
+                                    <span className="text-green-400">$2,300.00</span>
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <span>Feb 1, 2024</span>
+                                    <span className="text-green-400">$1,850.00</span>
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <span>Jan 1, 2024</span>
+                                    <span className="text-green-400">$2,100.00</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-center">
+                                <span
+                                    className={`w-3 h-3 rounded-full mr-3 ${
+                                    selectedUser.raw_user_meta_data?.payment_enabled
+                                        ? "bg-green-500"
+                                        : "bg-red-500"
+                                    }`}
+                                />
+                                <span className="text-sm text-slate-300">
+                                    Payment Enabled
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                  </div>
+
+                    <div className="p-6 bg-slate-700/30 rounded-xl backdrop-blur-sm">
+                        <h4 className="mb-4 text-lg font-medium text-gray-300">
+                            Channel Management
+                        </h4>
+
+                        <div className="mb-2 text-gray-400 text-center">Active Channels</div>
+                        <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
+                            <a href="https://youtube.com/@mainchannel" target="_blank" rel="noopener noreferrer"
+                                className="flex items-center rounded px-2 py-1 hover:shadow-lg hover:shadow-blue-500/20 hover:bg-blue-500/5 transition-all duration-300 border border-transparent hover:border-blue-500/30">
+                                <span className="text-blue-400 hover:underline">@mainchannel</span> 
+                                {/* <CheckCircle2 size={16} className="ml-1 text-green-500" /> */}
+                            </a>
+                        </div>
+
+                        <div className="mb-2 text-gray-400 text-center mt-4">Affiliate Channels</div>
+                        <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
+                            <a href="https://youtube.com/@mainchannel" target="_blank" rel="noopener noreferrer"
+                                className="flex items-center rounded px-2 py-1 hover:shadow-lg hover:shadow-blue-500/20 hover:bg-blue-500/5 transition-all duration-300 border border-transparent hover:border-blue-500/30">
+                                <span className="text-blue-400 hover:underline">@mainchannel</span> 
+                                {/* <CheckCircle2 size={16} className="ml-1 text-green-500" /> */}
+                            </a>
+                        </div>
+                    </div>
+                    {/*  */}
 
                   <div className="p-6 bg-slate-700/30 rounded-lg backdrop-blur-sm">
                     <h4 className="text-sm font-medium text-slate-400 mb-4">
