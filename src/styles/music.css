@@ -1,0 +1,270 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 16px;
+  }
+  
+  .body-music {
+    @apply bg-[#FFFDD0] font-mono text-black;
+    color: black;
+    min-width: 320px;
+    overflow-x: hidden;
+    
+    background: #FFFDD0!important;
+  }
+
+  /* Custom scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #FFFDD0!important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #000;
+    border: 2px solid #FFFDD0;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333;
+  }
+}
+
+@layer components {
+  .neubrutalist-card {
+    @apply bg-[#FFFDD0] border-4 border-black p-4 sm:p-8 relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black;
+  }
+
+  .neubrutalist-card nav a {
+    @apply border-2 border-black bg-[#FFFDD0];
+  }
+
+  .neubrutalist-button {
+    @apply bg-yellow-400 border-4 border-black px-6 sm:px-8 py-3 sm:py-4 text-lg sm:text-xl font-bold uppercase 
+           shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[3px] hover:translate-y-[3px]
+           hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all duration-200
+           min-h-[44px] min-w-[44px] touch-manipulation;
+  }
+
+  .neubrutalist-input {
+    @apply border-4 border-black p-4 text-xl focus:outline-none focus:ring-4 ring-yellow-400;
+  }
+
+  .neubrutalist-title {
+    @apply text-4xl sm:text-5xl md:text-7xl font-black uppercase leading-none;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease forwards;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(10px);
+    }
+  }
+
+  .animate-bounce-slow {
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes fadeSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+      filter: blur(5px);
+    }
+    50% {
+      opacity: 0.6;
+      filter: blur(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .animate-fade-slide-in {
+    animation: fadeSlideIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes typing {
+    0%, 50%, 100% {
+      content: "VIDEOS";
+    }
+    25%, 75% {
+      content: "SHORTS";
+    }
+  }
+
+  .typing-animation::before {
+    content: "VIDEOS";
+    animation: typing 4s infinite;
+    background-color: #facc15;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease forwards;
+  }
+
+  .animate-pulse {
+    animation: pulse 0.3s ease;
+  }
+  /* Base styles for animated elements */
+  .header,
+  .navigation,
+  .search-container,
+  .main-content,
+  .music-item {
+    opacity: 1;
+  }
+
+  /* Initially hide elements before animation */
+  .header:not(.animate-fade-in),
+  .navigation:not(.animate-fade-in),
+  .search-container:not(.animate-fade-in),
+  .main-content:not(.animate-fade-in),
+  .music-item:not(.animate-scale-in) {
+    opacity: 0;
+  }
+}
+
+.animate-fade-slide-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeSlideIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.fade-in-element {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-element.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-child {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.fade-in-child.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-animation > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.stagger-animation.animate > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Music Player Animations */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.play-button.playing {
+  animation: pulse 2s ease infinite;
+}
+
+.progress-fill {
+  transition: width 0.1s linear;
+}
+
+.play-button {
+  transition: transform 0.2s ease;
+}
+
+.play-button:hover {
+  transform: scale(1.05);
+}
+
+.play-button:active {
+  transform: scale(0.95);
+}
+
+/* Music Player styles */
+.music-player-progress {
+  width: var(--progress-width, 0%);
+  height: 100%;
+  background-color: rgb(16 185 129); /* emerald-500 */
+  border-radius: 9999px;
+  transition: all 0.1s linear;
+}

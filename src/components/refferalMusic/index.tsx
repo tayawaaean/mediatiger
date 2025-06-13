@@ -6,7 +6,7 @@ import BenefitsSection from './sections/BenefitsSection';
 import PaymentSection from './sections/PaymentSection';
 import UniqueSellingSection from './sections/UniqueSellingSection';
 import Footer from './common/Footer';
-import "../../music.css"
+import "../../styles/music.css";  // Import your custom styles
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver"
 
 const MusicReferal = () => {
