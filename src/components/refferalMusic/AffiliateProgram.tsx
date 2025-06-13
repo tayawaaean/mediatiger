@@ -1,11 +1,18 @@
-import { Copy, Share2, CheckCircle, ToggleRight, ToggleLeft, ArrowLeft } from "lucide-react";
+import {
+  Copy,
+  Share2,
+  CheckCircle,
+  ToggleRight,
+  ToggleLeft,
+  ArrowLeft,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { Switch } from "../ui/switch";
 import { supabase } from "../../lib/supabase";
 import ChannelCard from "./ChannelCard";
 
 export const AffiliateProgram = () => {
-  const [copied, setCopied] = useState(false); 
+  const [copied, setCopied] = useState(false);
   const [affiliateCode, setAffiliateCode] = useState("");
   const [affiliateChannels, setAffiliateChannels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,31 +24,34 @@ export const AffiliateProgram = () => {
 
   const fetchAffiliateData = async () => {
     try {
-        
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
       setAffiliateCode(user?.user_metadata?.username);
 
-        const { data: affiliateData, error: affiliateError } = await supabase
-            .from("referrals")
-            .select("user_id")
-            .eq("referral_id", user.id);
+      const { data: affiliateData, error: affiliateError } = await supabase
+        .from("referrals")
+        .select("user_id")
+        .eq("referral_id", user.id);
 
       if (affiliateError) throw affiliateError;
 
-      console.log(affiliateData)
-      let {data: channelData, error: channelError} = await supabase
+      console.log(affiliateData);
+      let { data: channelData, error: channelError } = await supabase
         .from("user_requests")
         .select("youtube_links")
-        .in("user_id", affiliateData.map(item => item.user_id));
+        .in(
+          "user_id",
+          affiliateData.map((item) => item.user_id)
+        );
 
-      if (channelError) throw channelError; 
-        const flattenedLinks = channelData?.flatMap(y => y.youtube_links) || [];
-        const uniqueLinks = [...new Set(flattenedLinks)];
-        setAffiliateChannels(uniqueLinks);
-        console.log("set", uniqueLinks);
+      if (channelError) throw channelError;
+      const flattenedLinks = channelData?.flatMap((y) => y.youtube_links) || [];
+      const uniqueLinks = [...new Set(flattenedLinks)];
+      setAffiliateChannels(uniqueLinks);
+      if (uniqueLinks.length === 0) setShowAffiliateInfo(true);
+      console.log("set", uniqueLinks);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -49,7 +59,6 @@ export const AffiliateProgram = () => {
     }
   };
 
- 
   const handleCopyCode = async () => {
     try {
       await navigator.clipboard.writeText(affiliateCode);
@@ -65,8 +74,11 @@ export const AffiliateProgram = () => {
 
   return (
     <div className="bg-slate-800 rounded-xl p-6 mx-auto">
-       <div className="flex items-center mb-4">
-          <h2 className="text-white text-lg font-medium mr-3">Affiliate Program</h2>
+      <div className="flex items-center mb-4">
+        <h2 className="text-white text-lg font-medium mr-3">
+          Affiliate Program
+        </h2>
+        <>
           <button
             onClick={() => setShowAffiliateInfo(!showAffiliateInfo)}
             className="flex items-center mr-3"
@@ -79,11 +91,14 @@ export const AffiliateProgram = () => {
           </button>
           <div className="flex items-center">
             <ArrowLeft size={18} className="text-purple-500 mr-1" />
-            <span className="text-purple-500 font-medium">{!showAffiliateInfo ? 'View Program Info' : 'Back to Channels'}</span>
+            <span className="text-purple-500 font-medium">
+              {!showAffiliateInfo ? "View Program Info" : "Back to Channels"}
+            </span>
           </div>
-        </div>
+        </>
+      </div>
 
-      {showAffiliateInfo?  (
+      {showAffiliateInfo ? (
         <>
           <div className="prose prose-invert text-slate-300 mb-6">
             <p>
@@ -105,14 +120,24 @@ export const AffiliateProgram = () => {
               YouTube.
             </p>
           </div>
-          <div className="mb-8"> 
+          <div className="mb-8">
             <div className="mt-6 bg-[#232A4D] rounded-lg p-4 border border-purple-500/20">
-                <p className="text-gray-300 mb-2">Your Affiliate Code:</p>
-                          <p className="text-2xl font-semibold text-purple-400">{affiliateCode}</p>
-              </div>
+              <p className="text-gray-300 mb-2">Your Affiliate Code:</p>
+              <p className="text-2xl font-semibold text-purple-400">
+                {affiliateCode}
+              </p>
+            </div>
           </div>
         </>
-          ) : affiliateChannels?.length != 0 ? <div>{affiliateChannels?.map((c) => <ChannelCard link={c} revenue={0} />)}</div>: <div></div>}
+      ) : affiliateChannels?.length != 0 ? (
+        <div>
+          {affiliateChannels?.map((c) => (
+            <ChannelCard link={c} revenue={0} />
+          ))}
+        </div>
+      ) : (
+        <div></div>
+      )}
     </div>
   );
 };
