@@ -145,24 +145,24 @@ const WhyCreatorsLove: React.FC = () => {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
         {/* Section header */}
         <div ref={headerRef} className={`text-center mb-16 ${headerClasses}`}>
-          <h2 className="relative inline-block mb-6">
-            <span className="text-4xl md:text-6xl inline-flex items-center gap-4  justify-center font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-200 to-indigo-300 tracking-tight leading-tight drop-shadow-2xl">
-              Why Creators Love{" "}
-              <div className="relative inline-flex items-center gap-3 px-4 py-2 ">
+          <h2 className="relative inline-block mb-6 ">
+            <span className="text-4xl md:text-6xl  gap-4 font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-200 to-indigo-300 tracking-tight leading-tight drop-shadow-2xl">
+              <span>Why Creators Love</span>
+              <div className="relative inline-flex items-baseline gap-x-3 min-h-20 h-20 px-4">
                 <img
                   src="https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//39888c2f-22d0-4a95-85ae-dfa6dc1aae7b.png"
                   alt="MediaTiger Logo"
                   className="w-16 h-16 object-contain"
                 />
-                <span className=" font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white tracking-tight">
+                <span className="font-black text-transparent bg-clip-text h-full bg-gradient-to-r from-white via-slate-100 to-white">
                   MediaTiger
                 </span>
               </div>
             </span>
 
             {/* Glowing underline effects */}
-            <div className="absolute -bottom-2 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 via-purple-400 to-indigo-500 rounded-full shadow-xl shadow-indigo-500/50"></div>
-            <div className="absolute -bottom-0.5 left-0 w-full h-0.5 bg-gradient-to-r from-purple-300 via-indigo-200 to-purple-300 rounded-full shadow-md shadow-purple-400/30"></div>
+            <div className="absolute -bottom-3.5 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 via-purple-400 to-indigo-500 rounded-full shadow-xl shadow-indigo-500/50"></div>
+            <div className="absolute -bottom-1.5 left-0 w-full h-0.5 bg-gradient-to-r from-purple-300 via-indigo-200 to-purple-300 rounded-full shadow-md shadow-purple-400/30"></div>
 
             {/* Premium glow effects */}
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-400/20 to-indigo-500/20 blur-2xl -z-10 animate-pulse"></div>
