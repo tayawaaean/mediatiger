@@ -99,7 +99,7 @@ const SignUp: React.FC = () => {
 
             {/* Subtext with subcontent styling */}
             <div className="max-w-sm">
-              <p className="text-lg text-slate-300 leading-relaxed font-normal">
+              <p className="text-lg text-slate-300 leading-relaxed font-normal drop-shadow-glow-subtle animate-glow">
                 Create your account and connect your YouTube channel
               </p>
             </div>
@@ -149,7 +149,7 @@ const SignUp: React.FC = () => {
 
             {/* Subtext with same styling */}
             <div className="max-w-sm">
-              <p className="text-lg text-slate-300 leading-relaxed font-normal">
+              <p className="text-lg text-slate-300 leading-relaxed font-normal drop-shadow-glow-subtle animate-glow">
                 Select from our library of revenue-generating tracks and add it
                 to your Shorts video during upload.
               </p>
@@ -200,7 +200,7 @@ const SignUp: React.FC = () => {
 
             {/* Subtext with same styling */}
             <div className="max-w-sm">
-              <p className="text-lg  text-slate-300 leading-relaxed font-normal">
+              <p className="text-lg  text-slate-300 leading-relaxed font-normal drop-shadow-glow-subtle animate-glow">
                 Start earning additional revenue from your Shorts
               </p>
             </div>
