@@ -102,7 +102,7 @@ const SignUp: React.FC = () => {
 
       <div
         ref={stepsRef}
-        className="relative max-w-7xl mx-auto px-4 sm:px-6 mt-20  z-10"
+        className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20  z-10"
       >
         <div
           className={`flex items-center justify-center gap-6 text-left ${getItemClasses(
@@ -197,7 +197,7 @@ const SignUp: React.FC = () => {
             <img
               src="https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//IMG_16CC1A73F23E-1.jpeg"
               alt="Music Selection Interface"
-              className="w-64 h-auto md:w-80object-contain drop-shadow-2xl rounded-lg"
+              className="w-64 h-auto md:w-80 object-contain drop-shadow-2xl rounded-lg"
             />
           </div>
         </div>
