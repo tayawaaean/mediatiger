@@ -147,17 +147,10 @@ const WhyCreatorsLove: React.FC = () => {
         <div ref={headerRef} className={`text-center mb-16 ${headerClasses}`}>
           <h2 className="relative inline-block mb-6 ">
             <span className="text-4xl md:text-6xl  gap-4 font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-200 to-indigo-300 tracking-tight leading-tight drop-shadow-2xl">
-              <span>Why Creators Love</span>
-              <div className="relative inline-flex items-baseline gap-x-3 min-h-20 h-20 px-4">
-                <img
-                  src="https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//39888c2f-22d0-4a95-85ae-dfa6dc1aae7b.png"
-                  alt="MediaTiger Logo"
-                  className="w-16 h-16 object-contain"
-                />
-                <span className="font-black text-transparent bg-clip-text h-full bg-gradient-to-r from-white via-slate-100 to-white">
-                  MediaTiger
-                </span>
-              </div>
+              <span>Why Creators Love</span>{" "}
+              <span className="font-black text-transparent bg-clip-text h-full bg-gradient-to-r from-white via-slate-100 to-white">
+                MediaTiger
+              </span>
             </span>
 
             {/* Glowing underline effects */}
