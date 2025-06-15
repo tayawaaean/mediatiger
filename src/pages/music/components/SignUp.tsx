@@ -20,8 +20,44 @@ const SignUp: React.FC = () => {
   return (
     <div
       ref={sectionRef}
-      className={`relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 overflow-hidden -mt-20 ${sectionClasses}`}
+      className={`relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20 overflow-hidden  ${sectionClasses}`}
     >
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-200">
+        <div className="text-center">
+          {/* Main heading with premium luxury styling */}
+          <h2 className="relative inline-block mb-4">
+            <span className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 tracking-tight leading-tight drop-shadow-2xl">
+              How It Works
+            </span>
+
+            {/* Multiple glowing underline effects for luxury */}
+            <div className="absolute -bottom-2 left-0 w-full h-1.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 rounded-full shadow-xl shadow-amber-500/50"></div>
+            <div className="absolute -bottom-0.5 left-0 w-full h-0.5 bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-300 rounded-full shadow-md shadow-yellow-400/30"></div>
+
+            {/* Premium glow effects with multiple layers */}
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 via-yellow-400/20 to-amber-500/20 blur-2xl -z-10 animate-pulse"></div>
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-yellow-400/15 via-amber-300/15 to-yellow-400/15 blur-xl -z-10 animate-pulse"
+              style={{ animationDelay: "1s" }}
+            ></div>
+
+            {/* Luxury sparkle effects */}
+            <div className="absolute -top-3 -left-3 w-2 h-2 bg-yellow-300 rounded-full animate-ping opacity-60"></div>
+            <div
+              className="absolute -top-1 -right-4 w-1.5 h-1.5 bg-amber-300 rounded-full animate-ping opacity-50"
+              style={{ animationDelay: "0.5s" }}
+            ></div>
+            <div
+              className="absolute -bottom-4 left-6 w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping opacity-40"
+              style={{ animationDelay: "1s" }}
+            ></div>
+            <div
+              className="absolute -bottom-3 -right-3 w-2 h-2 bg-amber-400 rounded-full animate-ping opacity-55"
+              style={{ animationDelay: "1.5s" }}
+            ></div>
+          </h2>
+        </div>
+      </div>
       {/* Seamlessly continue the same background elements from HowItWorks */}
       <div className="absolute inset-0">
         {/* Identical gradient overlays as HowItWorks for seamless transition */}
@@ -66,7 +102,7 @@ const SignUp: React.FC = () => {
 
       <div
         ref={stepsRef}
-        className="relative max-w-7xl mx-auto px-4 sm:px-6  z-10"
+        className="relative max-w-7xl mx-auto px-4 sm:px-6 mt-20  z-10"
       >
         <div
           className={`flex items-center justify-center gap-6 text-left ${getItemClasses(
