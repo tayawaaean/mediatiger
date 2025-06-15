@@ -1,5 +1,5 @@
 export interface MusicItem {
-  id: number;
+  id: string;
   title: string;
   artist: string;
   cover: string;
@@ -10,111 +10,75 @@ export interface MusicItem {
 
 export const musicData: MusicItem[] = [
   {
-    id: 1,
-    title: "Ambient Dreams",
-    artist: "Serene Sounds",
-    cover: "https://images.pexels.com/photos/1626481/pexels-photo-1626481.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "3:45",
+    id: 'KRMIM2515371',
+    title: 'Simple Joys...',
+    artist: 'Serene Sounds',
+    cover: 'https://images.pexels.com/photos/1626481/pexels-photo-1626481.jpeg?auto=compress&cs=tinysrgb&w=100',
+    duration: '3:45',
     favorite: false,
-    category: ["all", "relaxing"]
+    category: ['Relaxing', 'Peaceful']
   },
   {
-    id: 2,
-    title: "Midnight Jazz",
-    artist: "Smooth Trio",
-    cover: "https://images.pexels.com/photos/1389429/pexels-photo-1389429.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "4:12",
+    id: 'KRMIM2515370',
+    title: 'Village Stroll',
+    artist: 'Smooth Trio',
+    cover: 'https://images.pexels.com/photos/1389429/pexels-photo-1389429.jpeg?auto=compress&cs=tinysrgb&w=100',
+    duration: '4:12',
     favorite: false,
-    category: ["all", "romantic"]
+    category: ['Relaxing', 'Lovely']
   },
   {
-    id: 3,
-    title: "Electric Waves",
-    artist: "Synth Masters",
-    cover: "https://images.pexels.com/photos/1021876/pexels-photo-1021876.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "3:28",
+    id: 'KRMIM2515369',
+    title: 'Serenity in Bloom',
+    artist: 'Nature Sounds',
+    cover: 'https://images.pexels.com/photos/1021876/pexels-photo-1021876.jpeg?auto=compress&cs=tinysrgb&w=100',
+    duration: '5:32',
     favorite: false,
-    category: ["all", "exciting", "new"]
+    category: ['Relaxing', 'Peaceful']
   },
   {
-    id: 4,
-    title: "Peaceful Morning",
-    artist: "Nature Sounds",
-    cover: "https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "5:32",
+    id: 'KRMIM2515336',
+    title: 'Eternal Farewell',
+    artist: 'Cosmic Melodies',
+    cover: 'https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?auto=compress&cs=tinysrgb&w=100',
+    duration: '5:15',
     favorite: false,
-    category: ["all", "refreshing"]
+    category: ['Dreamy', 'Mysterious']
   },
   {
-    id: 5,
-    title: "Urban Beats",
-    artist: "City Life",
-    cover: "https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "3:15",
+    id: 'KRMIM2515335',
+    title: 'Awakening Dreams...',
+    artist: 'Synth Masters',
+    cover: 'https://images.pexels.com/photos/167092/pexels-photo-167092.jpeg?auto=compress&cs=tinysrgb&w=100',
+    duration: '3:28',
     favorite: false,
-    category: ["all", "groovy", "new"]
+    category: ['Romantic', 'Refreshing']
   },
   {
-    id: 6,
-    title: "Chill Vibes",
-    artist: "Lofi Collective",
-    cover: "https://images.pexels.com/photos/230795/pexels-photo-230795.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "4:05",
+    id: 'KRMIM2515334',
+    title: 'Lingering Hopes',
+    artist: 'Lofi Collective',
+    cover: 'https://images.pexels.com/photos/230795/pexels-photo-230795.jpeg?auto=compress&cs=tinysrgb&w=100',
+    duration: '4:05',
     favorite: false,
-    category: ["all", "dreamy"]
+    category: ['Gloomy', 'Dreamy']
   },
   {
-    id: 7,
-    title: "Ocean Waves",
-    artist: "Coastal Sounds",
-    cover: "https://images.pexels.com/photos/355288/pexels-photo-355288.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "6:22",
+    id: 'KRMIM2515295',
+    title: 'Breathless',
+    artist: 'Coastal Sounds',
+    cover: 'https://images.pexels.com/photos/355288/pexels-photo-355288.jpeg?auto=compress&cs=tinysrgb&w=100',
+    duration: '6:22',
     favorite: false,
-    category: ["all", "relaxing"]
+    category: ['Sad', 'Wistful']
   },
   {
-    id: 8,
-    title: "Morning Coffee",
-    artist: "Cafe Lounge",
-    cover: "https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "3:47",
+    id: 'KRMIM2515294',
+    title: 'Escape Realm...',
+    artist: 'City Life',
+    cover: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=100',
+    duration: '3:47',
     favorite: false,
-    category: ["all", "cheerful", "new"]
-  },
-  {
-    id: 9,
-    title: "Starry Night",
-    artist: "Cosmic Melodies",
-    cover: "https://images.pexels.com/photos/1694000/pexels-photo-1694000.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "5:15",
-    favorite: false,
-    category: ["all", "mysterious", "new"]
-  },
-  {
-    id: 10,
-    title: "Summer Breeze",
-    artist: "Tropical Vibes",
-    cover: "https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "3:32",
-    favorite: false,
-    category: ["all", "bright"]
-  },
-  {
-    id: 11,
-    title: "Focus Flow",
-    artist: "Deep Concentration",
-    cover: "https://images.pexels.com/photos/775907/pexels-photo-775907.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "4:45",
-    favorite: false,
-    category: ["all", "determined"]
-  },
-  {
-    id: 12,
-    title: "Rainy Day",
-    artist: "Cozy Tunes",
-    cover: "https://images.pexels.com/photos/1089440/pexels-photo-1089440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    duration: "4:22",
-    favorite: false,
-    category: ["all", "sad"]
+    category: ['Horror', 'Determined']
   }
 ];
