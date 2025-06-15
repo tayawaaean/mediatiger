@@ -34,6 +34,29 @@ const MusicComponent: React.FC = () => {
   const componentMounted = useRef(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // List of valid mood categories from the mood dropdown
+  const validMoods = [
+    "cheerful",
+    "horror",
+    "lovely",
+    "groovy",
+    "tense",
+    "dramatic",
+    "romantic",
+    "dreamy",
+    "scary",
+    "bright",
+    "determined",
+    "sad",
+    "exciting",
+    "mysterious",
+    "wistful",
+    "epic",
+    "relaxing",
+    "entertaining",
+    "refreshing",
+  ];
+
   // Filter music based on current tab, search, and sort
   const filteredMusic = React.useMemo(() => {
     let filtered = [...musicItems];
@@ -42,7 +65,9 @@ const MusicComponent: React.FC = () => {
       filtered = filtered.filter(
         (item) =>
           item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.artist.toLowerCase().includes(searchTerm.toLowerCase())
+          item.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (validMoods.includes(searchTerm.toLowerCase()) &&
+            item.category.includes(searchTerm.toLowerCase()))
       );
     } else if (currentTab === "home") {
       if (sortBy === "mood" && selectedMood) {
@@ -170,8 +195,21 @@ const MusicComponent: React.FC = () => {
   };
 
   const renderHomeContent = () => {
-    const featuredTracks = filteredMusic.filter((item) => item.favorite).slice(0, 4);
-    const newTracks = filteredMusic.filter((item) => item.category.includes("new")).slice(0, 4);
+    // Render only filteredMusic list for search or mood filter
+    if (searchTerm || (sortBy === "mood" && selectedMood)) {
+      return (
+        <MusicList
+          items={filteredMusic}
+          onPlay={handlePlay}
+          onFavorite={handleFavorite}
+          onCopyISRC={handleCopyISRC}
+        />
+      );
+    }
+
+    // Render sections when no search or mood filter
+    const featuredTracks = musicItems.filter((item) => item.favorite).slice(0, 4);
+    const newTracks = musicItems.filter((item) => item.category.includes("new")).slice(0, 4);
 
     return (
       <>
@@ -197,6 +235,13 @@ const MusicComponent: React.FC = () => {
             />
           </>
         )}
+        <SectionHeader title="All Tracks" />
+        <MusicList
+          items={filteredMusic}
+          onPlay={handlePlay}
+          onFavorite={handleFavorite}
+          onCopyISRC={handleCopyISRC}
+        />
       </>
     );
   };
