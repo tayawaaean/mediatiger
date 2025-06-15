@@ -33,7 +33,7 @@ const BenefitCard: React.FC<BenefitCardProps> = ({
         bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent
         dark:from-white dark:via-slate-100 dark:to-white
         px-2 py-1 rounded-md backdrop-blur-sm
-        border border-black/20 dark:border-white/20`}
+        border border-black/20 dark:border-white/20 ${titleColor}`}
       >
         {title}
       </h3>
@@ -67,24 +67,26 @@ const Benefits: React.FC = () => {
       title: "EFFORTLESS EARNING",
       description:
         "Adding background music onto your shorts is as simple as it can get, no other changes have to be made whatsoever to your current content.",
-      titleColor: "text-green-600 dark:text-green-400",
+      titleColor: "text-teal-600 drop-shadow-glow-teal dark:text-teal-400",
     },
     {
       title: "YOUR BENEFIT",
       description:
         "You will earn extra revenue that's separate from your Adsense/Partner Program earnings because it comes directly from MediaTiger's music. No RPM impact at all, and easy additional income.",
-      titleColor: "text-blue-600 dark:text-blue-400",
+      titleColor: "text-amber-600 drop-shadow-glow-amber dark:text-amber-400",
     },
     {
       title: "WHAT WE DO",
       description:
         "MediaTiger helps you claim additional YouTube Shorts revenue through music integration from exclusive music pool contracts with YouTube for our background music tracks.",
-      titleColor: "text-orange-600 dark:text-orange-400",
+      titleColor:
+        "text-fuchsia-600 drop-shadow-glow-fuchsia dark:text-fuchsia-400",
     },
     {
       title: "300+ PARTNERS",
       description: "Join our exclusive community of successful creators",
-      titleColor: "text-purple-600 dark:text-purple-400",
+      titleColor:
+        "text-emerald-600 drop-shadow-glow-emerald dark:text-emerald-400",
       icon: (
         <img
           src="https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//cfe2e9ab-d894-4c22-afa6-5ad39d87b3de.png"
@@ -96,7 +98,7 @@ const Benefits: React.FC = () => {
     {
       title: "EXTRA INCOME",
       description: "Don't miss out on revenue you deserve",
-      titleColor: "text-green-600 dark:text-green-400",
+      titleColor: "text-sky-600 drop-shadow-glow-sky dark:text-sky-400",
       icon: (
         <img
           src="https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//payout%20-%20Edited.png"
@@ -108,7 +110,7 @@ const Benefits: React.FC = () => {
     {
       title: "TRACK GROWTH",
       description: "Monitor your earnings in real-time",
-      titleColor: "text-indigo-600 dark:text-indigo-400",
+      titleColor: "text-rose-600 drop-shadow-glow-rose dark:text-rose-400",
       icon: (
         <img
           src="https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//20250512_2340_Mascot%20with%20Analytics%20Chart_remix_01jv45xbrcfmps9a776wqm25a5%20-%20Edited.png"
