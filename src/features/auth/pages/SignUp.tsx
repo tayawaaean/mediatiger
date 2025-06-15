@@ -26,7 +26,7 @@ const showUniqueToast = (
     // Remove from tracking after some time
     setTimeout(() => {
       shownToasts.delete(toastId);
-    }, 5000);
+    }, 3000);
   }
 };
 
