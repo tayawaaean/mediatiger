@@ -12,6 +12,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearch }) =>
   const handleClear = () => {
     onSearch('');
     inputRef.current?.focus();
+    inputRef.current!.value = ''; // Force reset input value
   };
 
   return (
@@ -21,7 +22,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearch }) =>
         type="text"
         value={searchTerm}
         onChange={(e) => onSearch(e.target.value)}
-        placeholder="Search by title or artist..."
+        placeholder="Search"
         className="w-full pl-10 pr-12 py-2 bg-white/5 text-slate-300 rounded-full border border-slate-700/50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50"
       />
       

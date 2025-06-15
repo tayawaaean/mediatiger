@@ -1,5 +1,5 @@
-import { MusicItem } from '../../../utils/data';
-import React from 'react';
+import { MusicItem } from "../../../utils/data"; // Adjusted import for consistency
+import React from "react";
 
 interface FavoritesListProps {
   items: MusicItem[];
@@ -22,17 +22,30 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({ items }) => {
           </div>
         ) : (
           favorites.map((item) => (
-            <div key={item.id} className="flex items-center gap-4 p-3 hover:bg-slate-700/30 rounded-lg transition-colors">
-              <img src={item.cover} alt={item.title} className="w-12 h-12 rounded-lg object-cover" />
+            <div
+              key={item.id}
+              className="flex items-center gap-4 p-3 hover:bg-slate-700/30 rounded-lg transition-colors"
+            >
+              <img
+                src={item.cover}
+                alt={item.title}
+                className="w-12 h-12 rounded-lg object-cover"
+              />
               <div className="flex-1">
                 <h3 className="text-white text-sm font-medium truncate">{item.title}</h3>
-                <div className="flex gap-2 mt-1.5">
+                <p className="text-slate-400 text-xs truncate">{item.artist}</p>
+                <div className="flex flex-wrap gap-2 mt-1">
                   {item.category.map((tag) => (
-                    <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10">
+                    <span
+                      key={tag}
+                      className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 whitespace-nowrap overflow-hidden overflow-ellipsis"
+                      style={{ maxWidth: "100%" }}
+                    >
                       {tag}
                     </span>
                   ))}
                 </div>
+                <p className="text-slate-400 text-xs">{item.duration}</p>
               </div>
             </div>
           ))
@@ -41,3 +54,5 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({ items }) => {
     </div>
   );
 };
+
+export default FavoritesList;
