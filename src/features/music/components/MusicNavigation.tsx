@@ -8,8 +8,8 @@ interface MusicNavigationProps {
 export const MusicNavigation: React.FC<MusicNavigationProps> = ({ currentTab, onTabChange }) => {
   const navItems = [
     { id: 'home', label: 'Home' },
-    { id: 'new', label: 'New Releases' },
-    { id: 'mood', label: 'Mood' },
+    { id: 'mood', label: 'All Moods' },
+    { id: 'new', label: 'New' },
     { id: 'favorited', label: 'Favorites' }
   ];
 

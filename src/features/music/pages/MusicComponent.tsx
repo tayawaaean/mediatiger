@@ -9,73 +9,74 @@ import { NoResults } from "../components/NoResults";
 import { SectionHeader } from "../components/SectionHeader";
 import { MusicPlayer } from "../components/MusicPlayer";
 import { animatePageLoad, animateItemClick } from "../utils/musicAnimations";
-import "../../../styles/music.css"; // Import your custom styles
+import "../../../styles/music.css";
 
 const MusicComponent: React.FC = () => {
   const [currentTab, setCurrentTab] = useState("home");
   const [sortBy, setSortBy] = useState("recent");
   const [selectedMood, setSelectedMood] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredMusic, setFilteredMusic] = useState(musicData);
+  const [musicItems, setMusicItems] = useState<MusicItem[]>(() => {
+    const savedFavorites = localStorage.getItem("favoriteTracks");
+    if (savedFavorites) {
+      const favoriteIds = JSON.parse(savedFavorites) as number[];
+      return musicData.map((item) => ({
+        ...item,
+        favorite: favoriteIds.includes(item.id),
+        category: favoriteIds.includes(item.id)
+          ? [...item.category, "favorited"].filter((v, i, a) => a.indexOf(v) === i)
+          : item.category.filter((cat) => cat !== "favorited"),
+      }));
+    }
+    return musicData;
+  });
   const [nowPlaying, setNowPlaying] = useState<MusicItem | null>(null);
   const componentMounted = useRef(false);
-  const contentRef = useRef<HTMLDivElement>(null); // Handle tab changes
-  const handleTabChange = (tabId: string) => {
-    const content = contentRef.current;
-    if (content) {
-      // First, remove the animation class and add a class to fade out
-      content.style.opacity = "0";
-      content.style.transition = "opacity 0.15s ease-out";
+  const contentRef = useRef<HTMLDivElement>(null);
 
-      // After fade out, update content and fade back in
-      setTimeout(() => {
-        setCurrentTab(tabId);
-        filterMusicByCategory(tabId);
+  // Filter music based on current tab, search, and sort
+  const filteredMusic = React.useMemo(() => {
+    let filtered = [...musicItems];
 
-        if (content) {
-          // Add animation class after content update
-          content.classList.add("animate-fade-in");
-          content.style.removeProperty("opacity");
-          content.style.removeProperty("transition");
-        }
-      }, 150);
-    } else {
-      setCurrentTab(tabId);
-      filterMusicByCategory(tabId);
-    }
-  };
-
-  // Filter music by category
-  const filterMusicByCategory = (category: string) => {
-    if (category === "home") {
-      // For home tab, we'll keep the current filtering logic
-      let filtered = [...musicData];
-
-      if (searchTerm) {
-        filtered = filtered.filter(
-          (item) =>
-            item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.artist.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.artist.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    } else if (currentTab === "home") {
       if (sortBy === "mood" && selectedMood) {
         filtered = filtered.filter((item) =>
           item.category.includes(selectedMood.toLowerCase())
         );
       }
+    } else if (currentTab === "new") {
+      filtered = filtered.filter((item) => item.category.includes("new"));
+    } else if (currentTab === "favorited") {
+      filtered = filtered.filter((item) => item.favorite);
+    }
 
-      setFilteredMusic(filtered);
+    return filtered;
+  }, [musicItems, currentTab, searchTerm, sortBy, selectedMood]);
+
+  // Handle tab change with animation
+  const handleTabChange = (tabId: string) => {
+    const content = contentRef.current;
+    if (content) {
+      content.style.opacity = "0";
+      content.style.transition = "opacity 0.15s ease-out";
+      setTimeout(() => {
+        setCurrentTab(tabId);
+        content.classList.add("animate-fade-in");
+        content.style.removeProperty("opacity");
+        content.style.removeProperty("transition");
+      }, 150);
     } else {
-      // For other tabs, filter by category
-      const filtered = musicData.filter((item) =>
-        item.category.includes(category.toLowerCase())
-      );
-      setFilteredMusic(filtered);
+      setCurrentTab(tabId);
     }
   };
 
-  // Cleanup animation classes when component unmounts
+  // Cleanup animation classes
   useEffect(() => {
     return () => {
       const content = contentRef.current;
@@ -95,16 +96,8 @@ const MusicComponent: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (currentTab === "home") {
-      filterMusicByCategory("home");
-    }
-  }, [searchTerm, sortBy, selectedMood]);
-
   const handlePlay = (item: MusicItem) => {
     setNowPlaying(item);
-
-    // Find and animate the clicked music item
     const musicItem = document.querySelector(`[data-id="${item.id}"]`);
     if (musicItem instanceof HTMLElement) {
       animateItemClick(musicItem);
@@ -112,83 +105,56 @@ const MusicComponent: React.FC = () => {
   };
 
   const handleFavorite = (id: number) => {
-    const updatedMusic = musicData.map((item) => {
-      if (item.id === id) {
-        // Update categories
-        const newCategories = [...item.category];
-        if (!item.favorite) {
-          newCategories.push("favorited");
-        } else {
-          const index = newCategories.indexOf("favorited");
-          if (index > -1) {
-            newCategories.splice(index, 1);
-          }
-        }
+    const currentFavorites = musicItems.filter((item) => item.favorite).length;
+    const itemIndex = musicItems.findIndex((item) => item.id === id);
+    if (itemIndex === -1) return;
 
-        // Animate favorite button
-        const favoriteBtn = document.querySelector(
-          `[data-favorite-id="${id}"]`
-        );
-        if (favoriteBtn instanceof HTMLElement) {
-          animateItemClick(favoriteBtn);
-        }
+    const newFavorite = !musicItems[itemIndex].favorite;
+    if (newFavorite && currentFavorites >= 15) {
+      alert("You can only favorite up to 15 tracks.");
+      return;
+    }
 
-        return {
-          ...item,
-          favorite: !item.favorite,
-          category: newCategories,
-        };
-      }
-      return item;
+    // Update music items
+    setMusicItems((prev) => {
+      const updated = [...prev];
+      updated[itemIndex] = {
+        ...updated[itemIndex],
+        favorite: newFavorite,
+        category: newFavorite
+          ? [...updated[itemIndex].category, "favorited"].filter(
+              (v, i, a) => a.indexOf(v) === i
+            )
+          : updated[itemIndex].category.filter((cat) => cat !== "favorited"),
+      };
+      return updated;
     });
 
-    // Update filtered music to reflect changes
-    setFilteredMusic(updatedMusic);
+    // Trigger animation after state update
+    setTimeout(() => {
+      const favoriteBtn = document.querySelector(`[data-favorite-id="${id}"]`);
+      if (favoriteBtn instanceof HTMLElement) {
+        animateItemClick(favoriteBtn);
+      }
+    }, 0);
 
-    // If we're on the favorites tab, refilter
-    if (currentTab === "favorited") {
-      filterMusicByCategory("favorited");
-    }
+    // Update localStorage
+    const favoriteIds = musicItems
+      .map((item, index) =>
+        index === itemIndex ? { ...item, favorite: newFavorite } : item
+      )
+      .filter((item) => item.favorite)
+      .map((item) => item.id);
+    localStorage.setItem("favoriteTracks", JSON.stringify(favoriteIds));
   };
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-
-    if (term === "") {
-      // If search is cleared, show default view for current tab
-      filterMusicByCategory(currentTab);
-    } else {
-      // Filter music items by search term
-      const filtered = musicData.filter(
-        (item) =>
-          item.title.toLowerCase().includes(term.toLowerCase()) ||
-          item.artist.toLowerCase().includes(term.toLowerCase())
-      );
-      setFilteredMusic(filtered);
-    }
   };
 
   const renderContent = () => {
-    if (searchTerm) {
-      if (filteredMusic.length === 0) {
-        return <NoResults searchTerm={searchTerm} />;
-      }
-
-      return (
-        <>
-          <div className="mb-6">
-            <h2 className="text-lg text-slate-300">
-              Search results for "{searchTerm}"
-            </h2>
-          </div>
-          <MusicList
-            items={filteredMusic}
-            onPlay={handlePlay}
-            onFavorite={handleFavorite}
-            onCopyISRC={handleCopyISRC}
-          />
-        </>
-      );
+    if (searchTerm && filteredMusic.length === 0) {
+      return <NoResults searchTerm={searchTerm} />;
     }
 
     return currentTab === "home" ? (
@@ -204,15 +170,8 @@ const MusicComponent: React.FC = () => {
   };
 
   const renderHomeContent = () => {
-    const featuredTracks = filteredMusic
-      .filter((item) => item.favorite)
-      .slice(0, 4);
-    const newTracks = filteredMusic
-      .filter((item) => item.category.includes("new"))
-      .slice(0, 4);
-    const moodTracks = filteredMusic
-      .filter((item) => item.category.includes("mood"))
-      .slice(0, 4);
+    const featuredTracks = filteredMusic.filter((item) => item.favorite).slice(0, 4);
+    const newTracks = filteredMusic.filter((item) => item.category.includes("new")).slice(0, 4);
 
     return (
       <>
@@ -227,7 +186,6 @@ const MusicComponent: React.FC = () => {
             />
           </>
         )}
-
         {newTracks.length > 0 && (
           <>
             <SectionHeader title="New Releases" />
@@ -239,24 +197,12 @@ const MusicComponent: React.FC = () => {
             />
           </>
         )}
-
-        {moodTracks.length > 0 && (
-          <>
-            <SectionHeader title="Mood Collection" />
-            <MusicList
-              items={moodTracks}
-              onPlay={handlePlay}
-              onFavorite={handleFavorite}
-              onCopyISRC={handleCopyISRC}
-            />
-          </>
-        )}
       </>
     );
   };
 
   const handleCopyISRC = (id: number) => {
-    const item = musicData.find((m) => m.id === id);
+    const item = musicItems.find((m) => m.id === id);
     if (item) {
       navigator.clipboard.writeText(item.id.toString());
       const copyButton = document.querySelector(`[data-copy-id="${id}"]`);
@@ -268,9 +214,7 @@ const MusicComponent: React.FC = () => {
 
   return (
     <div className="bg-slate-900 text-white pb-24">
-      <div
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 header"
-        id="main-content">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 header" id="main-content">
         <h1 className="text-3xl font-bold text-white mb-8">
           Background Music List
           {nowPlaying && (
@@ -280,16 +224,13 @@ const MusicComponent: React.FC = () => {
           )}
         </h1>
 
-        <MusicNavigation
-          currentTab={currentTab}
-          onTabChange={handleTabChange}
-        />
+        <MusicNavigation currentTab={currentTab} onTabChange={handleTabChange} />
 
         <div className="grid grid-cols-7 gap-6">
-          {/* Left large section */}
           <div
             ref={contentRef}
-            className="col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-8 min-h-[600px] main-content">
+            className="col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-8 min-h-[600px] main-content"
+          >
             <div className="flex justify-between items-center mb-6 search-container">
               <div className="flex gap-4 w-full">
                 {currentTab === "home" && (
@@ -298,13 +239,13 @@ const MusicComponent: React.FC = () => {
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
                       className="appearance-none bg-white/5 text-slate-300 pl-4 pr-10 py-2 rounded-full border border-slate-700/50 cursor-pointer hover:bg-white/10 transition-colors"
-                      aria-label="Sort tracks">
+                      aria-label="Sort tracks"
+                    >
                       <option value="recent">Sort by Recent</option>
                       <option value="mood">Sort by Mood</option>
                     </select>
                   </div>
                 )}
-
                 {currentTab === "home" && sortBy === "mood" && (
                   <div className="flex items-center gap-2">
                     <div className="relative">
@@ -312,27 +253,39 @@ const MusicComponent: React.FC = () => {
                         value={selectedMood}
                         onChange={(e) => setSelectedMood(e.target.value)}
                         className="appearance-none bg-white/5 text-slate-300 pl-4 pr-10 py-2 rounded-full border border-slate-700/50 cursor-pointer hover:bg-white/10 transition-colors"
-                        aria-label="Select mood">
+                        aria-label="Select mood"
+                      >
                         <option value="">Select Mood</option>
-                        <option value="chill">Chill</option>
-                        <option value="energetic">Energetic</option>
-                        <option value="focus">Focus</option>
-                        <option value="upbeat">Upbeat</option>
+                        <option value="cheerful">Cheerful</option>
+                        <option value="horror">Horror</option>
+                        <option value="lovely">Lovely</option>
+                        <option value="groovy">Groovy</option>
+                        <option value="tense">Tense</option>
+                        <option value="dramatic">Dramatic</option>
+                        <option value="romantic">Romantic</option>
+                        <option value="dreamy">Dreamy</option>
+                        <option value="scary">Scary</option>
+                        <option value="bright">Bright</option>
+                        <option value="determined">Determined</option>
+                        <option value="sad">Sad</option>
+                        <option value="exciting">Exciting</option>
+                        <option value="mysterious">Mysterious</option>
+                        <option value="wistful">Wistful</option>
+                        <option value="epic">Epic</option>
+                        <option value="relaxing">Relaxing</option>
+                        <option value="entertaining">Entertaining</option>
+                        <option value="refreshing">Refreshing</option>
                       </select>
                     </div>
                   </div>
                 )}
-
                 <SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
               </div>
             </div>
-
             {renderContent()}
           </div>
-
-          {/* Right sections */}
           <div className="col-span-3 space-y-6">
-            <FavoritesList items={musicData} />
+            <FavoritesList items={musicItems.filter((item) => item.favorite)} />
             <CustomTrackRequest />
           </div>
         </div>

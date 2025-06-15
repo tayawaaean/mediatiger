@@ -1,5 +1,5 @@
-import { MusicItem } from '../../../utils/data';
-import React from 'react';
+import { MusicItem } from "../../../utils/data";
+import React from "react";
 
 interface MusicListProps {
   items: MusicItem[];
@@ -8,7 +8,12 @@ interface MusicListProps {
   onCopyISRC: (id: number) => void;
 }
 
-export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite, onCopyISRC }) => {
+export const MusicList: React.FC<MusicListProps> = ({
+  items,
+  onPlay,
+  onFavorite,
+  onCopyISRC,
+}) => {
   return (
     <div className="mt-8">
       <div className="grid grid-cols-[80px_1fr_200px_100px] gap-4 px-4 py-2 text-slate-400 text-sm font-medium">
@@ -22,14 +27,24 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
           <div
             key={item.id}
             className="grid grid-cols-[80px_1fr_200px_100px] gap-4 items-center px-4 py-3 hover:bg-slate-700/30 rounded-lg transition-colors cursor-pointer group"
+            data-id={item.id}
             onClick={() => onPlay(item)}
           >
-            <img src={item.cover} alt={item.title} className="w-12 h-12 rounded-lg object-cover" />
+            <img
+              src={item.cover}
+              alt={item.title}
+              className="w-12 h-12 rounded-lg object-cover"
+            />
             <div>
-              <h3 className="text-white text-sm font-medium truncate">{item.title}</h3>
-              <div className="flex gap-2 mt-1.5">
+              <h3 className="text-white text-sm font-medium truncate">
+                {item.title}
+              </h3>
+              <div className="flex flex-wrap gap-2 mt-1.5">
                 {item.category.map((tag) => (
-                  <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10">
+                  <span
+                    key={tag}
+                    className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 whitespace-nowrap overflow-hidden text-ellipsis max-w-[100px]"
+                  >
                     {tag}
                   </span>
                 ))}
@@ -37,6 +52,7 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
             </div>
             <div
               className="text-sm text-slate-400 font-mono tracking-wider text-right pr-8 cursor-pointer hover:text-white transition-colors"
+              data-copy-id={item.id}
               onClick={(e) => {
                 e.stopPropagation();
                 onCopyISRC(item.id);
@@ -47,7 +63,10 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
             </div>
             <div className="flex gap-2 justify-center">
               <button
-                className="favorite-btn p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+                className={`favorite-btn p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors ${
+                  item.favorite ? "text-yellow-400" : ""
+                }`}
+                data-favorite-id={item.id}
                 onClick={(e) => {
                   e.stopPropagation();
                   onFavorite(item.id);
@@ -56,7 +75,7 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
                 <svg
                   className="w-5 h-5"
                   viewBox="0 0 24 24"
-                  fill={item.favorite ? 'currentColor' : 'none'}
+                  fill={item.favorite ? "currentColor" : "none"}
                   stroke="currentColor"
                   strokeWidth="2"
                 >
@@ -68,7 +87,13 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
                 title="Download"
                 onClick={(e) => e.stopPropagation()}
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />

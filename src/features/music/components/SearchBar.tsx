@@ -12,6 +12,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearch }) =>
   const handleClear = () => {
     onSearch('');
     inputRef.current?.focus();
+    inputRef.current!.value = ''; // Force reset input value
   };
 
   return (

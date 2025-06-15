@@ -10,7 +10,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentProgress, setCurrentProgress] = useState(0);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const totalDuration = 225; // 3:45 in seconds
+
+  const parseDuration = (durationStr: string): number => {
+    const [minutes, seconds] = durationStr.split(':').map(Number);
+    return minutes * 60 + seconds;
+  };
+
+  const totalDuration = currentTrack ? parseDuration(currentTrack.duration) : 225;
 
   const togglePlayState = () => {
     setIsPlaying(prev => !prev);
@@ -23,10 +29,9 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack }) => {
 
     progressIntervalRef.current = setInterval(() => {
       setCurrentProgress(prev => {
-        const newProgress = prev + 0.5;
+        const newProgress = prev + (0.1 / totalDuration) * 100;
         
         if (newProgress >= 100) {
-          // Reset when reached 100%
           if (progressIntervalRef.current) {
             clearInterval(progressIntervalRef.current);
           }
@@ -59,14 +64,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack }) => {
     }
   };
 
-  // Format time in mm:ss
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Handle play state changes
   useEffect(() => {
     if (isPlaying) {
       startProgressSimulation();
@@ -79,7 +82,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack }) => {
     };
   }, [isPlaying]);
 
-  // Reset progress when track changes
   useEffect(() => {
     setCurrentProgress(0);
     setIsPlaying(false);
@@ -91,7 +93,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack }) => {
     <div className="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-sm border-t border-slate-700/50">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center gap-4">
-          {/* Album art and track info */}
           <div className="flex items-center gap-4 flex-1">
             {currentTrack && (
               <>
@@ -110,9 +111,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack }) => {
             )}
           </div>
 
-          {/* Player controls */}
           <div className="flex flex-col items-center gap-2 flex-1">
-            {/* Play button */}
             <button
               className={`play-button w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white transition-transform hover:scale-105 ${isPlaying ? 'playing animate-pulse' : ''}`}
               onClick={togglePlayState}
@@ -124,7 +123,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack }) => {
               )}
             </button>
 
-            {/* Progress bar */}
             <div className="w-full flex items-center gap-2 text-xs text-slate-400">
               <span className="current-time">{formatTime(currentTime)}</span>
               <div 
@@ -139,7 +137,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ currentTrack }) => {
             </div>
           </div>
 
-          {/* Volume control (placeholder for future implementation) */}          <div className="flex-1"></div>
+          <div className="flex-1"></div>
         </div>
       </div>
     </div>
