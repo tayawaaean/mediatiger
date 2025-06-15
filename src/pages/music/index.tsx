@@ -11,8 +11,6 @@ import Benefits from "./components/Benefits";
 import WhyCreatorsLove from "./components/WhyCreatorsLove";
 import FAQ from "./components/FAQ";
 import OurMission from "./components/OurMission";
-import About from "./components/About";
-import HowItWorks from "./components/HowItWorks";
 import SignUp from "./components/SignUp";
 import Footer from "./components/Footer";
 import "./index.css";
@@ -63,8 +61,6 @@ const MusicPage: React.FC = () => {
       <Benefits />
 
       <WhyCreatorsLove />
-
-      <HowItWorks />
 
       <SignUp />
 
