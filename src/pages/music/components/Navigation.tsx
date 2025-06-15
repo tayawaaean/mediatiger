@@ -177,7 +177,7 @@ const Navigation: React.FC<NavigationProps & { loadingState: LoadingState }> = (
             {/* Mobile CTA */}
             <div className="relative pt-4 border-t border-slate-700/50">
               <Link
-                to="/signup"
+                to="/signup?referal=true"
                 className="relative block group overflow-hidden"
                 onClick={closeMobileMenu}
               >
