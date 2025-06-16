@@ -41,11 +41,18 @@ const Analytics = () => {
 
   useEffect(() => {
     // Initialize animations after component mounts
-    initSectionAnimations();
+    const cleanup = initSectionAnimations();
 
     // Re-init animations when loading state changes
-    const timer = setTimeout(initSectionAnimations, 1600);
-    return () => clearTimeout(timer);
+    const timer = setTimeout(() => {
+      cleanup?.(); // Clean up previous animations
+      initSectionAnimations();
+    }, 1600);
+    
+    return () => {
+      clearTimeout(timer);
+      cleanup?.(); // Clean up animations when component unmounts
+    };
   }, [isLoading]);
 
   const handleChannelChange = (channel: string) => {

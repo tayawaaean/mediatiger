@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { supabase } from "../../../lib/supabase";
 import { validateEmail, validatePassword } from "../../../utils/validation";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 // Utility to prevent duplicate toasts
 const shownToasts = new Set<string>();
 const showUniqueToast = (
@@ -26,15 +26,15 @@ const showUniqueToast = (
     // Remove from tracking after some time
     setTimeout(() => {
       shownToasts.delete(toastId);
-    }, 5000);
+    }, 3000);
   }
 };
 
 export default function SignUp() {
-  const locals = useLocation()
+  const locals = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const paramValue = searchParams.get('referal'); 
-  const isReferal = paramValue === "true" 
+  const paramValue = searchParams.get("referal");
+  const isReferal = paramValue === "true";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -103,13 +103,13 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-     let userId = await signUp(email, password, name);
+      let userId = await signUp(email, password, name);
       if (isReferal) {
-        let {data,error} = await supabase.from("referrals").insert({
-          user_id:userId
-        })
-        console.log("data", data)
-        console.log("error" , error)
+        let { data, error } = await supabase.from("referrals").insert({
+          user_id: userId,
+        });
+        console.log("data", data);
+        console.log("error", error);
       }
 
       setIsSignupComplete(true);
@@ -196,7 +196,7 @@ export default function SignUp() {
         <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-xl shadow-lg text-center">
           <div>
             <Link
-              to="/"
+              to={!isReferal ? "/" : "/music"}
               className="inline-flex items-center text-slate-400 hover:text-white mb-8"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
@@ -270,7 +270,7 @@ export default function SignUp() {
       <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-xl shadow-lg">
         <div>
           <Link
-            to="/"
+            to={!isReferal ? "/" : "/music"}
             className="inline-flex items-center text-slate-400 hover:text-white mb-8"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />

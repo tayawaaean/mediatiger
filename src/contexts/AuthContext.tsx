@@ -14,7 +14,7 @@ const showUniqueToast = (message: string, type: "success" | "error", id?: string
   if (!shownToasts.has(toastId)) {
     shownToasts.add(toastId);
     type === "success" ? toast.success(message, { id: toastId }) : toast.error(message, { id: toastId });
-    setTimeout(() => shownToasts.delete(toastId), 5000);
+    setTimeout(() => shownToasts.delete(toastId), 3000);
   }
 };
 
