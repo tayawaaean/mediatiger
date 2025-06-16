@@ -18,12 +18,12 @@ export default {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        'card-bg': '#1C1C3B',
-        'border-hover': 'rgba(99, 102, 241, 0.3)',
-        'accent-light': 'rgba(99, 102, 241, 0.1)',
-        'accent-border-hover': 'rgba(99, 102, 241, 0.3)',
-        'accent-icon': 'rgb(129, 140, 248)',
-        secondary: 'rgb(148 163 184)',
+        "card-bg": "#1C1C3B",
+        "border-hover": "rgba(99, 102, 241, 0.3)",
+        "accent-light": "rgba(99, 102, 241, 0.1)",
+        "accent-border-hover": "rgba(99, 102, 241, 0.3)",
+        "accent-icon": "rgb(129, 140, 248)",
+        secondary: "rgb(148 163 184)",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -80,10 +80,26 @@ export default {
             height: "0",
           },
         },
+        glow: {
+          "0%, 100%": {
+            filter: "drop-shadow(0 0 12px rgba(253, 224, 71, 0.45))",
+          },
+          "50%": { filter: "drop-shadow(0 0 20px rgba(253, 224, 71, 0.7))" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        glow: "glow 2.5s ease-in-out infinite",
+      },
+      dropShadow: {
+        "glow-teal": "0 0 10px rgba(13, 148, 136, 0.7)",
+        "glow-amber": "0 0 10px rgba(245, 158, 11, 0.7)",
+        "glow-fuchsia": "0 0 10px rgba(192, 38, 211, 0.7)",
+        "glow-emerald": "0 0 10px rgba(5, 150, 105, 0.7)",
+        "glow-sky": "0 0 10px rgba(14, 165, 233, 0.7)",
+        "glow-rose": "0 0 10px rgba(244, 63, 94, 0.7)",
+        "glow-subtle": "0 0 8px rgba(253, 224, 71, 0.25)", // Soft yellow glow
       },
     },
   },
