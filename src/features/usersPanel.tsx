@@ -339,7 +339,7 @@ const UsersPanel: React.FC = () => {
             overscrollBehavior: "contain",
           }}
         >
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto">
             <div className="bg-slate-800/95 rounded-xl p-8 shadow-2xl border border-slate-700 relative">
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-semibold text-slate-200">
@@ -387,16 +387,15 @@ const UsersPanel: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-6 bg-slate-700/30 rounded-xl backdrop-blur-sm">
                         <h4 className="mb-4 text-lg font-medium text-gray-300">
                             Summary
                         </h4>
                         <div className="space-y-3">
-                            <p className="text-sm text-slate-300">
+                            <p className=" text-slate-300">
                             <span className="text-slate-400">Account Status:</span>{" "}
-                            {selectedUser.email}
-
+                            {/* TODO: fix active/inactive status */}
                             <span
                                 className={`w-3 h-3 rounded-full mr-3 ${
                                 selectedUser.raw_user_meta_data?.payment_enabled
@@ -404,19 +403,23 @@ const UsersPanel: React.FC = () => {
                                     : "bg-red-500"
                                 }`}
                             />
-                            
+                            Active
+
                             </p>
-                            <p className="text-sm text-slate-300">
+                            <p className="text-slate-300">
                             <span className="text-slate-400">Member Since:</span>{" "}
-                            {selectedUser.user_id}
+                            {/* TODO: fix data */}
+                            March 15, 2023
                             </p>
-                            <p className="text-sm text-slate-300">
+                            <p className=" text-slate-300">
                             <span className="text-slate-400">Last Active:</span>{" "}
-                            {selectedUser.raw_app_meta_data?.role}
+                            {/* TODO: fix data */}
+                            2 hours ago
                             </p>
-                            <p className="text-sm text-slate-300">
+                            <p className=" text-slate-300">
                             <span className="text-slate-400">Total Channels:</span>{" "}
-                            {selectedUser.raw_app_meta_data?.role}
+                            {/* TODO: fix data */}
+                            0
                             </p>
                         </div>
                     </div>
@@ -436,22 +439,32 @@ const UsersPanel: React.FC = () => {
                         </h4>
                         <div className="space-y-3">
                             <p className="text-sm text-slate-300">
-                                <span className="text-slate-400">Total Earnings:</span>{" "}
-                                {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-400">Total Earnings:</span>
+                                    {/* {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"} */}
+                                    {/* TODO: fix data */}
+                                    <span className="text-xl font-semibold text-green-400">$12,450.00</span>
+                                </div>
                             </p>
 
-                            <p className="text-sm text-slate-300">
-                                <span className="text-slate-400">This Month:</span>{" "}
-                                {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}
+                            <div className="mt-2 flex items-center justify-between">
+                                <span className="text-gray-400">This Month:</span>
+                                <span className="text-lg font-medium text-green-400">$850.00</span>
+                            </div>
 
-                                channel earnings
-                                affiliate channel earnings
-                            </p>
+                            <div className="mt-1 flex items-center justify-between pl-4">
+                                <span className="text-sm text-gray-400">Channel Earnings:</span>
+                                <span className="text-sm text-green-400">$650.00</span>
+                            </div>
+                            <div className="mt-1 flex items-center justify-between pl-4">
+                                <span className="text-sm text-gray-400">Affiliate Channel Earnings:</span>
+                                <span className="text-sm text-green-400">$200.00</span>
+                            </div>
 
-                            <p className="text-sm text-slate-300">
-                                <span className="text-slate-400">Tiplati ID:</span>{" "}
-                                {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}
-                            </p>
+                            <div className="mt-2 flex items-center justify-between">
+                                <span className="text-gray-400">Tipalti ID:</span>
+                                <span>{selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}</span>
+                            </div>
 
                             <div className="mb-2 text-gray-400 text-center">Recent Payouts</div>
                             <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
@@ -509,64 +522,44 @@ const UsersPanel: React.FC = () => {
                             </a>
                         </div>
                     </div>
-                    {/*  */}
-
-                  <div className="p-6 bg-slate-700/30 rounded-lg backdrop-blur-sm">
-                    <h4 className="text-sm font-medium text-slate-400 mb-4">
-                      Account Status
-                    </h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center">
-                        <span
-                          className={`w-3 h-3 rounded-full mr-3 ${
-                            selectedUser.raw_user_meta_data?.onboarding_complete
-                              ? "bg-green-500"
-                              : "bg-yellow-500"
-                          }`}
-                        ></span>
-                        <span className="text-sm text-slate-300">
-                          Onboarding Status
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-300">
-                        <span className="text-slate-400">Provider:</span>{" "}
-                        {selectedUser.raw_app_meta_data?.provider}
-                      </p>
-                      <div className="flex items-center justify-between mt-4">
-                        <span className="text-sm text-slate-300">
-                          Block User
-                        </span>
-                        <button
-                          className={`flex items-center gap-2 flew-row px-4 py-2 rounded-md text-sm font-medium ${
-                            banList.includes(selectedUser.user_id)
-                              ? "bg-red-500/20 text-red-300 hover:bg-red-500/30"
-                              : "bg-slate-600/50 text-slate-300 hover:bg-slate-600"
-                          }`}
-                          onClick={() => {
-                            // Add your block user logic here
-                            setBlockedRequest(selectedUser);
-                            console.log("Block user clicked");
-                          }}
-                        >
-                          {banList.includes(selectedUser.user_id)
-                            ? "Unblock"
-                            : "Block"}
-                          <BanIcon size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
-
-              <div className="mt-8 flex justify-end">
-                <button
-                  onClick={() => setSelectedUser(null)}
-                  className="px-6 py-2 bg-slate-700 text-slate-200 rounded-md hover:bg-slate-600 transition-colors"
+                {/* leaving this commented out for future reference */}
+                {/* <button
+                    className={`flex items-center gap-2 flew-row px-4 py-2 rounded-md text-sm font-medium ${
+                    banList.includes(selectedUser.user_id)
+                        ? "bg-red-500/20 text-red-300 hover:bg-red-500/30"
+                        : "bg-slate-600/50 text-slate-300 hover:bg-slate-600"
+                    }`}
+                    onClick={() => {
+                    // Add your block user logic here
+                    setBlockedRequest(selectedUser);
+                    console.log("Block user clicked");
+                    }}
                 >
-                  Close
-                </button>
-              </div>
+                    {banList.includes(selectedUser.user_id)
+                    ? "Unblock"
+                    : "Block"}
+                    <BanIcon size={16} />
+                </button> */}
+
+                <div className="flex items-center justify-between animate-section mt-4">
+                    <button className="flex items-center rounded bg-red-600/20 px-4 py-2 text-red-400 transition hover:bg-red-600/30"
+                        onClick={() => {
+                            setBlockedRequest(selectedUser);
+                            console.log("Block user clicked");
+                        }}
+                    >
+                        <BanIcon className="mr-2" size={16} />
+                        <span>Ban User</span>
+                    </button>
+                    <button
+                        onClick={() => setSelectedUser(null)}
+                        className="rounded bg-gray-700 px-6 py-2 text-white transition hover:bg-gray-600"
+                    >
+                        Close
+                    </button>
+                </div>
             </div>
           </div>
         </div>
