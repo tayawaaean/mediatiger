@@ -18,7 +18,7 @@ createRoot(document.getElementById('root')!).render(
             <Toaster 
               position="top-right"
               toastOptions={{
-                duration: 4000,
+                duration: 3000,
                 className: '!rounded-xl !p-4 !bg-opacity-95 backdrop-blur-sm shadow-lg',
                 success: {
                   className: '!bg-green-600 !text-white !rounded-xl',

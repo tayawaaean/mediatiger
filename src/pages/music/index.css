@@ -1,0 +1,311 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force dark mode globally - remove all light mode support */
+:root {
+  color-scheme: dark only !important;
+  background-color: #0f172a !important;
+}
+
+html {
+  background-color: #0f172a !important;
+  color-scheme: dark only !important;
+  -webkit-color-scheme: dark !important;
+}
+
+body {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+}
+
+/* Override any potential light mode classes */
+.bg-white {
+  background-color: #0f172a !important;
+}
+
+.bg-slate-50,
+.bg-slate-100,
+.bg-slate-200 {
+  background-color: #1e293b !important;
+}
+
+.bg-slate-100\/95 {
+  background-color: rgba(30, 41, 59, 0.95) !important;
+}
+
+.text-slate-900 {
+  color: #ffffff !important;
+}
+
+.text-slate-800 {
+  color: #e2e8f0 !important;
+}
+
+.text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+/* Force all text colors to be visible */
+.text-slate-600.dark\\:text-slate-300,
+.dark\\:text-slate-300 {
+  color: #cbd5e1 !important;
+}
+
+/* Force ring colors */
+.ring-slate-900\/10 {
+  --tw-ring-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark\\:ring-white\/10 {
+  --tw-ring-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Custom animations for premium loading effects */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes slideInUp {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleInCenter {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes rotateInCenter {
+  0% {
+    transform: rotate(-5deg) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(79, 70, 229, 0.6);
+  }
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes rotateIn {
+  0% {
+    transform: rotate(-10deg) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Utility classes for animations */
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-slide-in-top {
+  animation: slideInFromTop 0.8s ease-out;
+}
+
+.animate-slide-in-bottom {
+  animation: slideInFromBottom 0.8s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.8s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInFromRight 0.8s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.8s ease-out;
+}
+
+.animate-rotate-in {
+  animation: rotateIn 0.8s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.8s ease-out;
+}
+
+.animate-scale-in-center {
+  animation: scaleInCenter 0.8s ease-out;
+}
+
+.animate-rotate-in-center {
+  animation: rotateInCenter 0.8s ease-out;
+}
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #4f46e5, #7c3aed);
+}
+
+/* Loading screen specific styles */
+.loading-screen {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Enhanced focus states for accessibility */
+.focus-visible:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,56 +1,75 @@
-import React from 'react';
-import { MusicItem } from '../data';
+import { MusicItem } from "@/utils/data"; // Next.js import convention
+import { useEffect, useState } from "react";
 
 interface MusicListProps {
   items: MusicItem[];
   onPlay: (item: MusicItem) => void;
-  onFavorite: (id: number) => void;
-  onCopyISRC: (id: number) => void;
+  onFavorite: (id: string, isFavorite: boolean) => void;
+  onCopyISRC: (id: string) => void;
 }
 
 export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite, onCopyISRC }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation when items change (e.g., after favorite toggle)
+    setIsRefreshing(true);
+    const timer = setTimeout(() => setIsRefreshing(false), 400); // Match listItemFadeIn duration
+    return () => clearTimeout(timer);
+  }, [items]);
+
   return (
     <div className="mt-8">
-      <div className="grid grid-cols-[80px_1fr_200px_100px] gap-4 px-4 py-2 text-slate-400 text-sm font-medium">
+      <div className="grid grid-cols-[80px_1fr_200px_100px] gap-4 px-4 py-2 text-slate-400 text-sm font-medium animate-fade-in">
         <div>Cover</div>
         <div>Title</div>
         <div className="text-right pr-8">ISRC</div>
         <div className="flex justify-center">Music File</div>
       </div>
       <div className="space-y-2 mt-4" id="musicList">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <div
             key={item.id}
-            className="grid grid-cols-[80px_1fr_200px_100px] gap-4 items-center px-4 py-3 hover:bg-slate-700/30 rounded-lg transition-colors cursor-pointer group"
+            className={`grid grid-cols-[80px_1fr_200px_100px] gap-4 items-center px-4 py-3 hover:bg-slate-700/30 rounded-lg transition-colors cursor-pointer group ${
+              isRefreshing ? 'animate-section active' : ''
+            }`}
+            style={{ animationDelay: `${index * 0.05}s` }} // Staggered delay to mimic original
             onClick={() => onPlay(item)}
           >
             <img src={item.cover} alt={item.title} className="w-12 h-12 rounded-lg object-cover" />
-            <div>
+            <div className="flex flex-col">
               <h3 className="text-white text-sm font-medium truncate">{item.title}</h3>
-              <div className="flex gap-2 mt-1.5">
+              <div className="flex flex-wrap gap-2 mt-1.5">
                 {item.category.map((tag) => (
-                  <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10">
+                  <span
+                    key={tag}
+                    className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 whitespace-nowrap overflow-hidden overflow-ellipsis"
+                    style={{ maxWidth: '100%' }}
+                  >
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
-            <div
-              className="text-sm text-slate-400 font-mono tracking-wider text-right pr-8 cursor-pointer hover:text-white transition-colors"
+            <button
+              type="button"
+              className="text-sm text-slate-400 font-mono tracking-wider text-right pr-8 cursor-pointer hover:text-white transition-colors bg-transparent border-none outline-none"
               onClick={(e) => {
                 e.stopPropagation();
                 onCopyISRC(item.id);
               }}
               title="Click to copy"
+              tabIndex={0}
+              style={{ textAlign: "right" }}
             >
               {item.id}
-            </div>
+            </button>
             <div className="flex gap-2 justify-center">
               <button
                 className="favorite-btn p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onFavorite(item.id);
+                  onFavorite(item.id, !item.favorite);
                 }}
               >
                 <svg
@@ -81,3 +100,5 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
     </div>
   );
 };
+
+export default MusicList;

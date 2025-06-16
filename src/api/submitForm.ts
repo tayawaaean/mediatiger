@@ -24,7 +24,7 @@ const showUniqueToast = (message: string, type: 'success' | 'error', id?: string
     // Remove from tracking after some time to allow the message to be shown again later if needed
     setTimeout(() => {
       shownToasts.delete(toastId);
-    }, 5000);
+    }, 3000);
   }
 };
 
