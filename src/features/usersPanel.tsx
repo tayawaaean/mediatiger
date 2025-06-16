@@ -1,4 +1,4 @@
-import { BanIcon } from "lucide-react";
+import { BanIcon, Check, Edit2, X as Close } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
@@ -10,6 +10,8 @@ const UsersPanel: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [banList, setBanList] = useState<string[]>([]);
+  const [isEditingSplit, setIsEditingSplit] = React.useState(false);
+  const [splitValue, setSplitValue] = React.useState('50');
   // Updated to use filteredUsers for pagination
   const filteredUsers = React.useMemo(() => {
     return users.filter((user) =>
@@ -122,6 +124,12 @@ const UsersPanel: React.FC = () => {
       console.log(error);
     }
   }
+
+  const handleSplitSubmit = () => {
+    // Here you would typically make an API call to update the split
+    setIsEditingSplit(false);
+  };
+  
   return (
     <>
       <div className="w-full bg-slate-800/90 backdrop-blur-sm rounded-xl p-6 shadow-xl border border-slate-700/50">
@@ -365,6 +373,46 @@ const UsersPanel: React.FC = () => {
                 </button>
               </div>
 
+              <div className="text-right">
+                {isEditingSplit ? (
+                <div className="flex items-center space-x-2">
+                    <input
+                    type="number"
+                    value={splitValue}
+                    onChange={(e) => setSplitValue(e.target.value)}
+                    className="w-20 rounded bg-[#1e2536] px-2 py-1 text-2xl text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                    max="100"
+                    />
+                    <div className="flex flex-col space-y-1">
+                    <button
+                        onClick={handleSplitSubmit}
+                        className="rounded bg-green-500/20 p-1 text-green-400 hover:bg-green-500/30"
+                    >
+                        <Check size={14} />
+                    </button>
+                    <button
+                        onClick={() => setIsEditingSplit(false)}
+                        className="rounded bg-red-500/20 p-1 text-red-400 hover:bg-red-500/30"
+                    >
+                        <Close size={14} />
+                    </button>
+                    </div>
+                </div>
+                ) : (
+                <div className="group relative">
+                    <div className="text-3xl font-bold text-blue-400">{splitValue}%</div>
+                    <button
+                    onClick={() => setIsEditingSplit(true)}
+                    className="absolute -right-6 top-1/2 -translate-y-1/2 rounded p-1 opacity-0 transition-opacity hover:bg-gray-700 group-hover:opacity-100"
+                    >
+                    <Edit2 size={14} className="text-gray-400" />
+                    </button>
+                </div>
+                )}
+                <div className="text-sm text-gray-400">Current Split</div>
+            </div>
+
               <div className="space-y-6">
                 <div className="flex items-center space-x-4">
                   <div className="h-20 w-20 rounded-full bg-slate-700 overflow-hidden">
@@ -524,6 +572,7 @@ const UsersPanel: React.FC = () => {
                     </div>
                 </div>
               </div>
+
                 {/* leaving this commented out for future reference */}
                 {/* <button
                     className={`flex items-center gap-2 flew-row px-4 py-2 rounded-md text-sm font-medium ${
