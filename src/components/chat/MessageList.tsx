@@ -376,6 +376,13 @@ const MessageList = ({
                                 left: "50%",
                                 transform: "translateX(-50%)",
                               }}
+                              onMouseLeave={() =>
+                                setShowEmojiPicker(
+                                    showEmojiPicker === message?.id
+                                    ? null
+                                    : message.id
+                                )
+                              }
                             >
                               <div className="grid grid-cols-6 gap-1.5">
                                 {EMOJI_REACTIONS.map((emoji) => {
@@ -397,16 +404,16 @@ const MessageList = ({
                                         setShowEmojiPicker(null);
                                       }}
                                       className={`
-          aspect-square flex items-center justify-center 
-          rounded-md transition-all text-base
-          ${
-            hasReacted
-              ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30"
-              : "hover:bg-slate-700/50"
-          }
-          hover:scale-105 active:scale-95
-          transform duration-100
-        `}
+                                        aspect-square flex items-center justify-center 
+                                        rounded-md transition-all text-base
+                                        ${
+                                            hasReacted
+                                            ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30"
+                                            : "hover:bg-slate-700/50"
+                                        }
+                                        hover:scale-105 active:scale-95
+                                        transform duration-100
+                                        `}
                                     >
                                       {emoji}
                                     </button>
