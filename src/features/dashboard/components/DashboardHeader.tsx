@@ -5,7 +5,7 @@ import { Notification } from "../../../types/notification";
 import { ExtendedUser } from "../../../types/user";
 import { handleSignOut } from "../../../utils/auth";
 import { NotificationDropdown } from "./NotificationDropdown";
-import { useLanguage } from "../../../contexts/LanguageContext"; // Adjust path as needed
+import { useLanguage } from "../../../contexts/LanguageContext";
 import { useRef, useEffect } from "react";
 
 interface DashboardHeaderProps {
@@ -31,26 +31,26 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({
-                                    activeSection,
-                                    isMobileMenuOpen,
-                                    setIsMobileMenuOpen,
-                                    showNotifications,
-                                    setShowNotifications,
-                                    showSettings,
-                                    setShowSettings,
-                                    hasUnreadMessages,
-                                    setShowMessage,
-                                    notifications,
-                                    notifNumber,
-                                    user,
-                                    signOut,
-                                    isRejected,
-                                    handleMarkAllAsRead,
-                                    handleClearNotifications,
-                                    setHasNewNotification,
-                                    setNotifications,
-                                    setNotifNumber,
-                                }: DashboardHeaderProps) {
+    activeSection,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen,
+    showNotifications,
+    setShowNotifications,
+    showSettings,
+    setShowSettings,
+    hasUnreadMessages,
+    setShowMessage,
+    notifications,
+    notifNumber,
+    user,
+    signOut,
+    isRejected,
+    handleMarkAllAsRead,
+    handleClearNotifications,
+    setHasNewNotification,
+    setNotifications,
+    setNotifNumber,
+}: DashboardHeaderProps) {
     const { translate } = useLanguage();
     const settingsButtonRef = useRef<HTMLDivElement>(null);
     const messageButtonRef = useRef<HTMLButtonElement>(null);
@@ -118,8 +118,8 @@ export function DashboardHeader({
     };
 
     // Define a consistent icon size
-    const iconSize = 20; // Set all icons to be 20px
-    const iconClass = "text-slate-400 transition-colors";
+    const iconSize = 30;
+    const iconClass = "text-slate-400 transition-colors duration-200";
 
     return (
         <div className="flex items-center justify-between w-full p-4 mb-6 rounded-lg">
@@ -137,9 +137,9 @@ export function DashboardHeader({
             <div className="md:hidden">
                 <button
                     type="button"
-                    className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:bg-slate-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors"
+                    className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors duration-200"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    style={{ transform: 'none' }}
+                    style={{ transform: 'none', transition: 'background-color 0.2s, color 0.2s' }}
                 >
                     <Menu size={iconSize} className={iconClass} />
                 </button>
@@ -165,11 +165,12 @@ export function DashboardHeader({
                         clearNotifications={(supabase, userId, handlers) => {
                             handleClearNotifications();
                         }}
+                        triggerClassName="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors duration-200"
                     />
                 </div>
                 <div
                     ref={settingsButtonRef}
-                    className="settings-button p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors cursor-pointer"
+                    className="settings-button p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors duration-200 cursor-pointer"
                     onMouseEnter={() => {
                         setShowNotifications(false);
                     }}
@@ -181,8 +182,6 @@ export function DashboardHeader({
                     style={{ transform: 'none', transition: 'background-color 0.2s, color 0.2s' }}
                 >
                     <Settings size={iconSize} className={iconClass} />
-
-                    {/* Settings Dropdown */}
                     {showSettings && (
                         <SettingsDropdown
                             user={user}
@@ -205,14 +204,12 @@ export function DashboardHeader({
                         stopPropagation(e);
                         setShowMessage((prev) => !prev);
                     }}
-                    className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
+                    className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors duration-200"
                     style={{ transform: 'none', transition: 'background-color 0.2s, color 0.2s' }}
                 >
                     <MessageSquare
                         size={iconSize}
-                        className={`${iconClass} ${
-                            hasUnreadMessages ? "text-white" : ""
-                        }`}
+                        className={`${iconClass} ${hasUnreadMessages ? "text-white" : ""}`}
                     />
                 </button>
             </div>

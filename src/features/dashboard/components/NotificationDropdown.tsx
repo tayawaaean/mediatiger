@@ -106,12 +106,12 @@ export function NotificationDropdown({
         <Popover.Trigger asChild>
           <button
               className={cn(
-                  "relative rounded-full p-2 text-slate-300 transition-all hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900",
+                  "relative rounded-full p-2 text-slate-300 transition-all hover:bg-slate-800 hover:text-white focus:outline-none",
                   triggerClassName
               )}
               aria-label="Open notifications"
           >
-            <Bell size={20} />
+            <Bell size={30} />
             {notifNumber > 0 && (
                 <NotificationBadge
                     count={notifNumber}
