@@ -377,6 +377,13 @@ const MessageList = ({
                                 left: "50%",
                                 transform: "translateX(-50%)",
                               }}
+                              onMouseLeave={() =>
+                                setShowEmojiPicker(
+                                    showEmojiPicker === message?.id
+                                    ? null
+                                    : message.id
+                                )
+                              }
                             >
                               <div className="grid grid-cols-6 gap-1.5">
                                 {EMOJI_REACTIONS.map((emoji) => {
