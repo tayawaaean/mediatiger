@@ -288,11 +288,12 @@ const MessageList = ({
                     }
                     `}
                   >
+                    {/* Message content - bubble */}
                     <div
                       className={`
                         group relative rounded-2xl px-4 py-2.5 
                         break-words hyphens-auto
-                        w-fit max-w-full min-w-[80px]
+                        min-w-min max-w-2xl
                         ${
                           (isAdmin && message.sender === "other") ||
                           (!isAdmin && message.sender === "user")
@@ -397,16 +398,16 @@ const MessageList = ({
                                         setShowEmojiPicker(null);
                                       }}
                                       className={`
-          aspect-square flex items-center justify-center 
-          rounded-md transition-all text-base
-          ${
-            hasReacted
-              ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30"
-              : "hover:bg-slate-700/50"
-          }
-          hover:scale-105 active:scale-95
-          transform duration-100
-        `}
+                                        aspect-square flex items-center justify-center 
+                                        rounded-md transition-all text-base
+                                        ${
+                                            hasReacted
+                                            ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30"
+                                            : "hover:bg-slate-700/50"
+                                        }
+                                        hover:scale-105 active:scale-95
+                                        transform duration-100
+                                        `}
                                     >
                                       {emoji}
                                     </button>
@@ -434,7 +435,7 @@ const MessageList = ({
                       </div>
 
                       {/* Message text */}
-                      <div className="text-base leading-relaxed whitespace-pre-wrap text-center">
+                      <div className="text-base leading-relaxed whitespace-pre-wrap">
                         {highlightText(message.content, searchQuery)}
                         {message.image_url && (
                           <div className="mt-3">
@@ -442,7 +443,6 @@ const MessageList = ({
                               src={message.image_url}
                               alt="Message attachment"
                               className="max-w-full h-auto rounded-lg shadow-lg mx-auto cursor-pointer transition-transform duration-200 hover:scale-105"
-                              style={{ maxWidth: "300px" }}
                               onClick={() =>
                                 setSelectedImage(message.image_url)
                               }
