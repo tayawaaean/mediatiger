@@ -291,7 +291,7 @@ const MessageList = ({
                     {/* Message content - bubble */}
                     <div
                       className={`
-                        group relative rounded-2xl px-4 py-2.5 
+                        group relative rounded-2xl px-4 py-2.5
                         break-words hyphens-auto
                         min-w-min max-w-2xl
                         ${
@@ -367,9 +367,9 @@ const MessageList = ({
                           {showEmojiPicker === message.id && (
                             <div
                               className="
-                                absolute top-full mt-2 z-50 
+                                absolute top-full mt-2 z-50
                                 bg-slate-800/95 backdrop-blur-sm
-                                rounded-lg shadow-lg border border-slate-700/50 
+                                rounded-lg shadow-lg border border-slate-700/50
                                 p-3
                                 min-w-[200px]
                               "
@@ -537,27 +537,22 @@ const MessageList = ({
         );
       })}
       <div ref={messagesEndRef} />
+
       {/* Image Lightbox Modal */}
       {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-          onClick={() => setSelectedImage(null)}
+        <div onClick={() => setSelectedImage(null)}
+          className="fixed inset-0 top-[-3%] z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm"
         >
-          <div
-            className="relative max-w-3xl w-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={selectedImage}
-              alt="Full preview"
-              className="rounded-lg shadow-2xl max-h-[80vh] max-w-full"
-            />
-            <button
-              className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-2 hover:bg-black/80 transition-colors"
-              onClick={() => setSelectedImage(null)}
+            <button onClick={() => setSelectedImage(null)}
+                className="absolute top-4 right-4 bg-white/5 text-white rounded-full w-10 h-10 hover:bg-black/80 transition-colors"
+            >×</button>
+            <div onClick={(e) => e.stopPropagation()}
+                // className="relative max-w-3xl w-full flex items-center justify-center"
+                className="relative max-w-max w-full flex items-center justify-center"
             >
-              ×
-            </button>
+                <img src={selectedImage} alt="Full preview"
+                    className="rounded-lg shadow-2xl max-h-[80vh] max-w-full"
+                />
           </div>
         </div>
       )}
