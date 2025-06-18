@@ -200,9 +200,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="p-2 text-slate-400 hover:text-indigo-400 transition-colors"
+          className="p-2.5 rounded-xl bg-slate-700/50 border border-slate-600 text-slate-400 hover:text-slate-300 hover:bg-slate-700 transition-all duration-200"
         >
-          <Image className="h-5 w-5" />
+            <Image className="h-5 w-5"/>
         </button>
         <input
           ref={inputRef}
@@ -217,7 +217,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           onChange={(e) => setMessage({ ...message, content: e.target.value })}
           onKeyDown={handleKeyPress}
           placeholder="Type a message..."
-          className={`flex-1 bg-slate-700/50 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none min-h-[40px] max-h-32 ${
+          className={`flex-1 rounded-xl bg-slate-700/50 text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none min-h-[40px] max-h-32 border border-slate-600 ${
             dragActive ? "ring-2 ring-indigo-500 border-indigo-500" : ""
           }`}
           rows={1}
@@ -225,7 +225,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <button
           type="submit"
           disabled={!message.content.trim() && !currentFile}
-          className="p-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="p-2.5 rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <Send className="h-5 w-5" />
         </button>
