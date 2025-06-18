@@ -7,6 +7,7 @@ import { DescriptionSection } from './form/DescriptionSection';
 import { ExampleVideosSection } from './form/ExampleVideosSection';
 import { ToggleSwitch } from './ui/ToggleSwitch';
 import { SubmitButton } from './ui/SubmitButton';
+import toast from 'react-hot-toast'; // Import toast for notifications
 
 export const CustomTrackRequest: React.FC = () => {
   const { isToggled: showCustomTracks, toggle: toggleCustomTracks } = useToggle(false);
@@ -25,6 +26,15 @@ export const CustomTrackRequest: React.FC = () => {
     removeExampleVideo,
     submitForm
   } = useCustomTrackForm();
+
+  const handleSubmit = async () => {
+    await submitForm();
+    if (!submitError) {
+      toast.success('Request submitted successfully'); // Show toast on success
+    } else {
+      toast.error(submitError || 'Failed to submit request'); // Show error if applicable
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -58,7 +68,7 @@ export const CustomTrackRequest: React.FC = () => {
 
             <div className="space-y-8">
               <ReferenceTracksSection
-                tracks={formData.referenceTracks}
+                tracks={formData.reference_tracks}
                 onAddTrack={addReferenceTrack}
                 onUpdateTrack={updateReferenceTrack}
                 onRemoveTrack={removeReferenceTrack}
@@ -70,7 +80,7 @@ export const CustomTrackRequest: React.FC = () => {
               />
 
               <ExampleVideosSection
-                videos={formData.exampleVideos}
+                videos={formData.example_videos}
                 onAddVideo={addExampleVideo}
                 onUpdateVideo={updateExampleVideo}
                 onRemoveVideo={removeExampleVideo}
@@ -89,7 +99,7 @@ export const CustomTrackRequest: React.FC = () => {
               )}
 
               <SubmitButton
-                onClick={submitForm}
+                onClick={handleSubmit}
                 loading={isSubmitting}
                 disabled={isSubmitting}
               >

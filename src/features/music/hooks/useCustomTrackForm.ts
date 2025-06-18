@@ -1,33 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CustomRequest } from '../types';
-import { useFormSubmission } from './useFormSubmission';
+import { useFormSubmission, fetchUserRequests } from '../services/api';
 
 interface CustomTrackFormData {
-  referenceTracks: string[];
+  reference_tracks: string[];
   description: string;
-  exampleVideos: string[];
+  example_videos: string[];
 }
 
 export const useCustomTrackForm = () => {
   const [formData, setFormData] = useState<CustomTrackFormData>({
-    referenceTracks: [''],
+    reference_tracks: [''],
     description: '',
-    exampleVideos: []
+    example_videos: []
   });
   const [submittedRequests, setSubmittedRequests] = useState<CustomRequest[]>([]);
   const { isSubmitting, submitError, submitForm: submitToApi, clearError } = useFormSubmission();
 
+  useEffect(() => {
+    const loadRequests = async () => {
+      const response = await fetchUserRequests();
+      if (response.success) {
+        setSubmittedRequests(response.data);
+      }
+    };
+    loadRequests();
+  }, []);
+
   const addReferenceTrack = () => {
     setFormData(prev => ({
       ...prev,
-      referenceTracks: [...prev.referenceTracks, '']
+      reference_tracks: [...prev.reference_tracks, '']
     }));
   };
 
   const updateReferenceTrack = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      referenceTracks: prev.referenceTracks.map((track, i) => 
+      reference_tracks: prev.reference_tracks.map((track, i) => 
         i === index ? value : track
       )
     }));
@@ -36,7 +46,7 @@ export const useCustomTrackForm = () => {
   const removeReferenceTrack = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      referenceTracks: prev.referenceTracks.filter((_, i) => i !== index)
+      reference_tracks: prev.reference_tracks.filter((_, i) => i !== index)
     }));
   };
 
@@ -47,14 +57,14 @@ export const useCustomTrackForm = () => {
   const addExampleVideo = () => {
     setFormData(prev => ({
       ...prev,
-      exampleVideos: [...prev.exampleVideos, '']
+      example_videos: [...prev.example_videos, '']
     }));
   };
 
   const updateExampleVideo = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      exampleVideos: prev.exampleVideos.map((video, i) => 
+      example_videos: prev.example_videos.map((video, i) => 
         i === index ? value : video
       )
     }));
@@ -63,44 +73,32 @@ export const useCustomTrackForm = () => {
   const removeExampleVideo = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      exampleVideos: prev.exampleVideos.filter((_, i) => i !== index)
+      example_videos: prev.example_videos.filter((_, i) => i !== index)
     }));
   };
 
   const resetForm = () => {
     setFormData({
-      referenceTracks: [''],
+      reference_tracks: [''],
       description: '',
-      exampleVideos: []
+      example_videos: []
     });
   };
 
   const submitForm = async () => {
-    // Filter out empty strings
     const cleanedData = {
       ...formData,
-      referenceTracks: formData.referenceTracks.filter(track => track.trim()),
-      exampleVideos: formData.exampleVideos.filter(video => video.trim())
+      reference_tracks: formData.reference_tracks.filter(track => track.trim()),
+      example_videos: formData.example_videos.filter(video => video.trim())
     };
     
-    // Submit to API
     const result = await submitToApi(cleanedData);
     
     if (result.success) {
-      // Create a new request object
-      const newRequest: CustomRequest = {
-        id: result.id || Date.now().toString(),
-        submittedBy: 'You',
-        submittedAt: new Date().toISOString(),
-        status: 'pending',
-        referenceTracks: cleanedData.referenceTracks,
-        description: cleanedData.description,
-        exampleVideos: cleanedData.exampleVideos,
-        priority: 'medium'
-      };
-      
-      // Add to submitted requests
-      setSubmittedRequests(prev => [newRequest, ...prev]);
+      const response = await fetchUserRequests();
+      if (response.success) {
+        setSubmittedRequests(response.data);
+      }
       resetForm();
     }
   };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { RequestStatus } from '../types';
+import { RequestStatus } from '../../music/types';
 
 interface RequestFiltersProps {
   activeFilter: RequestStatus | 'all';
@@ -11,8 +11,10 @@ export const RequestFilters: React.FC<RequestFiltersProps> = ({
   onFilterChange
 }) => {
   const filters: Array<{ key: RequestStatus | 'all'; label: string }> = [
-    { key: 'in-progress', label: 'In Progress' },
-    { key: 'completed', label: 'Completed' }
+    { key: 'all', label: 'All' },
+    { key: 'pending', label: 'Pending' },
+    { key: 'completed', label: 'Completed' },
+    { key: 'rejected', label: 'Rejected' }
   ];
 
   return (

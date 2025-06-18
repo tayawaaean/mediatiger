@@ -1,15 +1,18 @@
 export interface CustomRequest {
   id: string;
-  submittedBy: string;
-  submittedAt: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'rejected';
-  referenceTracks: string[];
+  user_id: string;
+  submitted_by: string;
+  submitted_at: string;
+  status: 'pending' | 'completed' | 'rejected';
+  reference_tracks: string[];
   description: string;
-  exampleVideos: string[];
+  example_videos: string[];
   priority: 'low' | 'medium' | 'high';
-  estimatedCompletion?: string;
-  completedTrack?: string;
+  estimated_completion?: string;
+  completed_track?: string;
   notes?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export type RequestStatus = CustomRequest['status'];

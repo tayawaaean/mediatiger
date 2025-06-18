@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Music, Play, MessageSquare, CheckCircle, Download } from 'lucide-react';
-import { CustomRequest, RequestStatus } from '../types';
+import { CustomRequest, RequestStatus } from '../../music/types';
+import toast from 'react-hot-toast'; // Import toast for notifications
 
 interface RequestDetailsProps {
   request: CustomRequest | null;
-  onUpdateStatus: (requestId: string, status: RequestStatus) => void;
-  onAddNote: (requestId: string, note: string) => void;
+  onUpdateStatus: (requestId: string, status: RequestStatus) => Promise<{ success: boolean; message?: string } | void>;
+  onAddNote: (requestId: string, note: string) => Promise<{ success: boolean; message?: string }>;
   onRequestUpdated?: () => void;
 }
 
@@ -16,19 +17,47 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
   onRequestUpdated
 }) => {
   const [noteText, setNoteText] = useState('');
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     if (request && noteText.trim()) {
-      onAddNote(request.id, noteText.trim());
-      setNoteText('');
+      const response = await onAddNote(request.id, noteText.trim());
+      if (response && response.success) {
+        toast.success('Note added successfully'); // Show toast on success
+        setNoteText(''); // Clear input on success
+      } else {
+        toast.error(response?.message || 'Failed to add note'); // Show error if applicable
+      }
     }
   };
 
-  const handleStatusUpdate = (requestId: string, status: RequestStatus) => {
-    onUpdateStatus(requestId, status);
-    if (status === 'completed' && onRequestUpdated) {
-      onRequestUpdated();
+  const handleStatusUpdate = async (requestId: string, status: RequestStatus) => {
+    if (request) {
+      const response = await onUpdateStatus(requestId, status);
+      if (response && response.success) {
+        if (status === 'completed' || status === 'rejected') {
+          toast.success('Updated successfully'); // Show toast on status change
+          if (onRequestUpdated) {
+            onRequestUpdated();
+          }
+        }
+      } else {
+        toast.error(response?.message || 'Failed to update status'); // Handle undefined response
+      }
     }
+    if (status === 'rejected') {
+      setShowRejectConfirm(false); // Hide confirmation after rejection
+    }
+  };
+
+  const confirmReject = () => {
+    if (request) {
+      handleStatusUpdate(request.id, 'rejected');
+    }
+  };
+
+  const cancelReject = () => {
+    setShowRejectConfirm(false);
   };
 
   if (!request) {
@@ -47,16 +76,32 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
   return (
     <div className="bg-slate-700/30 rounded-xl p-6">
       <div className="space-y-6">
+        {/* Status Identifier and Action Buttons on the Right */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-white">Request Details</h3>
-          <div className="flex gap-2">
-            {request.status === 'in-progress' && (
-              <button
-                onClick={() => handleStatusUpdate(request.id, 'completed')}
-                className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
-              >
-                Mark Complete
-              </button>
+          <div className="flex items-center gap-2">
+            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+              request.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
+              request.status === 'completed' ? 'bg-green-500/20 text-green-300' :
+              'bg-red-500/20 text-red-300'
+            }`}>
+              {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+            </div>
+            {request.status === 'pending' && (
+              <>
+                <button
+                  onClick={() => handleStatusUpdate(request.id, 'completed')}
+                  className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+                >
+                  Mark Completed
+                </button>
+                <button
+                  onClick={() => setShowRejectConfirm(true)}
+                  className="px-3 py-1 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors"
+                >
+                  Reject
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -143,6 +188,30 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Reject Confirmation Dialog */}
+        {showRejectConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-slate-800 p-6 rounded-lg border border-slate-700/50">
+              <h3 className="text-lg font-semibold text-white mb-4">Confirm Rejection</h3>
+              <p className="text-slate-300 mb-4">Are you sure you want to reject this request?</p>
+              <div className="flex gap-4">
+                <button
+                  onClick={confirmReject}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Yes, Reject
+                </button>
+                <button
+                  onClick={cancelReject}
+                  className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

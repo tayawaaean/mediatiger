@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CustomRequest } from '../types';
+import { CustomRequest } from '../../music/types';
 
 export const useRequestSelection = () => {
   const [selectedRequest, setSelectedRequest] = useState<CustomRequest | null>(null);

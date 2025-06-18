@@ -1,14 +1,14 @@
 import React from 'react';
 
 interface ExampleVideosSectionProps {
-  videos: string[];
+  videos: string[] | undefined;
   onAddVideo: () => void;
   onUpdateVideo: (index: number, value: string) => void;
   onRemoveVideo?: (index: number) => void;
 }
 
 export const ExampleVideosSection: React.FC<ExampleVideosSectionProps> = ({
-  videos,
+  videos = [],
   onAddVideo,
   onUpdateVideo,
   onRemoveVideo
@@ -17,11 +17,11 @@ export const ExampleVideosSection: React.FC<ExampleVideosSectionProps> = ({
     <div>
       <label className="block text-white mb-4">Example Videos (Optional)</label>
       <div className="space-y-4">
-        {videos.map((video, index) => (
+        {(videos || []).map((video, index) => (
           <div key={index} className="flex gap-2">
             <input
               type="text"
-              value={video}
+              value={video || ''}
               onChange={(e) => onUpdateVideo(index, e.target.value)}
               placeholder="Enter video URL"
               className="flex-1 px-6 py-4 bg-slate-800 text-white rounded-xl border border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all duration-200 placeholder-slate-400"

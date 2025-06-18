@@ -8,6 +8,10 @@ interface RequestCardProps {
 }
 
 export const RequestCard: React.FC<RequestCardProps> = ({ request }) => {
+  // Default to empty arrays if undefined
+  const referenceTracks = request.reference_tracks || [];
+  const exampleVideos = request.example_videos || [];
+
   return (
     <div className="p-6 bg-slate-700/30 rounded-xl border border-slate-600/50 hover:bg-slate-700/40 transition-all duration-200">
       <div className="flex items-start justify-between mb-4">
@@ -18,7 +22,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request }) => {
         </div>
         <div className="flex items-center gap-1 text-xs text-slate-400">
           <Clock className="w-4 h-4" />
-          {formatDate(request.submittedAt)}
+          {formatDate(request.submitted_at)}
         </div>
       </div>
 
@@ -27,16 +31,16 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request }) => {
       </p>
 
       <div className="flex items-center gap-6 text-xs text-slate-400">
-        {request.referenceTracks.length > 0 && (
+        {referenceTracks.length > 0 && (
           <div className="flex items-center gap-1">
             <Music className="w-4 h-4" />
-            <span>{request.referenceTracks.length} reference{request.referenceTracks.length !== 1 ? 's' : ''}</span>
+            <span>{referenceTracks.length} reference{referenceTracks.length !== 1 ? 's' : ''}</span>
           </div>
         )}
-        {request.exampleVideos.length > 0 && (
+        {exampleVideos.length > 0 && (
           <div className="flex items-center gap-1">
             <Video className="w-4 h-4" />
-            <span>{request.exampleVideos.length} video{request.exampleVideos.length !== 1 ? 's' : ''}</span>
+            <span>{exampleVideos.length} video{exampleVideos.length !== 1 ? 's' : ''}</span>
           </div>
         )}
         {request.description && (
@@ -55,13 +59,13 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request }) => {
         </div>
       )}
 
-      {request.completedTrack && (
+      {request.completed_track && (
         <div className="mt-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
           <div className="flex items-center gap-2">
             <Music className="w-4 h-4 text-green-400" />
             <span className="text-green-300 text-sm font-medium">Track completed!</span>
           </div>
-          <p className="text-green-200 text-sm mt-1">{request.completedTrack}</p>
+          <p className="text-green-200 text-sm mt-1">{request.completed_track}</p>
         </div>
       )}
     </div>
