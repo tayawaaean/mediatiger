@@ -1,0 +1,40 @@
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-in;
+}
+
+.animate-section {
+  transition: all 0.3s ease;
+}
+
+.toggle-switch {
+  width: 40px;
+  height: 20px;
+  background-color: #4b5563;
+  border-radius: 9999px;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.toggle-switch.active {
+  background-color: #8b5cf6;
+}
+
+.toggle-switch .toggle-handle {
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+}
+
+.toggle-switch.active .toggle-handle {
+  transform: translateX(20px);
+}

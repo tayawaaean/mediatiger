@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Music } from 'lucide-react';
 import { useRequests } from './admin/hooks/useRequests';
 import { useRequestFilter } from './admin/hooks/useRequestFilter';
@@ -6,15 +6,48 @@ import { useRequestSelection } from './admin/hooks/useRequestSelection';
 import { RequestList } from './admin/components/RequestList';
 import { RequestDetails } from './admin/components/RequestDetails';
 import { RequestFilters } from './admin/components/RequestFilters';
+import { supabase } from './music/services/supabase';
 
 export const MusicManager = () => {
-  const { requests, updateRequestStatus, addNote } = useRequests();
+  const { requests, updateRequestStatus, addNote, error } = useRequests();
   const { filterStatus, setFilterStatus, filteredRequests } = useRequestFilter(requests);
   const { selectedRequest, setSelectedRequest, clearSelection } = useRequestSelection();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Reset filter to 'all' when component mounts or requests change
+  useEffect(() => {
+    setFilterStatus('all'); // Default to show all requests
+  }, [requests, setFilterStatus]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const role = user.user_metadata?.role;
+        if (role === 'admin') {
+          setIsAuthenticated(true);
+        } else {
+          setAuthError('You do not have admin privileges.');
+        }
+      } else {
+        setAuthError('Please log in as an admin.');
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleRequestUpdated = () => {
     clearSelection();
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="p-4 bg-slate-800/90 backdrop-blur-sm rounded-xl shadow-xl border border-slate-700/50">
+        <p className="text-red-300 text-center">{authError}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 bg-slate-800/90 backdrop-blur-sm rounded-xl shadow-xl border border-slate-700/50">
@@ -28,6 +61,12 @@ export const MusicManager = () => {
         </div>
         <RequestFilters activeFilter={filterStatus} onFilterChange={setFilterStatus} />
       </div>
+
+      {error && (
+        <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg mb-6">
+          <p className="text-red-300 text-sm">{error}</p>
+        </div>
+      )}
 
       {filteredRequests.length === 0 ? (
         <p className="text-slate-400 text-center py-8">No requests found.</p>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, Clock } from 'lucide-react';
-import { CustomRequest } from '../types';
-import { formatDate } from '../utils/formatters';
+import { CustomRequest } from '../../music/types';
+import { formatDate, getStatusColor } from '../../music/utils/formatters';
 
 interface RequestListProps {
   requests: CustomRequest[];
@@ -30,6 +30,9 @@ export const RequestList: React.FC<RequestListProps> = ({
             <div className="flex items-center gap-3">
               <User className="w-5 h-5 text-slate-400" />
               <span className="font-medium text-white">@{request.submitted_by}</span>
+            </div>
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+              {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
             </div>
           </div>
           

@@ -3,7 +3,7 @@ export interface CustomRequest {
   user_id: string;
   submitted_by: string;
   submitted_at: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'rejected';
+  status: 'pending' | 'completed' | 'rejected';
   reference_tracks: string[];
   description: string;
   example_videos: string[];
