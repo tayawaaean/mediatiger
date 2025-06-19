@@ -28,12 +28,12 @@ const MusicComponent = () => {
   const musicListRef = useRef<HTMLDivElement>(null);
 
   const API_KEY = import.meta.env.VITE_PLAYIST_API_KEY || 'your-api-key-here';
-  const API_URL = '/api/public/v1/music/list';
+  const API_URL_MUSIC_LIST = import.meta.env.VITE_API_URL_MUSIC_LIST || '/api/public/v1/music/list';
 
   const fetchMusicData = async (newPage = 1, append = false) => {
     setLoading(true);
     try {
-      const response = await axios.get(API_URL, {
+      const response = await axios.get(API_URL_MUSIC_LIST, {
         headers: {
           'ZS-API-Auth': API_KEY,
           'Accept-Language': 'en',
