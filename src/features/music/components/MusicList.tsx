@@ -1,5 +1,5 @@
-import { MusicItem } from "@/utils/data"; // Next.js import convention
-import { useEffect, useState } from "react";
+import { MusicItem } from '../../../utils/data';
+import React, { useEffect, useState } from 'react';
 
 interface MusicListProps {
   items: MusicItem[];
@@ -12,39 +12,41 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    // Trigger animation when items change (e.g., after favorite toggle)
     setIsRefreshing(true);
-    const timer = setTimeout(() => setIsRefreshing(false), 400); // Match listItemFadeIn duration
+    const timer = setTimeout(() => setIsRefreshing(false), 400);
     return () => clearTimeout(timer);
   }, [items]);
 
   return (
     <div className="mt-8">
-      <div className="grid grid-cols-[80px_1fr_200px_100px] gap-4 px-4 py-2 text-slate-400 text-sm font-medium animate-fade-in">
+      <div className="grid grid-cols-[60px_1fr_120px_80px] gap-2 px-2 py-2 text-slate-400 text-xs font-medium animate-fade-in sm:grid-cols-[80px_1fr_200px_100px] sm:gap-4 sm:px-4 sm:text-sm">
         <div>Cover</div>
         <div>Title</div>
-        <div className="text-right pr-8">ISRC</div>
+        <div className="text-right pr-4 sm:pr-8">ISRC</div>
         <div className="flex justify-center">Music File</div>
       </div>
       <div className="space-y-2 mt-4" id="musicList">
         {items.map((item, index) => (
           <div
             key={item.id}
-            className={`grid grid-cols-[80px_1fr_200px_100px] gap-4 items-center px-4 py-3 hover:bg-slate-700/30 rounded-lg transition-colors cursor-pointer group ${
+            className={`grid grid-cols-[60px_1fr_120px_80px] gap-2 items-center px-2 py-2 hover:bg-slate-700/30 rounded-lg transition-colors cursor-pointer group sm:grid-cols-[80px_1fr_200px_100px] sm:gap-4 sm:px-4 sm:py-3 ${
               isRefreshing ? 'animate-section active' : ''
             }`}
-            style={{ animationDelay: `${index * 0.05}s` }} // Staggered delay to mimic original
+            style={{ animationDelay: `${index * 0.05}s` }}
             onClick={() => onPlay(item)}
           >
-            <img src={item.cover} alt={item.title} className="w-12 h-12 rounded-lg object-cover" />
-            <div className="flex flex-col">
-              <h3 className="text-white text-sm font-medium truncate">{item.title}</h3>
-              <div className="flex flex-wrap gap-2 mt-1.5">
+            <img
+              src={item.cover}
+              alt={item.title}
+              className="w-10 h-10 rounded-lg object-cover sm:w-12 sm:h-12"
+            />
+            <div className="flex flex-col min-w-0">
+              <h3 className="text-white text-xs font-medium truncate sm:text-sm">{item.title}</h3>
+              <div className="flex flex-wrap gap-1 mt-1 max-h-10 overflow-hidden sm:gap-2 sm:mt-1.5 sm:max-h-12">
                 {item.category.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 whitespace-nowrap overflow-hidden overflow-ellipsis"
-                    style={{ maxWidth: '100%' }}
+                    className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 whitespace-nowrap truncate max-w-[100px] sm:text-xs sm:px-2 sm:max-w-[120px]"
                   >
                     {tag}
                   </span>
@@ -53,27 +55,26 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
             </div>
             <button
               type="button"
-              className="text-sm text-slate-400 font-mono tracking-wider text-right pr-8 cursor-pointer hover:text-white transition-colors bg-transparent border-none outline-none"
+              className="text-xs text-slate-400 font-mono tracking-wider text-right pr-4 cursor-pointer hover:text-white transition-colors bg-transparent border-none outline-none sm:text-sm sm:pr-8"
               onClick={(e) => {
                 e.stopPropagation();
                 onCopyISRC(item.id);
               }}
               title="Click to copy"
               tabIndex={0}
-              style={{ textAlign: "right" }}
             >
               {item.id}
             </button>
-            <div className="flex gap-2 justify-center">
+            <div className="flex gap-1 justify-center sm:gap-2">
               <button
-                className="favorite-btn p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+                className="favorite-btn p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors sm:p-2"
                 onClick={(e) => {
                   e.stopPropagation();
                   onFavorite(item.id, !item.favorite);
                 }}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   viewBox="0 0 24 24"
                   fill={item.favorite ? 'currentColor' : 'none'}
                   stroke="currentColor"
@@ -83,11 +84,25 @@ export const MusicList: React.FC<MusicListProps> = ({ items, onPlay, onFavorite,
                 </svg>
               </button>
               <button
-                className="download-btn p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+                className="download-btn p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors sm:p-2"
                 title="Download"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (item.music) {
+                    const link = document.createElement('a');
+                    link.href = item.music;
+                    link.download = `${item.title}.mp3`;
+                    link.click();
+                  }
+                }}
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
