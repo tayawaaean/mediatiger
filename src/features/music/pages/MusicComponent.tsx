@@ -1,47 +1,131 @@
-import { musicData, MusicItem } from "../../../utils/data";
-import React, { useEffect, useState, useRef } from "react";
-import { CustomTrackRequest } from "../components/CustomTrackRequest";
-import { FavoritesList } from "../components/FavoritesList";
-import { MusicList } from "../components/MusicList";
-import { NoResults } from "../components/NoResults";
-import { MusicPlayer } from "../components/MusicPlayer";
-import { animatePageLoad } from "../utils/musicAnimations";
-import { SearchBar } from "../components/SearchBar";
-import "../../../styles/music.css";
+import React, { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { CustomTrackRequest } from '../components/CustomTrackRequest';
+import { FavoritesList } from '../components/FavoritesList';
+import { MusicList } from '../components/MusicList';
+import { NoResults } from '../components/NoResults';
+import { MusicPlayer } from '../components/MusicPlayer';
+import { animatePageLoad } from '../utils/musicAnimations';
+import { SearchBar } from '../components/SearchBar';
+import { MusicItem } from '../../../utils/data';
+import '../../../styles/music.css';
 
 const MusicComponent = () => {
-  const [sortBy, setSortBy] = useState("recent");
-  const [selectedMood, setSelectedMood] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredMusic, setFilteredMusic] = useState<MusicItem[]>(musicData);
+  const [sortBy, setSortBy] = useState('recent');
+  const [selectedMood, setSelectedMood] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [allMusic, setAllMusic] = useState<MusicItem[]>([]);
+  const [filteredMusic, setFilteredMusic] = useState<MusicItem[]>([]);
+  const [searchResults, setSearchResults] = useState<MusicItem[]>([]);
+  const [displayedItems, setDisplayedItems] = useState(15);
   const [nowPlaying, setNowPlaying] = useState<MusicItem | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
+  const musicListRef = useRef<HTMLDivElement>(null);
+
+  const API_KEY = import.meta.env.VITE_PLAYIST_API_KEY || 'your-api-key-here';
+  const API_URL = '/api/public/v1/music/list';
+
+  const fetchMusicData = async (newPage = 1, append = false) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(API_URL, {
+        headers: {
+          'ZS-API-Auth': API_KEY,
+          'Accept-Language': 'en',
+        },
+        params: {
+          page: newPage,
+          size: 15,
+        },
+      });
+
+      if (response.data.success && response.data.response_code === 0) {
+        const tracks = response.data.datas.map((item: any) => ({
+          id: item.isrc,
+          title: item.name,
+          artist: item.artist || 'Unknown Artist',
+          cover: item.thumbnail || 'https://via.placeholder.com/100',
+          duration: '0:00',
+          favorite: false,
+          category: item.tags ? item.tags.map((tag: any) => tag.name.toLowerCase()) : [],
+          music: item.music || '',
+        }));
+
+        setAllMusic((prev) => {
+          const newAllMusic = append ? [...prev, ...tracks] : tracks;
+          return newAllMusic;
+        });
+        setHasMore(response.data.page_data.next.length > 0);
+
+        if (append && musicListRef.current) {
+          setTimeout(() => {
+            const scrollHeight = document.body.scrollHeight;
+            window.scrollTo({
+              top: scrollHeight,
+              behavior: 'smooth',
+            });
+          }, 200);
+        }
+      } else {
+        setError('Failed to fetch music tracks: ' + (response.data.message || 'Unknown error'));
+      }
+    } catch (err) {
+      setError('Failed to fetch music from API');
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 429) {
+          setError('Rate limit exceeded. Please try again later.');
+        } else if (err.response?.status === 403) {
+          setError('Access denied. Your IP may not be whitelisted.');
+        } else {
+          setError('Network error. Check proxy configuration or contact API support.');
+        }
+      }
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const savedFavorites = localStorage.getItem("favorites");
-    if (savedFavorites) {
-      const favoriteIds = new Set(JSON.parse(savedFavorites));
-      const updatedMusic = musicData.map((item) => ({
-        ...item,
-        favorite: favoriteIds.has(item.id),
-        category: favoriteIds.has(item.id)
-          ? [...item.category, "favorited"]
-          : item.category.filter((cat) => cat !== "favorited"),
-      }));
-      setFilteredMusic(updatedMusic);
-    } else {
-      setFilteredMusic(musicData);
-    }
+    fetchMusicData();
     animatePageLoad();
-    filterMusicByCategory();
   }, []);
 
   useEffect(() => {
-    filterMusicByCategory();
-  }, [sortBy, searchTerm]);
+    let filtered = [...allMusic];
 
-  const filterMusicByCategory = () => {
-    let filtered = [...filteredMusic];
+    if (searchTerm) {
+      const results = allMusic.filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (item.artist && item.artist.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setSearchResults(results);
+    } else {
+      setSearchResults([]);
+      if (selectedMood) {
+        filtered = filtered.filter((item) =>
+          item.category.some((cat) => cat.toLowerCase() === selectedMood.toLowerCase())
+        );
+      }
+      if (sortBy === 'recent') {
+        filtered.sort((a, b) => a.id.localeCompare(b.id)); // Ascending order
+      }
+      setFilteredMusic(filtered.length > 0 ? filtered : allMusic);
+    }
+  }, [allMusic, searchTerm, sortBy, selectedMood]);
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+  };
+
+  const handleApplyMood = () => {
+    let filtered = [...allMusic];
 
     if (searchTerm) {
       filtered = filtered.filter(
@@ -49,36 +133,19 @@ const MusicComponent = () => {
           item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (item.artist && item.artist.toLowerCase().includes(searchTerm.toLowerCase()))
       );
-    } else {
-      filtered = [...musicData].map((item) => ({
-        ...item,
-        favorite: filtered.find((f) => f.id === item.id)?.favorite || false,
-        category: filtered.find((f) => f.id === item.id)?.category || item.category,
-      }));
     }
 
-    if (sortBy === "recent") {
-      filtered.sort((a, b) => b.id.localeCompare(a.id));
-    }
-
-    setFilteredMusic(filtered);
-  };
-
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-    filterMusicByCategory();
-  };
-
-  const handleApplyMood = () => {
-    let filtered = [...filteredMusic];
     if (selectedMood) {
       filtered = filtered.filter((item) =>
         item.category.some((cat) => cat.toLowerCase() === selectedMood.toLowerCase())
       );
-    } else if (sortBy === "recent") {
-      filtered.sort((a, b) => b.id.localeCompare(a.id));
     }
-    setFilteredMusic(filtered);
+
+    if (sortBy === 'recent') {
+      filtered.sort((a, b) => a.id.localeCompare(b.id)); // Ascending order
+    }
+
+    setFilteredMusic(filtered.length > 0 ? filtered : allMusic);
   };
 
   const handlePlay = (item: MusicItem) => {
@@ -86,12 +153,29 @@ const MusicComponent = () => {
   };
 
   const handleFavorite = (id: string, isFavorite: boolean) => {
-    const updatedMusic = filteredMusic.map((item) =>
-      item.id === id ? { ...item, favorite: isFavorite } : item
+    if (isFavorite) {
+      const favoriteCount = allMusic.filter((item) => item.favorite).length;
+      if (favoriteCount >= 15) {
+        toast.error('You can only favorite up to 15 songs. Please unfavorite some songs to add new ones.');
+        return;
+      }
+    }
+
+    const updatedAllMusic = allMusic.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            favorite: isFavorite,
+            category: isFavorite
+              ? [...item.category, 'favorited']
+              : item.category.filter((cat) => cat !== 'favorited'),
+          }
+        : item
     );
-    setFilteredMusic(updatedMusic);
-    const favoriteIds = updatedMusic.filter((item) => item.favorite).map((item) => item.id);
-    localStorage.setItem("favorites", JSON.stringify(favoriteIds));
+    setAllMusic(updatedAllMusic);
+    if (nowPlaying?.id === id) {
+      setNowPlaying({ ...nowPlaying, favorite: isFavorite });
+    }
   };
 
   const handleCopyISRC = (id: string) => {
@@ -99,17 +183,68 @@ const MusicComponent = () => {
     if (item) navigator.clipboard.writeText(item.id);
   };
 
+  const handleUpdateDuration = (id: string, duration: string) => {
+    setAllMusic((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, duration } : item))
+    );
+    if (nowPlaying?.id === id) {
+      setNowPlaying((prev) => (prev ? { ...prev, duration } : null));
+    }
+  };
+
+  const handleSeeMore = () => {
+    setPage((prev) => prev + 1);
+    setDisplayedItems((prev) => prev + 15);
+    fetchMusicData(page + 1, true);
+  };
+
   const renderContent = () => {
-    if (searchTerm && filteredMusic.length === 0) {
-      return <NoResults searchTerm={searchTerm} />;
+    if (loading && page === 1) {
+      return <div className="text-center py-16 text-slate-400">Loading music tracks...</div>;
+    }
+    if (error) {
+      return (
+        <div className="text-center py-16 text-red-400">
+          {error}
+          {error.includes('network') && (
+            <p className="text-sm mt-2">
+              This may be due to CORS restrictions or IP whitelisting. Contact API support.
+            </p>
+          )}
+        </div>
+      );
+    }
+    const itemsToDisplay = searchTerm ? searchResults : filteredMusic.slice(0, displayedItems);
+    if (itemsToDisplay.length === 0) {
+      return searchTerm ? (
+        <NoResults searchTerm={searchTerm} />
+      ) : (
+        <div className="text-center py-16 text-slate-400">
+          <p>No tracks found for this mood.</p>
+          <p className="text-sm mt-2">Try a different mood or sort by recent.</p>
+        </div>
+      );
     }
     return (
-      <MusicList
-        items={filteredMusic}
-        onPlay={handlePlay}
-        onFavorite={handleFavorite}
-        onCopyISRC={handleCopyISRC}
-      />
+      <div ref={musicListRef}>
+        <MusicList
+          items={itemsToDisplay}
+          onPlay={handlePlay}
+          onFavorite={handleFavorite}
+          onCopyISRC={handleCopyISRC}
+        />
+        {!searchTerm && hasMore && filteredMusic.length >= displayedItems && (
+          <div className="text-center mt-8">
+            <button
+              onClick={handleSeeMore}
+              className="px-6 py-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? 'Loading...' : 'See More'}
+            </button>
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -144,7 +279,7 @@ const MusicComponent = () => {
                   </div>
                 </div>
 
-                {sortBy === "mood" && (
+                {sortBy === 'mood' && (
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <select
@@ -173,20 +308,11 @@ const MusicComponent = () => {
                         <option value="entertaining">Entertaining</option>
                         <option value="refreshing">Refreshing</option>
                       </select>
-                    </div>
-                    <button
-                      onClick={handleApplyMood}
-                      className="ml-2 px-4 py-1 rounded-full bg-purple-600 text-white text-sm hover:bg-purple-700 transition-colors"
-                    >
-                      Apply
-                    </button>
+                    </div>                    
                   </div>
                 )}
 
-                <SearchBar
-                  searchTerm={searchTerm}
-                  onSearch={handleSearch}
-                />
+                <SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
               </div>
             </div>
 
@@ -199,9 +325,10 @@ const MusicComponent = () => {
           </div>
         </div>
       </div>
-     <MusicPlayer
+      <MusicPlayer
         currentTrack={nowPlaying}
         onFavoriteToggle={handleFavorite}
+        onUpdateDuration={handleUpdateDuration}
       />
     </div>
   );
