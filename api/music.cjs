@@ -12,8 +12,9 @@ module.exports = async (req, res) => {
       nodeEnv: process.env.NODE_ENV,
     });
 
+    // Updated CORS headers to include POST
     res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
@@ -21,12 +22,12 @@ module.exports = async (req, res) => {
       return res.status(200).end();
     }
 
-    // Reject POST requests
-    if (req.method !== 'GET') {
+    // Accept both GET and POST requests
+    if (req.method !== 'GET' && req.method !== 'POST') {
       console.log('Method not allowed:', req.method);
       return res.status(405).json({
         error: 'Method Not Allowed',
-        details: 'Only GET requests are supported',
+        details: 'Only GET and POST requests are supported',
       });
     }
 
@@ -42,9 +43,20 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Handle GET request
-    const page = parseInt(req.query.page) || 1;
-    const size = parseInt(req.query.size) || 15;
+    // Handle both GET and POST requests
+    // For GET: use query parameters
+    // For POST: use request body
+    let page, size;
+    
+    if (req.method === 'GET') {
+      page = parseInt(req.query.page) || 1;
+      size = parseInt(req.query.size) || 15;
+    } else if (req.method === 'POST') {
+      const body = req.body || {};
+      page = parseInt(body.page) || 1;
+      size = parseInt(body.size) || 15;
+      console.log('POST request body:', body);
+    }
 
     const apiUrl = process.env.PLAYIST_API_URL || 'https://api.playist.studio/public/v1/music/list';
     const apiKey = process.env.PLAYIST_API_KEY;
