@@ -21,7 +21,7 @@ interface ApiResponse {
 }
 
 // Changed from module.exports to export default
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async (req: VercelRequest, res: VercelResponse) => {
   // Debug environment variables
   console.log('Vercel ENV:', process.env);
 
