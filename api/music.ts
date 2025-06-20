@@ -20,10 +20,14 @@ interface ApiResponse {
   message?: string;
 }
 
-// Changed from module.exports to export default
-module.exports = async (req: VercelRequest, res: VercelResponse) => {
+// Export as default function for Vercel
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Debug environment variables
-  console.log('Vercel ENV:', process.env);
+  console.log('Environment check:', {
+    hasApiKey: !!process.env.PLAYIST_API_KEY,
+    hasApiUrl: !!process.env.PLAYIST_API_URL,
+    hasFrontendUrl: !!process.env.FRONTEND_URL
+  });
 
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
@@ -36,11 +40,33 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   }
 
   try {
-    const { page = 1, size = 15 } = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+    // Handle both GET and POST requests
+    let page = 1;
+    let size = 15;
 
-    const response = await axios.get<ApiResponse>(process.env.PLAYIST_API_URL || 'https://api.playist.studio/public/v1/music/list', {
+    if (req.method === 'GET') {
+      page = parseInt(req.query.page as string) || 1;
+      size = parseInt(req.query.size as string) || 15;
+    } else if (req.method === 'POST') {
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+      page = body.page || 1;
+      size = body.size || 15;
+    }
+
+    const apiUrl = process.env.PLAYIST_API_URL || 'https://api.playist.studio/public/v1/music/list';
+    const apiKey = process.env.PLAYIST_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({ 
+        error: 'API key not configured' 
+      });
+    }
+
+    console.log('Making API request:', { page, size, apiUrl });
+
+    const response = await axios.get<ApiResponse>(apiUrl, {
       headers: {
-        'ZS-API-Auth': process.env.PLAYIST_API_KEY,
+        'ZS-API-Auth': apiKey,
         'Accept-Language': 'en',
       },
       params: {
@@ -48,6 +74,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         size,
       },
     });
+
+    console.log('API response status:', response.status);
+    console.log('API response success:', response.data.success);
 
     if (response.data.success && response.data.response_code === 0) {
       const tracks: MusicItem[] = response.data.datas.map((item: any) => ({
@@ -65,8 +94,12 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         success: true,
         tracks,
         hasMore: response.data.page_data.next.length > 0,
+        page,
+        size,
+        total: tracks.length
       });
     } else {
+      console.error('API returned error:', response.data);
       res.status(400).json({
         error: response.data.message || 'Failed to fetch music tracks',
       });
@@ -74,11 +107,30 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   } catch (error) {
     console.error('Error fetching music:', error);
     let message = 'Failed to fetch music from API';
-    if (axios.isAxiosError(error) && error.response?.status === 429) {
-      message = 'Rate limit exceeded. Please try again later.';
-    } else if (axios.isAxiosError(error) && error.response?.status === 403) {
-      message = 'Access denied. Check IP whitelisting.';
+    let statusCode = 500;
+
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+
+      if (error.response?.status === 429) {
+        message = 'Rate limit exceeded. Please try again later.';
+        statusCode = 429;
+      } else if (error.response?.status === 403) {
+        message = 'Access denied. Check IP whitelisting.';
+        statusCode = 403;
+      } else if (error.response?.status === 401) {
+        message = 'Invalid API key or authentication failed.';
+        statusCode = 401;
+      }
     }
-    res.status(500).json({ error: message });
+
+    res.status(statusCode).json({ 
+      error: message,
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 }
