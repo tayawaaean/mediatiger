@@ -20,7 +20,8 @@ interface ApiResponse {
   message?: string;
 }
 
-module.exports = async (req: VercelRequest, res: VercelResponse) => {
+// Changed from module.exports to export default
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Debug environment variables
   console.log('Vercel ENV:', process.env);
 
@@ -80,4 +81,4 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     }
     res.status(500).json({ error: message });
   }
-};
+}
