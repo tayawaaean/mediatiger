@@ -295,7 +295,7 @@ const UsersPanel: React.FC = () => {
                         View Details
                       </button>
                     </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-3 py-4 whitespace-nowrap">
                       <button 
                         className="px-3 py-1 text-sm text-slate-200 bg-red-600/20 hover:bg-red-600/30 rounded-md border border-slate-600 transition-colors"
                         onClick={() => {
