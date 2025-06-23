@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 const UsersPanel: React.FC = () => {
+  
   const [users, setUsers] = useState<any[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -12,6 +13,7 @@ const UsersPanel: React.FC = () => {
   const [banList, setBanList] = useState<string[]>([]);
   const [isEditingSplit, setIsEditingSplit] = React.useState(false);
   const [splitValue, setSplitValue] = React.useState('50');
+
   // Updated to use filteredUsers for pagination
   const filteredUsers = React.useMemo(() => {
     return users.filter((user) =>
@@ -67,6 +69,30 @@ const UsersPanel: React.FC = () => {
         console.error("Error fetching users:", error);
       } else {
         setUsers(data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+
+  const deleteUser= async (user: any) => {
+    try {
+      console.log(user)
+      const { data, error } = await supabase.rpc("delete_the_user", {
+      tuid: user.user_id  // or any user UUID
+});
+
+      if (error) {
+        console.error("Error fetching users:", error);
+      } else {
+             await fetchUsers();
+      //  setUsers(data || []);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -187,9 +213,14 @@ const UsersPanel: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Details
                 </th>
+                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                
+                </th>
+               
+
               </tr>
             </thead>
             <tbody className="bg-slate-700/50 divide-y divide-slate-600">
@@ -253,6 +284,7 @@ const UsersPanel: React.FC = () => {
                           : "Pending"}
                       </span>
                     </td>
+                  
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         className="px-3 py-1 text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-md border border-slate-600 transition-colors"
@@ -261,6 +293,16 @@ const UsersPanel: React.FC = () => {
                         }}
                       >
                         View Details
+                      </button>
+                    </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                      <button 
+                        className="px-3 py-1 text-sm text-slate-200 bg-red-600/20 hover:bg-red-600/30 rounded-md border border-slate-600 transition-colors"
+                        onClick={() => {
+                         deleteUser(user);
+                        }}
+                      >
+                        Delete User
                       </button>
                     </td>
                   </tr>

@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 
 // Get environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+console.log(supabaseUrl+"KLKL");
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Enhanced validation with detailed error messages
