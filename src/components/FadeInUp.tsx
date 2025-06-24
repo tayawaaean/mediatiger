@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, ElementType } from "react";
 
 interface FadeInUpProps {
   children: React.ReactNode;
@@ -7,6 +7,7 @@ interface FadeInUpProps {
   threshold?: number;
   className?: string;
   style?: React.CSSProperties;
+  as?: ElementType;
 }
 
 export default function FadeInUp({
@@ -16,10 +17,11 @@ export default function FadeInUp({
   threshold = 0.1,
   className = "",
   style = {},
+  as: Component = "div",
 }: FadeInUpProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-  const elementRef = useRef<HTMLDivElement>(null);
+  const elementRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -54,9 +56,13 @@ export default function FadeInUp({
     ...style,
   };
 
-  return (
-    <div ref={elementRef} className={className} style={animationStyle}>
-      {children}
-    </div>
+  return React.createElement(
+    Component,
+    {
+      ref: elementRef,
+      className,
+      style: animationStyle,
+    },
+    children
   );
 }
