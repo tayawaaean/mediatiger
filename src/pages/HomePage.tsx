@@ -16,9 +16,11 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { submitForm } from "../api/submitForm";
 import FadeInUp from "../components/FadeInUp";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -32,6 +34,13 @@ export default function HomePage() {
     message: "",
   });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+
+  // All useEffect hooks must be called before any conditional returns
+  useEffect(() => {
+    if (!loading && user?.email_confirmed_at) {
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
@@ -48,26 +57,18 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Check if user has already visited the home page
-    const hasVisitedHomePage =
-      sessionStorage.getItem("hasVisitedHomePage") === "true";
-
-    if (hasVisitedHomePage) {
-      // Skip animation for returning visitors
+    // Simple timeout to trigger page load animations
+    const loadTimer = setTimeout(() => {
       setIsPageLoaded(true);
-    } else {
-      // Set page as loaded to trigger animations with a slight delay for first-time visitors
-      const loadTimer = setTimeout(() => {
-        setIsPageLoaded(true);
-        // Mark that user has visited the home page
-        sessionStorage.setItem("hasVisitedHomePage", "true");
-      }, 100);
+    }, 100);
 
-      return () => {
-        clearTimeout(loadTimer);
-      };
-    }
+    return () => clearTimeout(loadTimer);
   }, []);
+
+  // Now we can have conditional returns
+  if (loading || user?.email_confirmed_at) {
+    return null;
+  }
 
   const features = [
     {
@@ -841,6 +842,33 @@ export default function HomePage() {
               </div>
             </div>
           </FadeInUp>
+              {/* Mobile Layout */}
+              <div className="flex flex-col items-center w-full sm:hidden">
+                <div className="flex items-center w-full">
+                  <svg
+                    className="w-5 h-5 mr-2 text-indigo-500"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span className="mr-2">Email us directly at</span>
+                </div>
+                <a
+                  href="mailto:support@mediatiger.co"
+                  className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                >
+                  support@mediatiger.co
+                </a>
+              </div>
+            </div>
+          </div>
 
           {/* Contact Form */}
           <FadeInUp delay={400} duration={800}>

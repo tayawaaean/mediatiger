@@ -4,11 +4,22 @@ import HomePage from "../pages/HomePage";
 import ProtectedRoutes from "./protectedRoutes";
 import PublicRoutes from "./publicRoutes";
 import { ROUTES } from "./routeConstants";
-import MusicReferal from "../components/refferalMusic";
 import MusicPage from "../pages/music/index";
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  // Show loading screen while auth state is being determined
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-2"></div>
+          <span className="text-white text-sm">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Routes>

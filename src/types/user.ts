@@ -22,12 +22,23 @@ export interface UserMetadata {
 export interface AuthState {
   user: ExtendedUser | null;
   loading: boolean;
-  signUp: (email: string, password: string, name: string,referral?:boolean) => Promise<void | string>;
-  signIn: (email: string, password: string, isAdminLogin?: boolean) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    name: string,
+    referral?: boolean
+  ) => Promise<void | string>;
+  signIn: (
+    email: string,
+    password: string,
+    isAdminLogin?: boolean
+  ) => Promise<void>;
   signOut: () => Promise<void>;
   showOnboarding: boolean;
   setShowOnboarding: React.Dispatch<React.SetStateAction<boolean>>;
-  resendVerificationEmail: (email: string) => Promise<{ success: boolean; message: string }>;
+  resendVerificationEmail: (
+    email: string
+  ) => Promise<{ success: boolean; message: string }>;
   isAdmin: () => boolean;
 }
 // Common props that use the user object
