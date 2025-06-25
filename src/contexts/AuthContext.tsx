@@ -138,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: "user",
           isReferal: refferal,
         },
-        emailRedirectTo: `${currentOrigin}/dashboard`,
+        emailRedirectTo: `${currentOrigin}/welcome`,
       },
     });
     if (error) throw error;
@@ -255,7 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo: `${currentOrigin}/dashboard?t=${timestamp}` },
+      options: { emailRedirectTo: `${currentOrigin}/welcome?t=${timestamp}` },
     });
     if (error) throw error;
     return {
