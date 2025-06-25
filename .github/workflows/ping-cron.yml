@@ -13,6 +13,6 @@ jobs:
       - name: Call Supabase Edge Function
         run: |
           curl -L -X POST 'https://qfxejgklkwfrkzoaztee.supabase.co/functions/v1/rapid-worker' \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_BEARER_TOKEN }}" \
+          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmeGVqZ2tsa3dmcmt6b2F6dGVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5MDg2NjUsImV4cCI6MjA1OTQ4NDY2NX0.ojQ-syvH2JYLBaXvIF0wc9ErjtpS_sMMXNPPQh1KGkQ" \
           -H "Content-Type: application/json" \
           --data '{"name":"Functions"}'
