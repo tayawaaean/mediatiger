@@ -1,16 +1,9 @@
 import {
-  BarChart2,
   CheckCircle,
-  ChevronRight,
   Clock,
   ExternalLink,
-  Eye,
-  Play,
   Plus,
   RefreshCw,
-  Settings,
-  TrendingUp,
-  User,
   XCircle,
   Youtube,
 } from "lucide-react";
@@ -21,6 +14,7 @@ import NewChannelPopup from "../components/AddNewChannel";
 import { Tooltip } from "../../../components/Tooltip";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { AffiliateProgram } from "../../../components/refferalMusic/AffiliateProgram";
+import FadeInUp from "../../../components/FadeInUp";
 interface Channel {
   url: string;
   views: number;
@@ -32,12 +26,12 @@ interface Channel {
 
 export default function ChannelManagement() {
   const { user } = useAuth();
-  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+  const [selectedChannel] = useState<Channel | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddChannelModal, setShowAddChannelModal] = useState(false);
-  const { translate, currentLanguage } = useLanguage();
+  const { translate } = useLanguage();
 
   const fetchChannels = async () => {
     try {
@@ -46,7 +40,7 @@ export default function ChannelManagement() {
       const { data: requestData, error: requestError } = await supabase
         .from("user_requests")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", user?.id)
         .single();
 
       if (requestError) throw requestError;
@@ -61,14 +55,14 @@ export default function ChannelManagement() {
       const { data: channelsData, error: channelsError } = await supabase
         .from("channels")
         .select("*")
-        .eq("user_id", user.id);
+        .eq("user_id", user?.id);
 
       if (channelsError) throw channelsError;
 
       const { data: viewsData, error: viewsError } = await supabase
         .from("channel_views")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", user?.id)
         .order("month", { ascending: false });
 
       if (viewsError) throw viewsError;
@@ -143,7 +137,9 @@ export default function ChannelManagement() {
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
-          <p className="text-slate-300">{translate("channels.loadingChannels")}</p>
+          <p className="text-slate-300">
+            {translate("channels.loadingChannels")}
+          </p>
         </div>
       </div>
     );
@@ -197,157 +193,162 @@ export default function ChannelManagement() {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col space-y-6">
-          {/* Channels List Section */}
-          <div className="bg-slate-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-white">
-                {translate("channels.yourChannels")}
-              </h2>
-              <div className="flex space-x-3">
-                <button
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                  onClick={() => {
-                    setIsLoading(true);
-                    fetchChannels();
-                  }}
-                >
-                  <RefreshCw className="h-5 w-5" />
-                </button>
-                <button
-                  className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors inline-flex items-center"
-                  onClick={() => setShowAddChannelModal(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {translate("channels.addChannel")}
-                </button>
+      <FadeInUp>
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col space-y-6">
+            {/* Channels List Section */}
+            <div className="bg-slate-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-white">
+                  {translate("channels.yourChannels")}
+                </h2>
+                <div className="flex space-x-3">
+                  <button
+                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                    onClick={() => {
+                      setIsLoading(true);
+                      fetchChannels();
+                    }}
+                  >
+                    <RefreshCw className="h-5 w-5" />
+                  </button>
+                  <button
+                    className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors inline-flex items-center"
+                    onClick={() => setShowAddChannelModal(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {translate("channels.addChannel")}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {channels.map((channel) => (
-                <button
-                  key={channel.url}
-                  onClick={() => {
-                    window.open(channel.url, '_blank')
-                  }}
-                  className={`p-4 rounded-xl transition-all duration-300 text-left ${
-                    selectedChannel?.url === channel.url
-                      ? "bg-indigo-600 shadow-lg shadow-indigo-500/20"
-                      : "border border-slate-700/50 hover:bg-slate-700"
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0">
-                      <Youtube className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="ml-3 overflow-hidden">
-                      <div className="flex items-center space-x-1">
-                        {channel.status == "pending" && (
-                          <Tooltip content={translate("channels.pendingApproval")}>
-                            <Clock className="h-4 w-4 text-yellow-300" />
-                          </Tooltip>
-                        )}
-                        {channel.status == "approved" && (
-                          <Tooltip content={translate("channels.approved")}>
-                            <CheckCircle className="h-4 w-4 text-green-300" />
-                          </Tooltip>
-                        )}
-                        {channel.status == "rejected" && (
-                          <Tooltip content={translate("channels.rejected")}>
-                            <XCircle className="h-4 w-4 text-red-300" />
-                          </Tooltip>
-                        )}
-                        <span className="text-white font-medium truncate">
-                          {channel.url.replace(
-                            /^https?:\/\/(www\.)?(youtube\.com\/|youtu\.be\/)/,
-                            ""
-                          )}
-                        </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {channels.map((channel) => (
+                  <button
+                    key={channel.url}
+                    onClick={() => {
+                      window.open(channel.url, "_blank");
+                    }}
+                    className={`p-4 rounded-xl transition-all duration-300 text-left ${
+                      selectedChannel?.url === channel.url
+                        ? "bg-indigo-600 shadow-lg shadow-indigo-500/20"
+                        : "border border-slate-700/50 hover:bg-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0">
+                        <Youtube className="h-5 w-5 text-white" />
                       </div>
-                      <p className="text-sm text-slate-400">
-                        {channel.monthlyViews.toLocaleString()} {translate("channels.viewsThisMonth")}
-                      </p>
+                      <div className="ml-3 overflow-hidden">
+                        <div className="flex items-center space-x-1">
+                          {channel.status == "pending" && (
+                            <Tooltip
+                              content={translate("channels.pendingApproval")}
+                            >
+                              <Clock className="h-4 w-4 text-yellow-300" />
+                            </Tooltip>
+                          )}
+                          {channel.status == "approved" && (
+                            <Tooltip content={translate("channels.approved")}>
+                              <CheckCircle className="h-4 w-4 text-green-300" />
+                            </Tooltip>
+                          )}
+                          {channel.status == "rejected" && (
+                            <Tooltip content={translate("channels.rejected")}>
+                              <XCircle className="h-4 w-4 text-red-300" />
+                            </Tooltip>
+                          )}
+                          <span className="text-white font-medium truncate">
+                            {channel.url.replace(
+                              /^https?:\/\/(www\.)?(youtube\.com\/|youtu\.be\/)/,
+                              ""
+                            )}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-400">
+                          {channel.monthlyViews.toLocaleString()}{" "}
+                          {translate("channels.viewsThisMonth")}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                ))}
+              </div>
+              <div className="divider"></div>
+              <AffiliateProgram />
             </div>
-            <div className="divider"></div>
-            <AffiliateProgram />
+
+            {/* Status messages */}
+            {selectedChannel?.status === "pending" ? (
+              <div className="bg-slate-800 rounded-xl p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Clock className="h-8 w-8 text-yellow-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  {translate("channels.channelPendingApproval")}
+                </h3>
+                <p className="text-slate-400 mb-6">
+                  {translate("channels.channelUnderReview")}
+                </p>
+                <div className="flex justify-center">
+                  <a
+                    href={selectedChannel.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-yellow-400 hover:text-yellow-300 flex items-center"
+                  >
+                    {translate("channels.viewChannel")}{" "}
+                    <ExternalLink className="h-4 w-4 ml-1" />
+                  </a>
+                </div>
+              </div>
+            ) : selectedChannel?.status === "rejected" ? (
+              <div className="bg-slate-800 rounded-xl p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                  <XCircle className="h-8 w-8 text-red-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  {translate("channels.channelNotApproved")}
+                </h3>
+                <p className="text-slate-400 mb-6">
+                  {translate("channels.channelRequirements")}
+                </p>
+                <div className="flex flex-col items-center gap-4">
+                  <a
+                    href={selectedChannel.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-red-400 hover:text-red-300 flex items-center"
+                  >
+                    {translate("channels.viewChannel")}{" "}
+                    <ExternalLink className="h-4 w-4 ml-1" />
+                  </a>
+                  <button
+                    onClick={() => setShowAddChannelModal(true)}
+                    className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors inline-flex items-center"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {translate("channels.tryAnotherChannel")}
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
-
-          {/* Status messages */}
-          {selectedChannel?.status === "pending" ? (
-            <div className="bg-slate-800 rounded-xl p-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4">
-                <Clock className="h-8 w-8 text-yellow-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                {translate("channels.channelPendingApproval")}
-              </h3>
-              <p className="text-slate-400 mb-6">
-                {translate("channels.channelUnderReview")}
-              </p>
-              <div className="flex justify-center">
-                <a
-                  href={selectedChannel.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-yellow-400 hover:text-yellow-300 flex items-center"
-                >
-                  {translate("channels.viewChannel")} <ExternalLink className="h-4 w-4 ml-1" />
-                </a>
-              </div>
-            </div>
-          ) : selectedChannel?.status === "rejected" ? (
-            <div className="bg-slate-800 rounded-xl p-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
-                <XCircle className="h-8 w-8 text-red-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                {translate("channels.channelNotApproved")}
-              </h3>
-              <p className="text-slate-400 mb-6">
-                {translate("channels.channelRequirements")}
-              </p>
-              <div className="flex flex-col items-center gap-4">
-                <a
-                  href={selectedChannel.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-red-400 hover:text-red-300 flex items-center"
-                >
-                  {translate("channels.viewChannel")} <ExternalLink className="h-4 w-4 ml-1" />
-                </a>
-                <button
-                  onClick={() => setShowAddChannelModal(true)}
-                  className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors inline-flex items-center"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {translate("channels.tryAnotherChannel")}
-                </button>
-              </div>
-            </div>
-          ) : (
-          null
-          )}
         </div>
-      </div>
 
-      {/* Add Channel Modal */}
-      {showAddChannelModal && (
-        <NewChannelPopup
-          isOpen={showAddChannelModal}
-          onClose={() => {
-            setShowAddChannelModal(false);
-          }}
-          userEmail={user?.email || ""}
-          userId={user?.id || ""}
-          loadChannels={fetchChannels}
-        />
-      )}
+        {/* Add Channel Modal */}
+        {showAddChannelModal && (
+          <NewChannelPopup
+            isOpen={showAddChannelModal}
+            onClose={() => {
+              setShowAddChannelModal(false);
+            }}
+            userEmail={user?.email || ""}
+            userId={user?.id || ""}
+            loadChannels={fetchChannels}
+          />
+        )}
+      </FadeInUp>
     </div>
   );
 }

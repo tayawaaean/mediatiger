@@ -1,16 +1,17 @@
 import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { validateEmail } from "../../../utils/validation";
+import FadeInUp from "../../../components/FadeInUp";
 
 // Utility to prevent duplicate toasts
 const shownToasts = new Set<string>();
 const showUniqueToast = (
-    message: string,
-    type: "success" | "error",
-    id?: string
+  message: string,
+  type: "success" | "error",
+  id?: string
 ) => {
   const toastId = id || message;
   if (!shownToasts.has(toastId)) {
@@ -34,14 +35,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
-  const navigate = useNavigate();
-  const location = useLocation();
   const { signIn } = useAuth();
-
-  // Get the redirect path from location state, default to dashboard
-  const from =
-      (location.state as { from?: { pathname: string } })?.from?.pathname ||
-      "/dashboard";
 
   const validateForm = (): boolean => {
     const newErrors = { email: "", password: "" };
@@ -80,12 +74,12 @@ export default function Login() {
       // Navigation is handled in AuthProvider
     } catch (error: unknown) {
       const errorMessage =
-          error instanceof Error ? error.message : "Invalid email or password";
+        error instanceof Error ? error.message : "Invalid email or password";
 
       if (errorMessage.includes("Admin users must login")) {
         setErrors({
           email: "Admin users must use the admin login page",
-          password: ""
+          password: "",
         });
       } else if (errorMessage.includes("credentials")) {
         setErrors({
@@ -101,12 +95,13 @@ export default function Login() {
   };
 
   return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-xl shadow-lg">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
+      <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-xl shadow-lg">
+        <FadeInUp delay={200} duration={800}>
           <div>
             <Link
-                to="/"
-                className="inline-flex items-center text-slate-400 hover:text-white mb-8"
+              to="/"
+              className="inline-flex items-center text-slate-400 hover:text-white mb-8"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
               Back to home
@@ -114,9 +109,9 @@ export default function Login() {
             <div className="flex flex-col items-center justify-center">
               <div className="w-28 h-28 relative mb-3 overflow-hidden p-1">
                 <img
-                    src="https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//39888c2f-22d0-4a95-85ae-dfa6dc1aae7b.png"
-                    alt="MediaTiger Logo"
-                    className="w-full h-full object-contain transition-all duration-300 hover:scale-105"
+                  src="https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//39888c2f-22d0-4a95-85ae-dfa6dc1aae7b.png"
+                  alt="MediaTiger Logo"
+                  className="w-full h-full object-contain transition-all duration-300 hover:scale-105"
                 />
               </div>
             </div>
@@ -126,67 +121,69 @@ export default function Login() {
             <p className="mt-2 text-center text-sm text-slate-400">
               Or{" "}
               <Link
-                  to="/signup"
-                  className="font-medium text-indigo-400 hover:text-indigo-300"
+                to="/signup"
+                className="font-medium text-indigo-400 hover:text-indigo-300"
               >
                 create a new account
               </Link>
             </p>
           </div>
+        </FadeInUp>
+        <FadeInUp delay={400} duration={800}>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
                 <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-slate-300"
+                  htmlFor="email"
+                  className="block text-sm font-medium text-slate-300"
                 >
                   Email address
                 </label>
                 <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setErrors((prev) => ({ ...prev, email: "" }));
-                    }}
-                    className={`mt-1 block w-full px-3 py-2 bg-slate-700 border ${
-                        errors.email ? "border-red-500" : "border-slate-600"
-                    } rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                    placeholder="Enter your email"
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setErrors((prev) => ({ ...prev, email: "" }));
+                  }}
+                  className={`mt-1 block w-full px-3 py-2 bg-slate-700 border ${
+                    errors.email ? "border-red-500" : "border-slate-600"
+                  } rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  placeholder="Enter your email"
                 />
                 {errors.email && (
-                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
                 )}
               </div>
               <div>
                 <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-slate-300"
+                  htmlFor="password"
+                  className="block text-sm font-medium text-slate-300"
                 >
                   Password
                 </label>
                 <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      setErrors((prev) => ({ ...prev, password: "" }));
-                    }}
-                    className={`mt-1 block w-full px-3 py-2 bg-slate-700 border ${
-                        errors.password ? "border-red-500" : "border-slate-600"
-                    } rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                    placeholder="Enter your password"
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setErrors((prev) => ({ ...prev, password: "" }));
+                  }}
+                  className={`mt-1 block w-full px-3 py-2 bg-slate-700 border ${
+                    errors.password ? "border-red-500" : "border-slate-600"
+                  } rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  placeholder="Enter your password"
                 />
                 {errors.password && (
-                    <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.password}</p>
                 )}
               </div>
             </div>
@@ -194,14 +191,14 @@ export default function Login() {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-600 rounded bg-slate-700"
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-600 rounded bg-slate-700"
                 />
                 <label
-                    htmlFor="remember-me"
-                    className="ml-2 block text-sm text-slate-300"
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-slate-300"
                 >
                   Remember me
                 </label>
@@ -209,8 +206,8 @@ export default function Login() {
 
               <div className="text-sm">
                 <a
-                    href="#"
-                    className="font-medium text-indigo-400 hover:text-indigo-300"
+                  href="#"
+                  className="font-medium text-indigo-400 hover:text-indigo-300"
                 >
                   Forgot your password?
                 </a>
@@ -219,15 +216,16 @@ export default function Login() {
 
             <div>
               <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Signing in..." : "Sign in"}
               </button>
             </div>
           </form>
-        </div>
+        </FadeInUp>
       </div>
+    </div>
   );
 }

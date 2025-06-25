@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { submitForm } from "../api/submitForm";
+import FadeInUp from "../components/FadeInUp";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function HomePage() {
@@ -358,220 +359,230 @@ export default function HomePage() {
           }`}
         >
           <div className="relative">
-            <h1
-              className={`text-5xl md:text-7xl font-bold mb-6 relative transition-all duration-700 ease-out ${
-                isPageLoaded
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-              style={{ transitionDelay: "200ms" }}
-            >
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-400 dark:via-purple-400 dark:to-indigo-400">
-                The Ultimate Media Hub
-              </span>
-              <br />
-              <span className="text-slate-900 dark:text-white">
-                For Creators
-              </span>
-
-              {/* Animated checkmark */}
-              <div className="absolute -top-10 -left-10 w-20 h-20 text-indigo-500/20 dark:text-indigo-400/20 transform rotate-12">
-                <svg
-                  className="w-full h-full"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeDasharray="75"
-                    strokeDashoffset="75"
-                    className={`${
-                      isPageLoaded ? "animate-[dash_2s_ease-out_forwards]" : ""
-                    }`}
-                  />
-                  <path
-                    d="M8.5 12.5L10.5 14.5L15.5 9.5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="20"
-                    strokeDashoffset="20"
-                    className={`${
-                      isPageLoaded
-                        ? "animate-[dash_2s_ease-out_0.7s_forwards]"
-                        : ""
-                    }`}
-                  />
-                </svg>
-              </div>
-
-              {/* Animated cube */}
-              <div className="absolute -bottom-5 -right-10 w-16 h-16 text-purple-500/20 dark:text-purple-400/20 transform -rotate-12">
-                <svg
-                  className="w-full h-full"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M21 7.5L12 2L3 7.5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="30"
-                    strokeDashoffset="30"
-                    className={`${
-                      isPageLoaded
-                        ? "animate-[dash_1.5s_ease-in-out_0.2s_forwards]"
-                        : ""
-                    }`}
-                  />
-                  <path
-                    d="M21 7.5V16.5L12 22"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="30"
-                    strokeDashoffset="30"
-                    className={`${
-                      isPageLoaded
-                        ? "animate-[dash_1.5s_ease-in-out_0.5s_forwards]"
-                        : ""
-                    }`}
-                  />
-                  <path
-                    d="M12 22L3 16.5V7.5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="30"
-                    strokeDashoffset="30"
-                    className={`${
-                      isPageLoaded
-                        ? "animate-[dash_1.5s_ease-in-out_0.8s_forwards]"
-                        : ""
-                    }`}
-                  />
-                  <path
-                    d="M21 7.5L12 13M12 13L3 7.5M12 13V22"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="40"
-                    strokeDashoffset="40"
-                    className={`${
-                      isPageLoaded
-                        ? "animate-[dash_1.5s_ease-in-out_1.1s_forwards]"
-                        : ""
-                    }`}
-                  />
-                </svg>
-              </div>
-            </h1>
-
-            <p
-              className={`text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed transition-all duration-700 ease-out ${
-                isPageLoaded
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-              style={{ transitionDelay: "400ms" }}
-            >
-              <span className="relative inline-block">
-                Starting out on your journey
-                <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/50 to-purple-500/50 transform scale-x-0 group-hover:scale-x-100"></span>
-              </span>{" "}
-              or already a{" "}
-              <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                seasoned veteran
-              </span>
-              ? MediaTiger provides and elevates creators with{" "}
-              <span className="relative">
-                <span className="relative z-10">exceptional tools</span>
-                <span className="absolute bottom-0 left-0 w-full h-2 bg-indigo-500/30 dark:bg-indigo-400/30 transform -rotate-1"></span>
-              </span>{" "}
-              along with{" "}
-              <span className="relative">
-                <span className="relative z-10">unmatched quality</span>
-                <span className="absolute bottom-0 left-0 w-full h-2 bg-purple-500/30 dark:bg-purple-400/30 transform rotate-1"></span>
-              </span>
-              .
-            </p>
-
-            <div
-              className={`mt-10 flex flex-col md:flex-row items-center justify-center transition-all duration-700 ease-out ${
-                isPageLoaded
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-              style={{ transitionDelay: "600ms" }}
-            >
-              <Link
-                to="/signup"
-                className="relative inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-all duration-300
-                  before:absolute before:inset-0 before:rounded-md before:bg-indigo-600 before:z-[-1]
-                  before:animate-pulse before:blur-lg
-                  after:absolute after:inset-0 after:rounded-md after:bg-gradient-to-r 
-                  after:from-indigo-600 after:via-purple-600 after:to-indigo-600
-                  after:z-[-1] after:blur-xl after:animate-pulse
-                  shadow-[0_0_20px_rgba(99,102,241,0.6)] hover:shadow-[0_0_30px_rgba(99,102,241,0.8)]
-                  scale-105 group mb-4 md:mb-0"
+            <FadeInUp delay={200} duration={800}>
+              <h1
+                className={`text-5xl md:text-7xl font-bold mb-6 relative transition-all duration-700 ease-out ${
+                  isPageLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-10"
+                }`}
+                style={{ transitionDelay: "200ms" }}
               >
-                Get Started
-                <ArrowRight className="ml-2 h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-400 dark:via-purple-400 dark:to-indigo-400">
+                  The Ultimate Media Hub
+                </span>
+                <br />
+                <span className="text-slate-900 dark:text-white">
+                  For Creators
+                </span>
+
+                {/* Animated checkmark */}
+                <div className="absolute -top-10 -left-10 w-20 h-20 text-indigo-500/20 dark:text-indigo-400/20 transform rotate-12">
+                  <svg
+                    className="w-full h-full"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="75"
+                      strokeDashoffset="75"
+                      className={`${
+                        isPageLoaded
+                          ? "animate-[dash_2s_ease-out_forwards]"
+                          : ""
+                      }`}
+                    />
+                    <path
+                      d="M8.5 12.5L10.5 14.5L15.5 9.5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray="20"
+                      strokeDashoffset="20"
+                      className={`${
+                        isPageLoaded
+                          ? "animate-[dash_2s_ease-out_0.7s_forwards]"
+                          : ""
+                      }`}
+                    />
+                  </svg>
+                </div>
+
+                {/* Animated cube */}
+                <div className="absolute -bottom-5 -right-10 w-16 h-16 text-purple-500/20 dark:text-purple-400/20 transform -rotate-12">
+                  <svg
+                    className="w-full h-full"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21 7.5L12 2L3 7.5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray="30"
+                      strokeDashoffset="30"
+                      className={`${
+                        isPageLoaded
+                          ? "animate-[dash_1.5s_ease-in-out_0.2s_forwards]"
+                          : ""
+                      }`}
+                    />
+                    <path
+                      d="M21 7.5V16.5L12 22"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray="30"
+                      strokeDashoffset="30"
+                      className={`${
+                        isPageLoaded
+                          ? "animate-[dash_1.5s_ease-in-out_0.5s_forwards]"
+                          : ""
+                      }`}
+                    />
+                    <path
+                      d="M12 22L3 16.5V7.5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray="30"
+                      strokeDashoffset="30"
+                      className={`${
+                        isPageLoaded
+                          ? "animate-[dash_1.5s_ease-in-out_0.8s_forwards]"
+                          : ""
+                      }`}
+                    />
+                    <path
+                      d="M21 7.5L12 13M12 13L3 7.5M12 13V22"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray="40"
+                      strokeDashoffset="40"
+                      className={`${
+                        isPageLoaded
+                          ? "animate-[dash_1.5s_ease-in-out_1.1s_forwards]"
+                          : ""
+                      }`}
+                    />
+                  </svg>
+                </div>
+              </h1>
+            </FadeInUp>
+
+            <FadeInUp delay={400} duration={800}>
+              <p
+                className={`text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed transition-all duration-700 ease-out ${
+                  isPageLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-10"
+                }`}
+                style={{ transitionDelay: "400ms" }}
+              >
+                <span className="relative inline-block">
+                  Starting out on your journey
+                  <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/50 to-purple-500/50 transform scale-x-0 group-hover:scale-x-100"></span>
+                </span>{" "}
+                or already a{" "}
+                <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                  seasoned veteran
+                </span>
+                ? MediaTiger provides and elevates creators with{" "}
+                <span className="relative">
+                  <span className="relative z-10">exceptional tools</span>
+                  <span className="absolute bottom-0 left-0 w-full h-2 bg-indigo-500/30 dark:bg-indigo-400/30 transform -rotate-1"></span>
+                </span>{" "}
+                along with{" "}
+                <span className="relative">
+                  <span className="relative z-10">unmatched quality</span>
+                  <span className="absolute bottom-0 left-0 w-full h-2 bg-purple-500/30 dark:bg-purple-400/30 transform rotate-1"></span>
+                </span>
+                .
+              </p>
+            </FadeInUp>
+
+            <FadeInUp delay={600} duration={800}>
+              <div
+                className={`mt-10 flex flex-col md:flex-row items-center justify-center transition-all duration-700 ease-out ${
+                  isPageLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-10"
+                }`}
+                style={{ transitionDelay: "600ms" }}
+              >
+                <Link
+                  to="/signup"
+                  className="relative inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-all duration-300
+                    before:absolute before:inset-0 before:rounded-md before:bg-indigo-600 before:z-[-1]
+                    before:animate-pulse before:blur-lg
+                    after:absolute after:inset-0 after:rounded-md after:bg-gradient-to-r 
+                    after:from-indigo-600 after:via-purple-600 after:to-indigo-600
+                    after:z-[-1] after:blur-xl after:animate-pulse
+                    shadow-[0_0_20px_rgba(99,102,241,0.6)] hover:shadow-[0_0_30px_rgba(99,102,241,0.8)]
+                    scale-105 group mb-4 md:mb-0"
+                >
+                  Get Started
+                  <ArrowRight className="ml-2 h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </FadeInUp>
 
             {/* Stats counter */}
-            <div
-              className={`mt-20 flex flex-wrap justify-center gap-8 md:gap-12 transition-all duration-700 ease-out ${
-                isPageLoaded
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-              style={{ transitionDelay: "800ms" }}
-            >
-              <div className="text-center">
-                <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
-                  50+
+            <FadeInUp delay={800} duration={800}>
+              <div
+                className={`mt-20 flex flex-wrap justify-center gap-8 md:gap-12 transition-all duration-700 ease-out ${
+                  isPageLoaded
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-10"
+                }`}
+                style={{ transitionDelay: "800ms" }}
+              >
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                    50+
+                  </div>
+                  <div className="text-slate-600 dark:text-slate-400 mt-1">
+                    Countries
+                  </div>
                 </div>
-                <div className="text-slate-600 dark:text-slate-400 mt-1">
-                  Countries
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                    1K+
+                  </div>
+                  <div className="text-slate-600 dark:text-slate-400 mt-1">
+                    Creators
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                    100k+
+                  </div>
+                  <div className="text-slate-600 dark:text-slate-400 mt-1">
+                    Content Items
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                    $1M+
+                  </div>
+                  <div className="text-slate-600 dark:text-slate-400 mt-1">
+                    Paid Out
+                  </div>
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
-                  1K+
-                </div>
-                <div className="text-slate-600 dark:text-slate-400 mt-1">
-                  Creators
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
-                  100k+
-                </div>
-                <div className="text-slate-600 dark:text-slate-400 mt-1">
-                  Content Items
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
-                  $1M+
-                </div>
-                <div className="text-slate-600 dark:text-slate-400 mt-1">
-                  Paid Out
-                </div>
-              </div>
-            </div>
+            </FadeInUp>
           </div>
         </div>
       </div>
@@ -581,53 +592,56 @@ export default function HomePage() {
         id="features"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 scroll-mt-16"
       >
-        <div className="text-center mb-8">
-          <p
-            className="relative inline-block text-sm text-slate-600 dark:text-slate-400 px-4 py-2 rounded-full
-            before:absolute before:inset-0 before:rounded-full before:bg-slate-200 dark:before:bg-slate-700 before:z-[-1]
-            before:animate-pulse before:blur-sm
-            after:absolute after:inset-0 after:rounded-full after:bg-gradient-to-r 
-            after:from-slate-200 after:to-slate-300 dark:after:from-slate-700 dark:after:to-slate-600
-            after:z-[-1] after:blur-md after:animate-pulse
-            shadow-[0_0_15px_rgba(99,102,241,0.3)]"
-          >
-            Click on any feature to learn more
-          </p>
-        </div>
+        <FadeInUp delay={200} duration={800}>
+          <div className="text-center mb-8">
+            <p
+              className="relative inline-block text-sm text-slate-600 dark:text-slate-400 px-4 py-2 rounded-full
+              before:absolute before:inset-0 before:rounded-full before:bg-slate-200 dark:before:bg-slate-700 before:z-[-1]
+              before:animate-pulse before:blur-sm
+              after:absolute after:inset-0 after:rounded-full after:bg-gradient-to-r 
+              after:from-slate-200 after:to-slate-300 dark:after:from-slate-700 dark:after:to-slate-600
+              after:z-[-1] after:blur-md after:animate-pulse
+              shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+            >
+              Click on any feature to learn more
+            </p>
+          </div>
+        </FadeInUp>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div
-              key={index}
-              onClick={() => !feature.comingSoon && navigate(feature.path)}
-              className={`relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300 ${
-                !feature.comingSoon ? "cursor-pointer" : ""
-              } group
-                before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
-                before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
-                before:z-[-1] before:animate-pulse before:blur-sm
-                after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
-                after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
-                after:z-[-1] after:blur-xl after:animate-pulse
-                shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
-                transform hover:scale-105 hover:rotate-1`}
-            >
-              <div className="mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                {feature.icon}
+            <FadeInUp key={index} delay={300 + index * 100} duration={800}>
+              <div
+                onClick={() => !feature.comingSoon && navigate(feature.path)}
+                className={`relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300 ${
+                  !feature.comingSoon ? "cursor-pointer" : ""
+                } group
+                  before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
+                  before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
+                  before:z-[-1] before:animate-pulse before:blur-sm
+                  after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
+                  after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
+                  after:z-[-1] after:blur-xl after:animate-pulse
+                  shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
+                  transform hover:scale-105 hover:rotate-1`}
+              >
+                <div className="mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2 flex items-center justify-between">
+                  {feature.title}
+                  {feature.comingSoon ? (
+                    <span className="text-xs font-medium bg-amber-500/20 text-amber-500 py-1 px-2 rounded-full">
+                      Coming Soon
+                    </span>
+                  ) : (
+                    <ArrowRight className="h-5 w-5 text-indigo-600 dark:text-indigo-400 transform group-hover:translate-x-1 transition-transform" />
+                  )}
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2 flex items-center justify-between">
-                {feature.title}
-                {feature.comingSoon ? (
-                  <span className="text-xs font-medium bg-amber-500/20 text-amber-500 py-1 px-2 rounded-full">
-                    Coming Soon
-                  </span>
-                ) : (
-                  <ArrowRight className="h-5 w-5 text-indigo-600 dark:text-indigo-400 transform group-hover:translate-x-1 transition-transform" />
-                )}
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300">
-                {feature.description}
-              </p>
-            </div>
+            </FadeInUp>
           ))}
         </div>
       </div>
@@ -635,109 +649,119 @@ export default function HomePage() {
       {/* About Section */}
       <div id="about" className="bg-white dark:bg-slate-900 py-20 scroll-mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2
-              className="relative inline-block text-3xl font-bold text-slate-900 dark:text-white mb-4 px-6 py-2
-              before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
-              before:from-indigo-500/10 before:via-purple-500/10 before:to-indigo-500/10
-              before:z-[-1] before:animate-pulse before:blur-lg
-              after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
-              after:from-indigo-500/5 after:via-purple-500/5 after:to-indigo-500/5
-              after:z-[-1] after:blur-xl after:animate-pulse"
-            >
-              About Us
-            </h2>
-            <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
-              We're a team of passionate individuals dedicated to
-              revolutionizing media management for creators worldwide.
-            </p>
-          </div>
+          <FadeInUp delay={200} duration={800}>
+            <div className="text-center mb-12">
+              <h2
+                className="relative inline-block text-3xl font-bold text-slate-900 dark:text-white mb-4 px-6 py-2
+                before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
+                before:from-indigo-500/10 before:via-purple-500/10 before:to-indigo-500/10
+                before:z-[-1] before:animate-pulse before:blur-lg
+                after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
+                after:from-indigo-500/5 after:via-purple-500/5 after:to-indigo-500/5
+                after:z-[-1] after:blur-xl after:animate-pulse"
+              >
+                About Us
+              </h2>
+              <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+                We're a team of passionate individuals dedicated to
+                revolutionizing media management for creators worldwide.
+              </p>
+            </div>
+          </FadeInUp>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div
-              className="relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg group
-              hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300
-              before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
-              before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
-              before:z-[-1] before:animate-pulse before:blur-sm
-              after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
-              after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
-              after:z-[-1] after:blur-xl after:animate-pulse
-              shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
-              transform hover:scale-105 hover:rotate-1"
-            >
-              <Users className="h-12 w-12 text-indigo-500 mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                Our Team
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300">
-                A diverse group of experts in media, technology, and content
-                creation, working together to build the future of digital media
-                management.
-              </p>
-            </div>
-            <div
-              className="relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg group
-              hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300
-              before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
-              before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
-              before:z-[-1] before:animate-pulse before:blur-sm
-              after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
-              after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
-              after:z-[-1] after:blur-xl after:animate-pulse
-              shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
-              transform hover:scale-105 hover:rotate-1"
-            >
-              <Building2 className="h-12 w-12 text-indigo-500 mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                Our Mission
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300">
-                To empower creators with cutting-edge tools and technology,
-                making media management seamless and efficient.
-              </p>
-            </div>
-            <div
-              className="relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg group
-              hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300
-              before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
-              before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
-              before:z-[-1] before:animate-pulse before:blur-sm
-              after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
-              after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
-              after:z-[-1] after:blur-xl after:animate-pulse
-              shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
-              transform hover:scale-105 hover:rotate-1"
-            >
-              <Users className="h-12 w-12 text-indigo-500 mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                Global Impact
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300">
-                Supporting creators across 50+ countries, helping them reach
-                wider audiences and achieve their creative goals.
-              </p>
-            </div>
-            <div
-              className="relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg group
-              hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300
-              before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
-              before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
-              before:z-[-1] before:animate-pulse before:blur-sm
-              after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
-              after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
-              after:z-[-1] after:blur-xl after:animate-pulse
-              shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
-              transform hover:scale-105 hover:rotate-1"
-            >
-              <Star className="h-12 w-12 text-indigo-500 mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                Why Choose MediaTiger?
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300">
-                At MediaTiger, the team goes up and beyond to give unique
-                benefits found nowhere else.
-              </p>
-            </div>
+            <FadeInUp delay={300} duration={800}>
+              <div
+                className="relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg group
+                hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300
+                before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
+                before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
+                before:z-[-1] before:animate-pulse before:blur-sm
+                after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
+                after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
+                after:z-[-1] after:blur-xl after:animate-pulse
+                shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
+                transform hover:scale-105 hover:rotate-1"
+              >
+                <Users className="h-12 w-12 text-indigo-500 mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                  Our Team
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300">
+                  A diverse group of experts in media, technology, and content
+                  creation, working together to build the future of digital
+                  media management.
+                </p>
+              </div>
+            </FadeInUp>
+            <FadeInUp delay={400} duration={800}>
+              <div
+                className="relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg group
+                hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300
+                before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
+                before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
+                before:z-[-1] before:animate-pulse before:blur-sm
+                after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
+                after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
+                after:z-[-1] after:blur-xl after:animate-pulse
+                shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
+                transform hover:scale-105 hover:rotate-1"
+              >
+                <Building2 className="h-12 w-12 text-indigo-500 mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                  Our Mission
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300">
+                  To empower creators with cutting-edge tools and technology,
+                  making media management seamless and efficient.
+                </p>
+              </div>
+            </FadeInUp>
+            <FadeInUp delay={500} duration={800}>
+              <div
+                className="relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg group
+                hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300
+                before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
+                before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
+                before:z-[-1] before:animate-pulse before:blur-sm
+                after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
+                after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
+                after:z-[-1] after:blur-xl after:animate-pulse
+                shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
+                transform hover:scale-105 hover:rotate-1"
+              >
+                <Users className="h-12 w-12 text-indigo-500 mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                  Global Impact
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300">
+                  Supporting creators across 50+ countries, helping them reach
+                  wider audiences and achieve their creative goals.
+                </p>
+              </div>
+            </FadeInUp>
+            <FadeInUp delay={600} duration={800}>
+              <div
+                className="relative bg-slate-100 dark:bg-slate-800 p-6 rounded-lg group
+                hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300
+                before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
+                before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
+                before:z-[-1] before:animate-pulse before:blur-sm
+                after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
+                after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
+                after:z-[-1] after:blur-xl after:animate-pulse
+                shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:shadow-[0_0_30px_rgba(79,70,229,0.4)]
+                transform hover:scale-105 hover:rotate-1"
+              >
+                <Star className="h-12 w-12 text-indigo-500 mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                  Why Choose MediaTiger?
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300">
+                  At MediaTiger, the team goes up and beyond to give unique
+                  benefits found nowhere else.
+                </p>
+              </div>
+            </FadeInUp>
           </div>
         </div>
       </div>
@@ -748,47 +772,76 @@ export default function HomePage() {
         className="bg-white dark:bg-slate-900 py-20 scroll-mt-16"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2
-              className="relative inline-block text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-400 dark:via-purple-400 dark:to-indigo-400 mb-4 px-6 py-2
-              before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
-              before:from-indigo-500/10 before:via-purple-500/10 before:to-indigo-500/10
-              before:z-[-1] before:animate-pulse before:blur-lg
-              after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
-              after:from-indigo-500/5 after:via-purple-500/5 after:to-indigo-500/5
-              after:z-[-1] after:blur-xl after:animate-pulse"
-            >
-              Contact Us
-            </h2>
-            <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-              Have questions? We're here to help. Reach out to our team by
-              filling out the form below.
-            </p>
-            <div className="mt-6 inline-flex items-center px-6 py-3 rounded-full bg-slate-100 dark:bg-slate-800 text-lg text-slate-600 dark:text-slate-300 shadow-lg hover:shadow-xl transition-shadow">
-              {/* Desktop Layout */}
-              <div className="hidden sm:flex items-center">
-                <svg
-                  className="w-5 h-5 mr-2 text-indigo-500"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-                <span className="mr-2">Email us directly at</span>
-                <a
-                  href="mailto:support@mediatiger.co"
-                  className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                >
-                  support@mediatiger.co
-                </a>
-              </div>
+          <FadeInUp delay={200} duration={800}>
+            <div className="text-center mb-12">
+              <h2
+                className="relative inline-block text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-400 dark:via-purple-400 dark:to-indigo-400 mb-4 px-6 py-2
+                before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
+                before:from-indigo-500/10 before:via-purple-500/10 before:to-indigo-500/10
+                before:z-[-1] before:animate-pulse before:blur-lg
+                after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
+                after:from-indigo-500/5 after:via-purple-500/5 after:to-indigo-500/5
+                after:z-[-1] after:blur-xl after:animate-pulse"
+              >
+                Contact Us
+              </h2>
+              <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+                Have questions? We're here to help. Reach out to our team by
+                filling out the form below.
+              </p>
+              <div className="mt-6 inline-flex items-center px-6 py-3 rounded-full bg-slate-100 dark:bg-slate-800 text-lg text-slate-600 dark:text-slate-300 shadow-lg hover:shadow-xl transition-shadow">
+                {/* Desktop Layout */}
+                <div className="hidden sm:flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-2 text-indigo-500"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span className="mr-2">Email us directly at</span>
+                  <a
+                    href="mailto:support@mediatiger.co"
+                    className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                  >
+                    support@mediatiger.co
+                  </a>
+                </div>
 
+                {/* Mobile Layout */}
+                <div className="flex flex-col items-center w-full sm:hidden">
+                  <div className="flex items-center w-full">
+                    <svg
+                      className="w-5 h-5 mr-2 text-indigo-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span className="mr-2">Email us directly at</span>
+                  </div>
+                  <a
+                    href="mailto:support@mediatiger.co"
+                    className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                  >
+                    support@mediatiger.co
+                  </a>
+                </div>
+              </div>
+            </div>
+          </FadeInUp>
               {/* Mobile Layout */}
               <div className="flex flex-col items-center w-full sm:hidden">
                 <div className="flex items-center w-full">
@@ -818,174 +871,176 @@ export default function HomePage() {
           </div>
 
           {/* Contact Form */}
-          <div className="max-w-3xl mx-auto">
-            <div
-              className="relative bg-slate-100 dark:bg-slate-800 p-8 rounded-2xl
-              before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
-              before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
-              before:z-[-1] before:animate-pulse before:blur-sm
-              after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
-              after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
-              after:z-[-1] after:blur-xl after:animate-pulse
-              shadow-[0_0_30px_rgba(79,70,229,0.2)] hover:shadow-[0_0_40px_rgba(79,70,229,0.3)] transition-shadow duration-500"
-            >
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-                  >
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-700 border ${
-                      formErrors.name
-                        ? "border-red-500"
-                        : "border-slate-300 dark:border-slate-600"
-                    } focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 text-slate-900 dark:text-white hover:border-indigo-500 dark:hover:border-indigo-500`}
-                    placeholder="John Doe"
-                  />
-                  {formErrors.name && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {formErrors.name}
-                    </p>
-                  )}
-                </div>
+          <FadeInUp delay={400} duration={800}>
+            <div className="max-w-3xl mx-auto">
+              <div
+                className="relative bg-slate-100 dark:bg-slate-800 p-8 rounded-2xl
+                before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r
+                before:from-slate-100/80 before:to-slate-200/80 dark:before:from-slate-800/80 dark:before:to-slate-700/80
+                before:z-[-1] before:animate-pulse before:blur-sm
+                after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r
+                after:from-indigo-500/20 after:via-purple-500/20 after:to-indigo-500/20
+                after:z-[-1] after:blur-xl after:animate-pulse
+                shadow-[0_0_30px_rgba(79,70,229,0.2)] hover:shadow-[0_0_40px_rgba(79,70,229,0.3)] transition-shadow duration-500"
+              >
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+                    >
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-700 border ${
+                        formErrors.name
+                          ? "border-red-500"
+                          : "border-slate-300 dark:border-slate-600"
+                      } focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 text-slate-900 dark:text-white hover:border-indigo-500 dark:hover:border-indigo-500`}
+                      placeholder="John Doe"
+                    />
+                    {formErrors.name && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {formErrors.name}
+                      </p>
+                    )}
+                  </div>
 
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-                  >
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-700 border ${
-                      formErrors.email
-                        ? "border-red-500"
-                        : "border-slate-300 dark:border-slate-600"
-                    } focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 text-slate-900 dark:text-white hover:border-indigo-500 dark:hover:border-indigo-500`}
-                    placeholder="your.email@example.com"
-                  />
-                  {formErrors.email && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {formErrors.email}
-                    </p>
-                  )}
-                </div>
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+                    >
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-700 border ${
+                        formErrors.email
+                          ? "border-red-500"
+                          : "border-slate-300 dark:border-slate-600"
+                      } focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 text-slate-900 dark:text-white hover:border-indigo-500 dark:hover:border-indigo-500`}
+                      placeholder="your.email@example.com"
+                    />
+                    {formErrors.email && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {formErrors.email}
+                      </p>
+                    )}
+                  </div>
 
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-                  >
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={5}
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-700 border ${
-                      formErrors.message
-                        ? "border-red-500"
-                        : "border-slate-300 dark:border-slate-600"
-                    } focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 text-slate-900 dark:text-white hover:border-indigo-500 dark:hover:border-indigo-500 resize-none`}
-                    placeholder="How can we help you?"
-                  ></textarea>
-                  {formErrors.message && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {formErrors.message}
-                    </p>
-                  )}
-                </div>
+                  <div>
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+                    >
+                      Message
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={5}
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-700 border ${
+                        formErrors.message
+                          ? "border-red-500"
+                          : "border-slate-300 dark:border-slate-600"
+                      } focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 text-slate-900 dark:text-white hover:border-indigo-500 dark:hover:border-indigo-500 resize-none`}
+                      placeholder="How can we help you?"
+                    ></textarea>
+                    {formErrors.message && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {formErrors.message}
+                      </p>
+                    )}
+                  </div>
 
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="relative px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-500
-                      before:absolute before:inset-0 before:rounded-md before:bg-indigo-600 before:z-[-1]
-                      before:animate-pulse before:blur-lg
-                      after:absolute after:inset-0 after:rounded-md after:bg-gradient-to-r 
-                      after:from-indigo-600 after:via-purple-600 after:to-indigo-600
-                      after:z-[-1] after:blur-xl after:animate-pulse
-                      shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)]
-                      disabled:opacity-50 disabled:pointer-events-none"
-                  >
-                    <span className="relative z-10 flex items-center">
-                      {isSubmitting ? (
-                        <>
-                          <svg
-                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
+                  <div className="flex justify-center">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="relative px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-500
+                        before:absolute before:inset-0 before:rounded-md before:bg-indigo-600 before:z-[-1]
+                        before:animate-pulse before:blur-lg
+                        after:absolute after:inset-0 after:rounded-md after:bg-gradient-to-r 
+                        after:from-indigo-600 after:via-purple-600 after:to-indigo-600
+                        after:z-[-1] after:blur-xl after:animate-pulse
+                        shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)]
+                        disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      <span className="relative z-10 flex items-center">
+                        {isSubmitting ? (
+                          <>
+                            <svg
+                              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            Send Message
+                            <svg
+                              className="ml-2 -mr-1 w-5 h-5"
+                              fill="none"
                               stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          Send Message
-                          <svg
-                            className="ml-2 -mr-1 w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M14 5l7 7m0 0l-7 7m7-7H3"
-                            />
-                          </svg>
-                        </>
-                      )}
-                    </span>
-                  </button>
-                </div>
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3"
+                              />
+                            </svg>
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
 
-                <div className="text-xs text-center space-y-2">
-                  <p className="text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-700/50 p-3 rounded-lg">
-                    By submitting this form, you agree to our privacy policy and
-                    terms of service. Your information will be used solely to
-                    respond to your inquiry.
-                  </p>
-                  <p className="text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-700/50 p-3 rounded-lg">
-                    You can also use this form to send feedback about our user
-                    support experiences. We value your input and continuously
-                    work to improve our services.
-                  </p>
-                </div>
-              </form>
+                  <div className="text-xs text-center space-y-2">
+                    <p className="text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-700/50 p-3 rounded-lg">
+                      By submitting this form, you agree to our privacy policy
+                      and terms of service. Your information will be used solely
+                      to respond to your inquiry.
+                    </p>
+                    <p className="text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-700/50 p-3 rounded-lg">
+                      You can also use this form to send feedback about our user
+                      support experiences. We value your input and continuously
+                      work to improve our services.
+                    </p>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
+          </FadeInUp>
         </div>
       </div>
 

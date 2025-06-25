@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { ApplicationData } from "../../../types/admin";
 import { ApplicationCard } from "./ApplicationCard";
+import FadeInUp from "../../../components/FadeInUp";
 
 interface ApplicationsTabProps {
   applicationFilter: string;
@@ -90,17 +91,18 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {applications?.map((app) => (
-              <ApplicationCard
-                key={app.id}
-                application={app}
-                onApprove={(id) => handleApplicationStatus(id, "approved")}
-                onReject={() => {
-                  setSelectedApplicationId(app.id);
-                  setRejectionReason("");
-                  setShowRejectionModal(true);
-                }}
-              />
+            {applications?.map((app, idx) => (
+              <FadeInUp key={app.id} delay={idx * 100}>
+                <ApplicationCard
+                  application={app}
+                  onApprove={(id) => handleApplicationStatus(id, "approved")}
+                  onReject={() => {
+                    setSelectedApplicationId(app.id);
+                    setRejectionReason("");
+                    setShowRejectionModal(true);
+                  }}
+                />
+              </FadeInUp>
             ))}
           </div>
         )}
