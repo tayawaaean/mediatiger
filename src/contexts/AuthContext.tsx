@@ -8,7 +8,11 @@ import { ROUTES } from "../routes/routeConstants";
 const AuthContext = createContext<AuthState | undefined>(undefined);
 const shownToasts = new Set<string>();
 
-const showUniqueToast = (message: string, type: "success" | "error", id?: string) => {
+const showUniqueToast = (
+  message: string,
+  type: "success" | "error",
+  id?: string
+) => {
   const toastId = id || message;
   if (!shownToasts.has(toastId)) {
     // Dismiss all existing toasts
@@ -50,7 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setLoading(true);
 
-    supabase.auth.getSession()
+    supabase.auth
+      .getSession()
       .then(async ({ data: { session } }) => {
         const currentUser = session?.user ?? null;
 
@@ -69,7 +74,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .catch((error) => {
         if (isCORSError(error)) {
-          showUniqueToast("CORS Error: Unable to authenticate.", "error", "cors-auth-error");
+          showUniqueToast(
+            "CORS Error: Unable to authenticate.",
+            "error",
+            "cors-auth-error"
+          );
         }
         setLoading(false);
       });
@@ -81,17 +90,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (currentUser) {
         setUser(currentUser as ExtendedUser);
-        console.log("Auth state change - user metadata:", currentUser.user_metadata);
+        console.log(
+          "Auth state change - user metadata:",
+          currentUser.user_metadata
+        );
 
         if (currentUser.email_confirmed_at && !hasShownVerification) {
           setHasShownVerification(true);
 
           if (!currentUser.user_metadata?.email_verification_notification) {
             await supabase.auth.updateUser({
-              data: { email_verification_notification: true }
+              data: { email_verification_notification: true },
             });
 
-            showUniqueToast("Email verified successfully!", "success", "email-verified");
+            showUniqueToast(
+              "Email verified successfully!",
+              "success",
+              "email-verified"
+            );
           }
 
           const redirectPath = getRedirectPath(currentUser as ExtendedUser);
@@ -105,25 +121,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name: string, refferal?: boolean) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    name: string,
+    refferal?: boolean
+  ) => {
     const currentOrigin = window.location.origin;
     const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: name, onboarding_complete: false, role: "user", isReferal: refferal },
-        emailRedirectTo: `${currentOrigin}/welcome`,
+        data: {
+          full_name: name,
+          onboarding_complete: false,
+          role: "user",
+          isReferal: refferal,
+        },
+        emailRedirectTo: `${currentOrigin}/dashboard`,
       },
     });
     if (error) throw error;
     if (data.user && !data.user.confirmed_at) {
-      showUniqueToast("Check your email to confirm your registration.", "success", "signup-email-sent");
+      showUniqueToast(
+        "Check your email to confirm your registration.",
+        "success",
+        "signup-email-sent"
+      );
     }
     return data.user?.id;
   };
 
-  const signIn = async (email: string, password: string, isAdminLogin: boolean = false) => {
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+  const signIn = async (
+    email: string,
+    password: string,
+    isAdminLogin: boolean = false
+  ) => {
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) throw error;
 
@@ -142,24 +179,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const { data: profileData } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', data.user.id)
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", data.user.id)
       .single();
 
-    const isAdmin = profileData?.is_admin || data.user.user_metadata?.role === "admin";
+    const isAdmin =
+      profileData?.is_admin || data.user.user_metadata?.role === "admin";
 
     if (isAdmin && data.user.user_metadata?.role !== "admin") {
       await supabase.auth.updateUser({
-        data: { role: "admin" }
+        data: { role: "admin" },
       });
 
       setUser({
         ...data.user,
         user_metadata: {
           ...data.user.user_metadata,
-          role: "admin"
-        }
+          role: "admin",
+        },
       } as ExtendedUser);
     }
 
@@ -171,13 +209,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async (): Promise<void> => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate(ROUTES.LOGIN);
         return;
       }
 
-      const isOnAdminPage = location.pathname.includes('/admin') ||
+      const isOnAdminPage =
+        location.pathname.includes("/admin") ||
         location.pathname === ROUTES.ADMIN_PANEL;
 
       await supabase.auth.signOut();
@@ -196,7 +237,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.clear();
       sessionStorage.clear();
 
-      const isOnAdminPage = location.pathname.includes('/admin') ||
+      const isOnAdminPage =
+        location.pathname.includes("/admin") ||
         location.pathname === ROUTES.ADMIN_PANEL;
 
       if (isOnAdminPage) {
@@ -213,7 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo: `${currentOrigin}/welcome?t=${timestamp}` },
+      options: { emailRedirectTo: `${currentOrigin}/dashboard?t=${timestamp}` },
     });
     if (error) throw error;
     return {
@@ -233,7 +275,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         showOnboarding,
         setShowOnboarding,
         resendVerificationEmail,
-        isAdmin
+        isAdmin,
       }}
     >
       {children}
