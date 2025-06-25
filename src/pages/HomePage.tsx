@@ -15,10 +15,11 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { submitForm } from "../api/submitForm";
-import ThemeToggle from "../components/ThemeToggle";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -32,6 +33,13 @@ export default function HomePage() {
     message: "",
   });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+
+  // All useEffect hooks must be called before any conditional returns
+  useEffect(() => {
+    if (!loading && user?.email_confirmed_at) {
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
@@ -48,26 +56,18 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Check if user has already visited the home page
-    const hasVisitedHomePage =
-      sessionStorage.getItem("hasVisitedHomePage") === "true";
-
-    if (hasVisitedHomePage) {
-      // Skip animation for returning visitors
+    // Simple timeout to trigger page load animations
+    const loadTimer = setTimeout(() => {
       setIsPageLoaded(true);
-    } else {
-      // Set page as loaded to trigger animations with a slight delay for first-time visitors
-      const loadTimer = setTimeout(() => {
-        setIsPageLoaded(true);
-        // Mark that user has visited the home page
-        sessionStorage.setItem("hasVisitedHomePage", "true");
-      }, 100);
+    }, 100);
 
-      return () => {
-        clearTimeout(loadTimer);
-      };
-    }
+    return () => clearTimeout(loadTimer);
   }, []);
+
+  // Now we can have conditional returns
+  if (loading || user?.email_confirmed_at) {
+    return null;
+  }
 
   const features = [
     {
@@ -216,7 +216,6 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-
               <span className="text-xl font-bold text-slate-900 dark:text-white">
                 MediaTiger
               </span>
@@ -255,7 +254,7 @@ export default function HomePage() {
                     Log in
                   </Link>
                 </div>
-               {/* <Link
+                {/* <Link
                   to="/signup"
                   className="relative px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-all duration-300
                     before:absolute before:inset-0 before:rounded-md before:bg-indigo-600 before:z-[-1]
@@ -814,7 +813,7 @@ export default function HomePage() {
                 >
                   support@mediatiger.co
                 </a>
-              </div>  
+              </div>
             </div>
           </div>
 

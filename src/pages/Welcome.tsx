@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -8,17 +8,14 @@ export default function Welcome() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.email_confirmed_at) {
+    if (!loading && user?.email_confirmed_at) {
       navigate("/dashboard");
     }
   }, [user, navigate, loading]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
+  // Return null during loading or when user is verified to prevent content flash
+  if (loading || user?.email_confirmed_at) {
+    return null;
   }
 
   return (
