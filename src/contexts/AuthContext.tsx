@@ -116,6 +116,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setUser(null);
       }
+
+      // Set loading to false after handling auth state change
+      console.log("🔄 Auth state change complete, setting loading to false");
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -152,11 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data.user?.id;
   };
 
-  const signIn = async (
-    email: string,
-    password: string,
-    isAdminLogin: boolean = false
-  ) => {
+  const signIn = async (email: string, password: string) => {
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
