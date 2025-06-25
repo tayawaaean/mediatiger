@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import { CustomTrackRequest } from '../components/CustomTrackRequest';
-import { FavoritesList } from '../components/FavoritesList';
-import { MusicList } from '../components/MusicList';
-import { NoResults } from '../components/NoResults';
-import { MusicPlayer } from '../components/MusicPlayer';
-import { animatePageLoad } from '../utils/musicAnimations';
-import { SearchBar } from '../components/SearchBar';
-import { MusicItem } from '../../../utils/data';
-import '../../../styles/music.css';
+import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { CustomTrackRequest } from "../components/CustomTrackRequest";
+import { FavoritesList } from "../components/FavoritesList";
+import { MusicList } from "../components/MusicList";
+import { NoResults } from "../components/NoResults";
+import { MusicPlayer } from "../components/MusicPlayer";
+import { animatePageLoad } from "../utils/musicAnimations";
+import { SearchBar } from "../components/SearchBar";
+import { MusicItem } from "../../../utils/data";
+import "../../../styles/music.css";
 
 interface MusicResponse {
   success: boolean;
@@ -19,9 +19,9 @@ interface MusicResponse {
 }
 
 const MusicComponent = () => {
-  const [sortBy, setSortBy] = useState<'recent' | 'mood'>('recent');
-  const [selectedMood, setSelectedMood] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [sortBy, setSortBy] = useState<"recent" | "mood">("recent");
+  const [selectedMood, setSelectedMood] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [allMusic, setAllMusic] = useState<MusicItem[]>([]);
   const [filteredMusic, setFilteredMusic] = useState<MusicItem[]>([]);
   const [searchResults, setSearchResults] = useState<MusicItem[]>([]);
@@ -34,7 +34,7 @@ const MusicComponent = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const musicListRef = useRef<HTMLDivElement>(null);
 
-  const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || '/api/music';
+  const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "/api/music";
 
   const fetchMusicData = async (newPage = 1, append = false) => {
     setLoading(true);
@@ -55,24 +55,30 @@ const MusicComponent = () => {
         if (append && musicListRef.current) {
           setTimeout(() => {
             const scrollHeight = document.body.scrollHeight;
-            window.scrollTo({ top: scrollHeight, behavior: 'smooth' });
+            window.scrollTo({ top: scrollHeight, behavior: "smooth" });
           }, 200);
         }
       } else {
-        setError(`Failed to fetch music tracks: ${response.data.error || 'Unknown error'}`);
+        setError(
+          `Failed to fetch music tracks: ${
+            response.data.error || "Unknown error"
+          }`
+        );
       }
     } catch (err) {
-      setError('Failed to fetch music from backend');
+      setError("Failed to fetch music from backend");
       if (axios.isAxiosError(err)) {
         switch (err.response?.status) {
           case 429:
-            setError('Rate limit exceeded. Please try again later.');
+            setError("Rate limit exceeded. Please try again later.");
             break;
           case 403:
-            setError('Access denied. Contact support to check IP whitelisting.');
+            setError(
+              "Access denied. Contact support to check IP whitelisting."
+            );
             break;
           default:
-            setError('Network error. Check configuration or contact support.');
+            setError("Network error. Check configuration or contact support.");
         }
       }
       console.error(err);
@@ -88,17 +94,20 @@ const MusicComponent = () => {
       filtered = filtered.filter(
         (item) =>
           item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (item.artist && item.artist.toLowerCase().includes(searchTerm.toLowerCase()))
+          (item.artist &&
+            item.artist.toLowerCase().includes(searchTerm.toLowerCase()))
       );
       setSearchResults(filtered);
     } else {
       setSearchResults([]);
       if (selectedMood) {
         filtered = filtered.filter((item) =>
-          item.category.some((cat) => cat.toLowerCase() === selectedMood.toLowerCase())
+          item.category.some(
+            (cat) => cat.toLowerCase() === selectedMood.toLowerCase()
+          )
         );
       }
-      if (sortBy === 'recent') {
+      if (sortBy === "recent") {
         filtered.sort((a, b) => a.id.localeCompare(b.id));
       }
       setFilteredMusic(filtered.length > 0 ? filtered : allMusic);
@@ -130,7 +139,9 @@ const MusicComponent = () => {
     if (isFavorite) {
       const favoriteCount = allMusic.filter((item) => item.favorite).length;
       if (favoriteCount >= 15) {
-        toast.error('You can only favorite up to 15 songs. Please unfavorite some songs to add new ones.');
+        toast.error(
+          "You can only favorite up to 15 songs. Please unfavorite some songs to add new ones."
+        );
         return;
       }
     }
@@ -141,8 +152,8 @@ const MusicComponent = () => {
             ...item,
             favorite: isFavorite,
             category: isFavorite
-              ? [...item.category, 'favorited']
-              : item.category.filter((cat) => cat !== 'favorited'),
+              ? [...item.category, "favorited"]
+              : item.category.filter((cat) => cat !== "favorited"),
           }
         : item
     );
@@ -174,26 +185,36 @@ const MusicComponent = () => {
 
   const renderContent = () => {
     if (loading && page === 1) {
-      return <div className="text-center py-16 text-slate-400">Loading music tracks...</div>;
+      return (
+        <div className="text-center py-16 text-slate-400">
+          Loading music tracks...
+        </div>
+      );
     }
     if (error) {
       return (
         <div className="text-center py-16 text-red-400">
           {error}
-          {error.includes('network') && (
-            <p className="text-sm mt-2">This may be due to configuration issues. Contact support.</p>
+          {error.includes("network") && (
+            <p className="text-sm mt-2">
+              This may be due to configuration issues. Contact support.
+            </p>
           )}
         </div>
       );
     }
-    const itemsToDisplay = searchTerm ? searchResults : filteredMusic.slice(0, displayedItems);
+    const itemsToDisplay = searchTerm
+      ? searchResults
+      : filteredMusic.slice(0, displayedItems);
     if (itemsToDisplay.length === 0) {
       return searchTerm ? (
         <NoResults searchTerm={searchTerm} />
       ) : (
         <div className="text-center py-16 text-slate-400">
           <p>No tracks found for this mood.</p>
-          <p className="text-sm mt-2">Try a different mood or sort by recent.</p>
+          <p className="text-sm mt-2">
+            Try a different mood or sort by recent.
+          </p>
         </div>
       );
     }
@@ -212,7 +233,7 @@ const MusicComponent = () => {
               className="px-6 py-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
-              {loading ? 'Loading...' : 'See More'}
+              {loading ? "Loading..." : "See More"}
             </button>
           </div>
         )}
@@ -221,18 +242,31 @@ const MusicComponent = () => {
   };
 
   return (
-    <div className="bg-slate-900 text-white pb-24 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 header" id="main-content">
-        <h1 className="text-3xl font-bold text-white mb-8">Background Music List</h1>
+    <div
+      className="bg-slate-900 text-white pb-24 font-sans"
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+      <div
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 header"
+        id="main-content"
+      >
+        <h1 className="text-3xl font-bold text-white mb-8">
+          Background Music List
+        </h1>
 
         <div className="grid grid-cols-7 gap-6">
-          <div ref={contentRef} className="col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-8 min-h-[600px] main-content">
+          <div
+            ref={contentRef}
+            className="col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-8 min-h-[600px] main-content"
+          >
             <div className="flex justify-between items-center mb-6 search-container">
               <div className="flex gap-4 w-full">
                 <div className="relative">
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as 'recent' | 'mood')}
+                    onChange={(e) =>
+                      setSortBy(e.target.value as "recent" | "mood")
+                    }
                     className="appearance-none bg-white/5 text-slate-300 pl-4 pr-10 py-2 rounded-full border border-slate-700/50 cursor-pointer hover:bg-white/10 transition-colors"
                   >
                     <option value="recent">Sort by Recent</option>
@@ -251,7 +285,7 @@ const MusicComponent = () => {
                   </div>
                 </div>
 
-                {sortBy === 'mood' && (
+                {sortBy === "mood" && (
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <select
@@ -292,7 +326,9 @@ const MusicComponent = () => {
           </div>
 
           <div className="col-span-3 space-y-6">
-            <FavoritesList items={filteredMusic.filter((item) => item.favorite)} />
+            <FavoritesList
+              items={filteredMusic.filter((item) => item.favorite)}
+            />
             <CustomTrackRequest />
           </div>
         </div>

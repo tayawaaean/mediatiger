@@ -1,18 +1,35 @@
 import { BanIcon, Check, Edit2, X as Close } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import FadeInUp from "../components/FadeInUp";
+
+// UserRow type for users returned by get_users RPC
+type UserRow = {
+  id: string;
+  user_id: string;
+  email: string;
+  raw_user_meta_data?: {
+    avatar_url?: string;
+    username?: string;
+    full_name?: string;
+    email_verified?: boolean;
+    payment_enabled?: boolean;
+    tipalti_id?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+};
 
 const UsersPanel: React.FC = () => {
-  
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserRow[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [banList, setBanList] = useState<string[]>([]);
   const [isEditingSplit, setIsEditingSplit] = React.useState(false);
-  const [splitValue, setSplitValue] = React.useState('50');
+  const [splitValue, setSplitValue] = React.useState("50");
 
   // Updated to use filteredUsers for pagination
   const filteredUsers = React.useMemo(() => {
@@ -47,7 +64,7 @@ const UsersPanel: React.FC = () => {
     getBanList();
   }, []);
   // Frontend pagination on filtered users
-  const paginatedUsers = React.useMemo(() => {
+  const paginatedUsers: UserRow[] = React.useMemo(() => {
     const startIndex = page * rowsPerPage;
     return filteredUsers.slice(startIndex, startIndex + rowsPerPage);
   }, [filteredUsers, page, rowsPerPage]);
@@ -77,22 +94,18 @@ const UsersPanel: React.FC = () => {
     }
   };
 
-
-
-
-
-  const deleteUser= async (user: any) => {
+  const deleteUser = async (user: UserRow) => {
     try {
-      console.log(user)
+      console.log(user);
       const { data, error } = await supabase.rpc("delete_the_user", {
-      tuid: user.user_id  // or any user UUID
-});
+        tuid: user.user_id, // or any user UUID
+      });
 
       if (error) {
         console.error("Error fetching users:", error);
       } else {
-             await fetchUsers();
-      //  setUsers(data || []);
+        await fetchUsers();
+        //  setUsers(data || []);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -104,7 +117,7 @@ const UsersPanel: React.FC = () => {
   // Calculate total pages based on filtered users
   const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
 
-  async function setBlockedRequest(selectedUser: any) {
+  async function setBlockedRequest(selectedUser: UserRow) {
     console.log("🚀 ~ setBlockedRequest ~ selectedUser:", selectedUser);
 
     try {
@@ -155,7 +168,7 @@ const UsersPanel: React.FC = () => {
     // Here you would typically make an API call to update the split
     setIsEditingSplit(false);
   };
-  
+
   return (
     <>
       <div className="w-full bg-slate-800/90 backdrop-blur-sm rounded-xl p-6 shadow-xl border border-slate-700/50">
@@ -213,14 +226,10 @@ const UsersPanel: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Status
                 </th>
-                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Details
                 </th>
-                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
-                
-                </th>
-               
-
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody className="bg-slate-700/50 divide-y divide-slate-600">
@@ -243,8 +252,8 @@ const UsersPanel: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                paginatedUsers?.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-600/50">
+                paginatedUsers?.map((user, idx) => (
+                  <FadeInUp key={user.id} delay={idx * 100} as="tr">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-slate-600 text-slate-200 flex items-center justify-center overflow-hidden">
@@ -284,7 +293,7 @@ const UsersPanel: React.FC = () => {
                           : "Pending"}
                       </span>
                     </td>
-                  
+
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         className="px-3 py-1 text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-md border border-slate-600 transition-colors"
@@ -296,17 +305,17 @@ const UsersPanel: React.FC = () => {
                       </button>
                     </td>
                     {/*Delete User*/}
-                          <td className="px-3 py-4 whitespace-nowrap">
-                      <button 
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      <button
                         className="px-3 py-1 text-sm text-slate-200 bg-red-600/20 hover:bg-red-600/30 rounded-md border border-slate-600 transition-colors"
                         onClick={() => {
-                         deleteUser(user);
+                          deleteUser(user);
                         }}
                       >
                         Delete User
                       </button>
                     </td>
-                  </tr>
+                  </FadeInUp>
                 ))
               )}
             </tbody>
@@ -390,270 +399,311 @@ const UsersPanel: React.FC = () => {
             overscrollBehavior: "contain",
           }}
         >
-          <div className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-            <div className="bg-slate-800/95 rounded-xl p-8 shadow-2xl border border-slate-700 relative">
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-semibold text-slate-200">
-                  User Details
-                </h2>
-                <button
-                  onClick={() => setSelectedUser(null)}
-                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 transition-colors"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+          <FadeInUp duration={600}>
+            <div className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-slate-800/95 rounded-xl p-8 shadow-2xl border border-slate-700 relative">
+                <div className="flex justify-between items-center mb-8">
+                  <h2 className="text-2xl font-semibold text-slate-200">
+                    User Details
+                  </h2>
+                  <button
+                    onClick={() => setSelectedUser(null)}
+                    className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 transition-colors"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
 
-              <div className="text-right">
-                {isEditingSplit ? (
-                <div className="flex items-center space-x-2">
-                    <input
-                    type="number"
-                    value={splitValue}
-                    onChange={(e) => setSplitValue(e.target.value)}
-                    className="w-20 rounded bg-[#1e2536] px-2 py-1 text-2xl text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min="0"
-                    max="100"
-                    />
-                    <div className="flex flex-col space-y-1">
-                    <button
-                        onClick={handleSplitSubmit}
-                        className="rounded bg-green-500/20 p-1 text-green-400 hover:bg-green-500/30"
-                    >
-                        <Check size={14} />
-                    </button>
-                    <button
-                        onClick={() => setIsEditingSplit(false)}
-                        className="rounded bg-red-500/20 p-1 text-red-400 hover:bg-red-500/30"
-                    >
-                        <Close size={14} />
-                    </button>
+                <div className="text-right">
+                  {isEditingSplit ? (
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        value={splitValue}
+                        onChange={(e) => setSplitValue(e.target.value)}
+                        className="w-20 rounded bg-[#1e2536] px-2 py-1 text-2xl text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        min="0"
+                        max="100"
+                      />
+                      <div className="flex flex-col space-y-1">
+                        <button
+                          onClick={handleSplitSubmit}
+                          className="rounded bg-green-500/20 p-1 text-green-400 hover:bg-green-500/30"
+                        >
+                          <Check size={14} />
+                        </button>
+                        <button
+                          onClick={() => setIsEditingSplit(false)}
+                          className="rounded bg-red-500/20 p-1 text-red-400 hover:bg-red-500/30"
+                        >
+                          <Close size={14} />
+                        </button>
+                      </div>
                     </div>
-                </div>
-                ) : (
-                <div className="group relative">
-                    <div className="text-3xl font-bold text-blue-400">{splitValue}%</div>
-                    <button
-                    onClick={() => setIsEditingSplit(true)}
-                    className="absolute -right-6 top-1/2 -translate-y-1/2 rounded p-1 opacity-0 transition-opacity hover:bg-gray-700 group-hover:opacity-100"
-                    >
-                    <Edit2 size={14} className="text-gray-400" />
-                    </button>
-                </div>
-                )}
-                <div className="text-sm text-gray-400">Current Split</div>
-            </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="h-20 w-20 rounded-full bg-slate-700 overflow-hidden">
-                    <img
-                      src={
-                        selectedUser.raw_user_meta_data?.avatar_url ||
-                        "https://mellitahog.ly/en/wp-content/uploads/2021/09/randomUser.jpg"
-                      }
-                      alt="User avatar"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-medium text-slate-200">
-                      {selectedUser.raw_user_meta_data?.full_name || "N/A"}
-                    </h3>
-                    <p className="text-sm text-slate-400">
-                      @{selectedUser.raw_user_meta_data?.username}
-                    </p>
-                  </div>
+                  ) : (
+                    <div className="group relative">
+                      <div className="text-3xl font-bold text-blue-400">
+                        {splitValue}%
+                      </div>
+                      <button
+                        onClick={() => setIsEditingSplit(true)}
+                        className="absolute -right-6 top-1/2 -translate-y-1/2 rounded p-1 opacity-0 transition-opacity hover:bg-gray-700 group-hover:opacity-100"
+                      >
+                        <Edit2 size={14} className="text-gray-400" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="text-sm text-gray-400">Current Split</div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="h-20 w-20 rounded-full bg-slate-700 overflow-hidden">
+                      <img
+                        src={
+                          selectedUser.raw_user_meta_data?.avatar_url ||
+                          "https://mellitahog.ly/en/wp-content/uploads/2021/09/randomUser.jpg"
+                        }
+                        alt="User avatar"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-medium text-slate-200">
+                        {selectedUser.raw_user_meta_data?.full_name || "N/A"}
+                      </h3>
+                      <p className="text-sm text-slate-400">
+                        @{selectedUser.raw_user_meta_data?.username}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-6 bg-slate-700/30 rounded-xl backdrop-blur-sm">
-                        <h4 className="mb-4 text-lg font-medium text-gray-300">
-                            Summary
-                        </h4>
-                        <div className="space-y-3">
-                            <p className=" text-slate-300">
-                            <span className="text-slate-400">Account Status:</span>{" "}
-                            {/* TODO: fix active/inactive status */}
-                            <span
-                                className={`w-3 h-3 rounded-full mr-3 ${
-                                selectedUser.raw_user_meta_data?.payment_enabled
-                                    ? "bg-green-500"
-                                    : "bg-red-500"
-                                }`}
-                            />
-                            Active
-
-                            </p>
-                            <p className="text-slate-300">
-                            <span className="text-slate-400">Member Since:</span>{" "}
-                            {/* TODO: fix data */}
-                            March 15, 2023
-                            </p>
-                            <p className=" text-slate-300">
-                            <span className="text-slate-400">Last Active:</span>{" "}
-                            {/* TODO: fix data */}
-                            2 hours ago
-                            </p>
-                            <p className=" text-slate-300">
-                            <span className="text-slate-400">Total Channels:</span>{" "}
-                            {/* TODO: fix data */}
-                            0
-                            </p>
-                        </div>
+                      <h4 className="mb-4 text-lg font-medium text-gray-300">
+                        Summary
+                      </h4>
+                      <div className="space-y-3">
+                        <p className=" text-slate-300">
+                          <span className="text-slate-400">
+                            Account Status:
+                          </span>{" "}
+                          {/* TODO: fix active/inactive status */}
+                          <span
+                            className={`w-3 h-3 rounded-full mr-3 ${
+                              selectedUser.raw_user_meta_data?.payment_enabled
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }`}
+                          />
+                          Active
+                        </p>
+                        <p className="text-slate-300">
+                          <span className="text-slate-400">Member Since:</span>{" "}
+                          {/* TODO: fix data */}
+                          March 15, 2023
+                        </p>
+                        <p className=" text-slate-300">
+                          <span className="text-slate-400">Last Active:</span>{" "}
+                          {/* TODO: fix data */}2 hours ago
+                        </p>
+                        <p className=" text-slate-300">
+                          <span className="text-slate-400">
+                            Total Channels:
+                          </span>{" "}
+                          {/* TODO: fix data */}0
+                        </p>
+                      </div>
                     </div>
 
                     {/* <span
-                        className={`w-3 h-3 rounded-full mr-3 ${
-                        selectedUser.raw_user_meta_data?.payment_enabled
-                            ? "bg-green-500"
-                            : "bg-red-500"
-                            : "bg-yellow-500"
-                        }`}
-                    /> */}
+                          className={`w-3 h-3 rounded-full mr-3 ${
+                          selectedUser.raw_user_meta_data?.payment_enabled
+                              ? "bg-green-500"
+                              : "bg-red-500"
+                              : "bg-yellow-500"
+                          }`}
+                      /> */}
 
                     <div className="p-6 bg-slate-700/30 rounded-xl backdrop-blur-sm">
-                        <h4 className="mb-4 text-lg font-medium text-gray-300">
-                            Payment Information
-                        </h4>
-                        <div className="space-y-3">
-                            <p className="text-sm text-slate-300">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-gray-400">Total Earnings:</span>
-                                    {/* {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"} */}
-                                    {/* TODO: fix data */}
-                                    <span className="text-xl font-semibold text-green-400">$12,450.00</span>
-                                </div>
-                            </p>
+                      <h4 className="mb-4 text-lg font-medium text-gray-300">
+                        Payment Information
+                      </h4>
+                      <div className="space-y-3">
+                        <p className="text-sm text-slate-300">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-400">
+                              Total Earnings:
+                            </span>
+                            {/* {selectedUser.raw_user_meta_data?.tipalti_id || "N/A"} */}
+                            {/* TODO: fix data */}
+                            <span className="text-xl font-semibold text-green-400">
+                              $12,450.00
+                            </span>
+                          </div>
+                        </p>
 
-                            <div className="mt-2 flex items-center justify-between">
-                                <span className="text-gray-400">This Month:</span>
-                                <span className="text-lg font-medium text-green-400">$850.00</span>
-                            </div>
-
-                            <div className="mt-1 flex items-center justify-between pl-4">
-                                <span className="text-sm text-gray-400">Channel Earnings:</span>
-                                <span className="text-sm text-green-400">$650.00</span>
-                            </div>
-                            <div className="mt-1 flex items-center justify-between pl-4">
-                                <span className="text-sm text-gray-400">Affiliate Channel Earnings:</span>
-                                <span className="text-sm text-green-400">$200.00</span>
-                            </div>
-
-                            <div className="mt-2 flex items-center justify-between">
-                                <span className="text-gray-400">Tipalti ID:</span>
-                                <span>{selectedUser.raw_user_meta_data?.tipalti_id || "N/A"}</span>
-                            </div>
-
-                            <div className="mb-2 text-gray-400 text-center">Recent Payouts</div>
-                            <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
-                                <div className="flex justify-between">
-                                    <span>Mar 1, 2024</span>
-                                    <span className="text-green-400">$2,300.00</span>
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <span>Feb 1, 2024</span>
-                                    <span className="text-green-400">$1,850.00</span>
-                                </div>
-
-                                <div className="flex justify-between">
-                                    <span>Jan 1, 2024</span>
-                                    <span className="text-green-400">$2,100.00</span>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-center">
-                                <span
-                                    className={`w-3 h-3 rounded-full mr-3 ${
-                                    selectedUser.raw_user_meta_data?.payment_enabled
-                                        ? "bg-green-500"
-                                        : "bg-red-500"
-                                    }`}
-                                />
-                                <span className="text-sm text-slate-300">
-                                    Payment Enabled
-                                </span>
-                            </div>
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="text-gray-400">This Month:</span>
+                          <span className="text-lg font-medium text-green-400">
+                            $850.00
+                          </span>
                         </div>
+
+                        <div className="mt-1 flex items-center justify-between pl-4">
+                          <span className="text-sm text-gray-400">
+                            Channel Earnings:
+                          </span>
+                          <span className="text-sm text-green-400">
+                            $650.00
+                          </span>
+                        </div>
+                        <div className="mt-1 flex items-center justify-between pl-4">
+                          <span className="text-sm text-gray-400">
+                            Affiliate Channel Earnings:
+                          </span>
+                          <span className="text-sm text-green-400">
+                            $200.00
+                          </span>
+                        </div>
+
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="text-gray-400">Tipalti ID:</span>
+                          <span>
+                            {selectedUser.raw_user_meta_data?.tipalti_id ||
+                              "N/A"}
+                          </span>
+                        </div>
+
+                        <div className="mb-2 text-gray-400 text-center">
+                          Recent Payouts
+                        </div>
+                        <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
+                          <div className="flex justify-between">
+                            <span>Mar 1, 2024</span>
+                            <span className="text-green-400">$2,300.00</span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span>Feb 1, 2024</span>
+                            <span className="text-green-400">$1,850.00</span>
+                          </div>
+
+                          <div className="flex justify-between">
+                            <span>Jan 1, 2024</span>
+                            <span className="text-green-400">$2,100.00</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-center">
+                          <span
+                            className={`w-3 h-3 rounded-full mr-3 ${
+                              selectedUser.raw_user_meta_data?.payment_enabled
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }`}
+                          />
+                          <span className="text-sm text-slate-300">
+                            Payment Enabled
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="p-6 bg-slate-700/30 rounded-xl backdrop-blur-sm">
-                        <h4 className="mb-4 text-lg font-medium text-gray-300">
-                            Channel Management
-                        </h4>
+                      <h4 className="mb-4 text-lg font-medium text-gray-300">
+                        Channel Management
+                      </h4>
 
-                        <div className="mb-2 text-gray-400 text-center">Active Channels</div>
-                        <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
-                            <a href="https://youtube.com/@mainchannel" target="_blank" rel="noopener noreferrer"
-                                className="flex items-center rounded px-2 py-1 hover:shadow-lg hover:shadow-blue-500/20 hover:bg-blue-500/5 transition-all duration-300 border border-transparent hover:border-blue-500/30">
-                                <span className="text-blue-400 hover:underline">@mainchannel</span> 
-                                {/* <CheckCircle2 size={16} className="ml-1 text-green-500" /> */}
-                            </a>
-                        </div>
+                      <div className="mb-2 text-gray-400 text-center">
+                        Active Channels
+                      </div>
+                      <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
+                        <a
+                          href="https://youtube.com/@mainchannel"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center rounded px-2 py-1 hover:shadow-lg hover:shadow-blue-500/20 hover:bg-blue-500/5 transition-all duration-300 border border-transparent hover:border-blue-500/30"
+                        >
+                          <span className="text-blue-400 hover:underline">
+                            @mainchannel
+                          </span>
+                          {/* <CheckCircle2 size={16} className="ml-1 text-green-500" /> */}
+                        </a>
+                      </div>
 
-                        <div className="mb-2 text-gray-400 text-center mt-4">Affiliate Channels</div>
-                        <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
-                            <a href="https://youtube.com/@mainchannel" target="_blank" rel="noopener noreferrer"
-                                className="flex items-center rounded px-2 py-1 hover:shadow-lg hover:shadow-blue-500/20 hover:bg-blue-500/5 transition-all duration-300 border border-transparent hover:border-blue-500/30">
-                                <span className="text-blue-400 hover:underline">@mainchannel</span> 
-                                {/* <CheckCircle2 size={16} className="ml-1 text-green-500" /> */}
-                            </a>
-                        </div>
+                      <div className="mb-2 text-gray-400 text-center mt-4">
+                        Affiliate Channels
+                      </div>
+                      <div className="max-h-32 space-y-2 overflow-y-auto rounded bg-[#1e2536] p-2">
+                        <a
+                          href="https://youtube.com/@mainchannel"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center rounded px-2 py-1 hover:shadow-lg hover:shadow-blue-500/20 hover:bg-blue-500/5 transition-all duration-300 border border-transparent hover:border-blue-500/30"
+                        >
+                          <span className="text-blue-400 hover:underline">
+                            @mainchannel
+                          </span>
+                          {/* <CheckCircle2 size={16} className="ml-1 text-green-500" /> */}
+                        </a>
+                      </div>
                     </div>
+                  </div>
                 </div>
-              </div>
 
                 {/* leaving this commented out for future reference */}
                 {/* <button
-                    className={`flex items-center gap-2 flew-row px-4 py-2 rounded-md text-sm font-medium ${
-                    banList.includes(selectedUser.user_id)
-                        ? "bg-red-500/20 text-red-300 hover:bg-red-500/30"
-                        : "bg-slate-600/50 text-slate-300 hover:bg-slate-600"
-                    }`}
-                    onClick={() => {
-                    // Add your block user logic here
-                    setBlockedRequest(selectedUser);
-                    console.log("Block user clicked");
-                    }}
-                >
-                    {banList.includes(selectedUser.user_id)
-                    ? "Unblock"
-                    : "Block"}
-                    <BanIcon size={16} />
-                </button> */}
+                      className={`flex items-center gap-2 flew-row px-4 py-2 rounded-md text-sm font-medium ${
+                      banList.includes(selectedUser.user_id)
+                          ? "bg-red-500/20 text-red-300 hover:bg-red-500/30"
+                          : "bg-slate-600/50 text-slate-300 hover:bg-slate-600"
+                      }`}
+                      onClick={() => {
+                      // Add your block user logic here
+                      setBlockedRequest(selectedUser);
+                      console.log("Block user clicked");
+                      }}
+                  >
+                      {banList.includes(selectedUser.user_id)
+                      ? "Unblock"
+                      : "Block"}
+                      <BanIcon size={16} />
+                  </button> */}
 
                 <div className="flex items-center justify-between animate-section mt-4">
-                    <button className="flex items-center rounded bg-red-600/20 px-4 py-2 text-red-400 transition hover:bg-red-600/30"
-                        onClick={() => {
-                            setBlockedRequest(selectedUser);
-                            console.log("Block user clicked");
-                        }}
-                    >
-                        <BanIcon className="mr-2" size={16} />
-                        <span>Ban User</span>
-                    </button>
-                    <button
-                        onClick={() => setSelectedUser(null)}
-                        className="rounded bg-gray-700 px-6 py-2 text-white transition hover:bg-gray-600"
-                    >
-                        Close
-                    </button>
+                  <button
+                    className="flex items-center rounded bg-red-600/20 px-4 py-2 text-red-400 transition hover:bg-red-600/30"
+                    onClick={() => {
+                      setBlockedRequest(selectedUser);
+                      console.log("Block user clicked");
+                    }}
+                  >
+                    <BanIcon className="mr-2" size={16} />
+                    <span>Ban User</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedUser(null)}
+                    className="rounded bg-gray-700 px-6 py-2 text-white transition hover:bg-gray-600"
+                  >
+                    Close
+                  </button>
                 </div>
+              </div>
             </div>
-          </div>
+          </FadeInUp>
         </div>
       )}
     </>

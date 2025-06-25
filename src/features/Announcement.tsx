@@ -1,27 +1,40 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import FadeInUp from "../components/FadeInUp";
 
-export const Announcements = () => {
-  const [announcements, setAnnouncements] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+// Announcement type
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  is_active: boolean;
+  action_link?: string;
+  action_text?: string;
+}
+
+export const Announcements = ({
+  preventAnimation,
+}: {
+  preventAnimation?: boolean;
+}) => {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
         setLoading(true);
-
         // Fetch announcements from Supabase
         const { data, error } = await supabase
           .from("announcements")
-          .select("")
+          .select("*")
           .eq("is_active", true)
           .order("created_at", { ascending: false })
           .limit(3);
-
         if (error) throw error;
-
-        setAnnouncements(data || []);
+        setAnnouncements((data as Announcement[]) || []);
       } catch (err) {
         console.error("Error fetching announcements:", err);
         setError("Failed to load announcements");
@@ -36,13 +49,13 @@ export const Announcements = () => {
     const subscription = supabase
       .channel("public:announcements")
       .on(
-        "postgres_changes",
+        "postgres_changes" as any,
         {
-          event: "",
+          event: "*",
           schema: "public",
           table: "announcements",
         },
-        (payload) => {
+        () => {
           fetchAnnouncements();
         }
       )
@@ -80,29 +93,38 @@ export const Announcements = () => {
         <div className="p-3 text-red-400">{error}</div>
       ) : (
         <div className="space-y-3">
-          {announcements.map((announcement) => (
-            <div
-              key={announcement.id}
-              className="p-3 bg-gray-700/50 rounded border-l-4 border-yellow-500"
-            >
-              <div className="flex justify-between">
-                <h3 className="font-medium text-white">{announcement.title}</h3>
-                <span className="text-xs text-gray-400">
-                  {new Date(announcement.created_at).toLocaleDateString()}
-                </span>
-              </div>
-              <p className="mt-1 text-gray-300">{announcement.content}</p>
+          {announcements.map((announcement, idx) => {
+            const Wrapper = preventAnimation ? "div" : FadeInUp;
 
-              {announcement.action_link && (
-                <a
-                  href={announcement.action_link}
-                  className="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300"
-                >
-                  {announcement.action_text || "Learn more"} →
-                </a>
-              )}
-            </div>
-          ))}
+            return (
+              <Wrapper
+                {...(!preventAnimation && {
+                  key: announcement.id,
+                  delay: idx * 80,
+                })}
+              >
+                <div className="p-3 bg-gray-700/50 rounded border-l-4 border-yellow-500">
+                  <div className="flex justify-between">
+                    <h3 className="font-medium text-white">
+                      {announcement.title}
+                    </h3>
+                    <span className="text-xs text-gray-400">
+                      {new Date(announcement.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-gray-300">{announcement.content}</p>
+                  {announcement.action_link && (
+                    <a
+                      href={announcement.action_link}
+                      className="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300"
+                    >
+                      {announcement.action_text || "Learn more"} →
+                    </a>
+                  )}
+                </div>
+              </Wrapper>
+            );
+          })}
         </div>
       )}
     </div>
