@@ -6,40 +6,20 @@ import { useAuth } from "../contexts/AuthContext";
 export default function Welcome() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Extract timestamp from URL if present (for email verification tracking)
-  const searchParams = new URLSearchParams(location.search);
-  const timestamp = searchParams.get("t");
-
-  // Debug logging
-  console.log("🔍 Welcome Page Debug:");
-  console.log("- user:", user);
-  console.log("- loading:", loading);
-  console.log("- user?.email_confirmed_at:", user?.email_confirmed_at);
-  console.log("- user?.email:", user?.email);
-  console.log("- user?.user_metadata:", user?.user_metadata);
-  console.log("- location.pathname:", location.pathname);
-  console.log("- timestamp from URL:", timestamp);
 
   useEffect(() => {
-    console.log("🔄 Welcome useEffect triggered");
-    console.log("- user:", user);
-    console.log("- user?.email_confirmed_at:", user?.email_confirmed_at);
-    console.log("- loading:", loading);
-
-    // If the user is already logged in and verified, redirect to dashboard
     if (user?.email_confirmed_at) {
-      console.log("✅ User is verified, navigating to dashboard");
       navigate("/dashboard");
-    } else if (user && !user.email_confirmed_at) {
-      console.log("⚠️ User exists but not verified yet");
-    } else if (!user && !loading) {
-      console.log("❌ No user and not loading");
-    } else if (loading) {
-      console.log("⏳ Still loading user data");
     }
   }, [user, navigate, loading]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900a flex items-center justify-center px-4 relative overflow-hidden">

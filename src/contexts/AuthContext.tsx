@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { isCORSError, supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 import { AuthState, ExtendedUser } from "../types/user";
 import { ROUTES } from "../routes/routeConstants";
 
@@ -18,9 +18,11 @@ const showUniqueToast = (
     // Dismiss all existing toasts
     toast.dismiss();
     shownToasts.add(toastId);
-    type === "success"
-      ? toast.success(message, { id: toastId, duration: 3000 })
-      : toast.error(message, { id: toastId, duration: 3000 });
+    if (type === "success") {
+      toast.success(message, { id: toastId, duration: 3000 });
+    } else {
+      toast.error(message, { id: toastId, duration: 3000 });
+    }
     setTimeout(() => shownToasts.delete(toastId), 3000);
   }
 };
@@ -28,7 +30,6 @@ const showUniqueToast = (
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isRedirected, setIsRedirected] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasShownVerification, setHasShownVerification] = useState(false);
   const navigate = useNavigate();
@@ -44,86 +45,107 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const getRedirectPath = (user: ExtendedUser | null): string => {
     if (user?.user_metadata?.role === "admin") {
-      console.log("User is admin. Redirecting to admin panel");
       return ROUTES.ADMIN_PANEL;
     }
-    console.log("User is not admin. Redirecting to dashboard");
     return ROUTES.DASHBOARD;
   };
 
   useEffect(() => {
-    setLoading(true);
+    let mounted = true;
+    let authSubscription: { unsubscribe: () => void } | null = null;
 
-    supabase.auth
-      .getSession()
-      .then(async ({ data: { session } }) => {
+    // Initialize auth state
+    const initializeAuth = async () => {
+      try {
+        // Get initial session
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!mounted) return;
+
         const currentUser = session?.user ?? null;
-
-        if (currentUser) {
-          setUser(currentUser as ExtendedUser);
-          console.log("Current user metadata:", currentUser.user_metadata);
-
-          if (currentUser.email_confirmed_at && !isRedirected) {
-            setIsRedirected(true);
-            const redirectPath = getRedirectPath(currentUser as ExtendedUser);
-            navigate(redirectPath, { replace: true });
-          }
-        }
-
-        setLoading(false);
-      })
-      .catch((error) => {
-        if (isCORSError(error)) {
-          showUniqueToast(
-            "CORS Error: Unable to authenticate.",
-            "error",
-            "cors-auth-error"
-          );
-        }
-        setLoading(false);
-      });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-
-      if (currentUser) {
         setUser(currentUser as ExtendedUser);
-        console.log(
-          "Auth state change - user metadata:",
-          currentUser.user_metadata
-        );
 
-        if (currentUser.email_confirmed_at && !hasShownVerification) {
-          setHasShownVerification(true);
+        // Set up auth state change listener
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (!mounted) return;
 
-          if (!currentUser.user_metadata?.email_verification_notification) {
-            await supabase.auth.updateUser({
-              data: { email_verification_notification: true },
-            });
+          const currentUser = session?.user ?? null;
+          setUser(currentUser as ExtendedUser);
 
-            showUniqueToast(
-              "Email verified successfully!",
-              "success",
-              "email-verified"
-            );
+          if (currentUser) {
+            // Handle email verification notification for SIGNED_IN events
+            if (
+              event === "SIGNED_IN" &&
+              currentUser.email_confirmed_at &&
+              !hasShownVerification
+            ) {
+              setHasShownVerification(true);
+
+              if (!currentUser.user_metadata?.email_verification_notification) {
+                await supabase.auth.updateUser({
+                  data: { email_verification_notification: true },
+                });
+
+                showUniqueToast(
+                  "Email verified successfully!",
+                  "success",
+                  "email-verified"
+                );
+              }
+            }
+
+            // Handle redirects for login-related paths
+            const loginRelatedPaths = [
+              ROUTES.HOME,
+              ROUTES.LOGIN,
+              ROUTES.SIGNUP,
+              ROUTES.ADMIN_LOGIN,
+            ];
+
+            if (
+              currentUser.email_confirmed_at &&
+              loginRelatedPaths.includes(location.pathname)
+            ) {
+              const redirectPath = getRedirectPath(currentUser as ExtendedUser);
+              navigate(redirectPath, { replace: true });
+            }
+          } else {
+            setUser(null);
+            setHasShownVerification(false);
           }
 
-          const redirectPath = getRedirectPath(currentUser as ExtendedUser);
-          navigate(redirectPath, { replace: true });
+          // Always set loading to false after handling auth state change
+          setLoading(false);
+        });
+
+        authSubscription = subscription;
+
+        // Set loading to false after initial setup
+        if (mounted) {
+          setLoading(false);
         }
-      } else {
-        setUser(null);
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
+    };
 
-      // Set loading to false after handling auth state change
-      console.log("🔄 Auth state change complete, setting loading to false");
-      setLoading(false);
-    });
+    // Start initialization
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Cleanup
+    return () => {
+      mounted = false;
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
+    };
+  }, [navigate, location.pathname, hasShownVerification]);
 
   const signUp = async (
     email: string,
