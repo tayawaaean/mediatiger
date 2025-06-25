@@ -7,6 +7,7 @@ import RevenueChart from "../components/RevenueChart";
 import VideoSearch from "../components/VideoSearch";
 import VideoTable from "../components/VideoTable";
 import { initSectionAnimations } from "../../../utils/animations";
+import FadeInUp from "../../../components/FadeInUp";
 
 const Analytics = () => {
   const [showReferred, setShowReferred] = useState(true);
@@ -48,7 +49,7 @@ const Analytics = () => {
       cleanup?.(); // Clean up previous animations
       initSectionAnimations();
     }, 1600);
-    
+
     return () => {
       clearTimeout(timer);
       cleanup?.(); // Clean up animations when component unmounts
@@ -73,78 +74,86 @@ const Analytics = () => {
 
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-slate-200">
-      <Header />
+      <FadeInUp>
+        <Header />
 
-      <AnalyticsControls
-        onChannelChange={handleChannelChange}
-        onDateRangeChange={handleDateRangeChange}
-      />
+        <AnalyticsControls
+          onChannelChange={handleChannelChange}
+          onDateRangeChange={handleDateRangeChange}
+        />
 
-      <div className="flex-1 overflow-auto">
-        <div className="p-3 animate-section">
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            {/* Total Views */}
-            <MetricCard
-              title="Views"
-              value={showReferred ? "59M" : "45M"}
-              previousLabel="Previous period"
-              previousValue={showReferred ? "55M" : "42M"}
-              change={7.3}
-              changeColor="text-green-500"
-              isLoading={isLoading}
-            />
+        <div className="flex-1 overflow-auto">
+          <div className="p-3 animate-section">
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              {/* Total Views */}
+              <MetricCard
+                title="Views"
+                value={showReferred ? "59M" : "45M"}
+                previousLabel="Previous period"
+                previousValue={showReferred ? "55M" : "42M"}
+                change={7.3}
+                changeColor="text-green-500"
+                isLoading={isLoading}
+              />
 
-            {/* Premium Views */}
-            <MetricCard
-              title="Premium Views"
-              value={showReferred ? "6.62M" : "5.12M"}
-              previousLabel="Previous period"
-              previousValue={showReferred ? "6.12M" : "4.82M"}
-              change={8.2}
-              changeColor="text-green-500"
-              isLoading={isLoading}
-            />
+              {/* Premium Views */}
+              <MetricCard
+                title="Premium Views"
+                value={showReferred ? "6.62M" : "5.12M"}
+                previousLabel="Previous period"
+                previousValue={showReferred ? "6.12M" : "4.82M"}
+                change={8.2}
+                changeColor="text-green-500"
+                isLoading={isLoading}
+              />
 
-            {/* RPM */}
-            <MetricCard
-              title="RPM"
-              value={showReferred ? "$0.13" : "$0.11"}
-              previousLabel="Previous period"
-              previousValue={showReferred ? "$0.12" : "$0.10"}
-              change={8.3}
-              changeColor="text-green-500"
-              isLoading={isLoading}
-            />
+              {/* RPM */}
+              <MetricCard
+                title="RPM"
+                value={showReferred ? "$0.13" : "$0.11"}
+                previousLabel="Previous period"
+                previousValue={showReferred ? "$0.12" : "$0.10"}
+                change={8.3}
+                changeColor="text-green-500"
+                isLoading={isLoading}
+              />
 
-            {/* Expected Revenue */}
-            <MetricCard
-              title="Expected Revenue"
-              value={showReferred ? "$7,670" : "$5,850"}
-              previousLabel="Previous period"
-              previousValue={showReferred ? "$6,600" : "$4,620"}
-              change={10.6}
-              changeColor="text-green-500"
-              isLoading={isLoading}
-            />
-          </div>
+              {/* Expected Revenue */}
+              <MetricCard
+                title="Expected Revenue"
+                value={showReferred ? "$7,670" : "$5,850"}
+                previousLabel="Previous period"
+                previousValue={showReferred ? "$6,600" : "$4,620"}
+                change={10.6}
+                changeColor="text-green-500"
+                isLoading={isLoading}
+              />
+            </div>
 
-          {/* Revenue Analysis */}
-          <div className="animate-section">
-            <h2 className="text-xl font-bold mb-2">Revenue Analysis</h2>
-            <RevenueChart
-              startDate={dateRange.start}
-              endDate={dateRange.end}
-              showReferred={showReferred}
-              isLoading={isLoading}
-            />
-          </div>
-          <div className="animate-section">
-            <VideoSearch onSearch={handleVideoSearch} isLoading={isSearching} />
-            <VideoTable data={videoData} isLoading={isLoading || isSearching} />
+            {/* Revenue Analysis */}
+            <div className="animate-section">
+              <h2 className="text-xl font-bold mb-2">Revenue Analysis</h2>
+              <RevenueChart
+                startDate={dateRange.start}
+                endDate={dateRange.end}
+                showReferred={showReferred}
+                isLoading={isLoading}
+              />
+            </div>
+            <div className="animate-section">
+              <VideoSearch
+                onSearch={handleVideoSearch}
+                isLoading={isSearching}
+              />
+              <VideoTable
+                data={videoData}
+                isLoading={isLoading || isSearching}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </FadeInUp>
     </div>
   );
 };

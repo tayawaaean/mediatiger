@@ -13,7 +13,11 @@ interface Announcement {
   action_text?: string;
 }
 
-export const Announcements = () => {
+export const Announcements = ({
+  preventAnimation,
+}: {
+  preventAnimation?: boolean;
+}) => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,29 +93,38 @@ export const Announcements = () => {
         <div className="p-3 text-red-400">{error}</div>
       ) : (
         <div className="space-y-3">
-          {announcements.map((announcement, idx) => (
-            <FadeInUp key={announcement.id} delay={idx * 80}>
-              <div className="p-3 bg-gray-700/50 rounded border-l-4 border-yellow-500">
-                <div className="flex justify-between">
-                  <h3 className="font-medium text-white">
-                    {announcement.title}
-                  </h3>
-                  <span className="text-xs text-gray-400">
-                    {new Date(announcement.created_at).toLocaleDateString()}
-                  </span>
+          {announcements.map((announcement, idx) => {
+            const Wrapper = preventAnimation ? "div" : FadeInUp;
+
+            return (
+              <Wrapper
+                {...(!preventAnimation && {
+                  key: announcement.id,
+                  delay: idx * 80,
+                })}
+              >
+                <div className="p-3 bg-gray-700/50 rounded border-l-4 border-yellow-500">
+                  <div className="flex justify-between">
+                    <h3 className="font-medium text-white">
+                      {announcement.title}
+                    </h3>
+                    <span className="text-xs text-gray-400">
+                      {new Date(announcement.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-gray-300">{announcement.content}</p>
+                  {announcement.action_link && (
+                    <a
+                      href={announcement.action_link}
+                      className="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300"
+                    >
+                      {announcement.action_text || "Learn more"} →
+                    </a>
+                  )}
                 </div>
-                <p className="mt-1 text-gray-300">{announcement.content}</p>
-                {announcement.action_link && (
-                  <a
-                    href={announcement.action_link}
-                    className="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300"
-                  >
-                    {announcement.action_text || "Learn more"} →
-                  </a>
-                )}
-              </div>
-            </FadeInUp>
-          ))}
+              </Wrapper>
+            );
+          })}
         </div>
       )}
     </div>

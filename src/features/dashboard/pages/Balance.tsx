@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../../contexts/AuthContext";
 import { supabase } from "../../../lib/supabase";
 import PayoutDashboard from "../components/PayoutDashboard";
+import FadeInUp from "../../../components/FadeInUp";
 
 // Props for the component
 
@@ -11,7 +12,7 @@ const BalanceSection = () => {
   const [signatureMethod, setSignatureMethod] = useState("type");
   const [signatureImage, setSignatureImage] = useState("");
   const [hasContract, setHasContract] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -54,7 +55,6 @@ const BalanceSection = () => {
       setLoading(false);
     }
   };
-
 
   const validateForm = () => {
     const errors = {};
@@ -200,7 +200,6 @@ const BalanceSection = () => {
       setIsSubmitting(false);
     }
   };
-
 
   // Check if user has a valid signature based on current method
 

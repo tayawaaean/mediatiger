@@ -1,3 +1,4 @@
+import FadeInUp from "../../../components/FadeInUp";
 import { PerformanceTrends } from "../../../components/PerformanceTrends";
 import { RealtimePerformance } from "../../../components/RealtimePerformance";
 import { RecentActivity } from "../../../components/RecentActivity";
@@ -36,19 +37,20 @@ export default function Overview({
 }: OverviewProps) {
   return (
     <div className="h-full w-full overflow-auto scrollbar-hide">
-
-      <DashboardCards
+      <FadeInUp>
+        <DashboardCards
           linkedChannels={linkedChannels}
           monthlyViews={monthlyViews}
-      />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 relative z-[1]">
-        <Announcements />
-        <RealtimePerformance realtimeViews={realtimeViews} />
-        <MonthlyGoals user={user} />
-        <RecentActivity recentActivity={recentActivity} />
+        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 relative z-[1]">
+          <Announcements preventAnimation />
+          <RealtimePerformance realtimeViews={realtimeViews} />
+          <MonthlyGoals user={user} />
+          <RecentActivity recentActivity={recentActivity} />
 
-        <PerformanceTrends performanceData={performanceData} />
-      </div>
+          <PerformanceTrends performanceData={performanceData} />
+        </div>
+      </FadeInUp>
     </div>
   );
 }
