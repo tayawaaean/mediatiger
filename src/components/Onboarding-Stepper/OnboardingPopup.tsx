@@ -1,25 +1,33 @@
+// ============ FULLY FIXED OnboardingPopup.tsx ============
 import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, Check, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  handleCopyVerification,
   handleFinalSubmit,
   handleSignOut,
-  handleSubmitInterests,
   showUniqueToast,
-  verifyChannel,
 } from ".";
 import { useAuth } from "../../contexts/AuthContext";
 import { useOnboardingStore } from "../../stores/onboardingStore";
 import { Stepper } from "./Stepper";
 import { isReferralUser } from "../../services/referralService";
 import { supabase } from "../../lib/supabase";
+
 interface OnboardingPopupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  userId: string;
-  userEmail: string;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly userId: string;
+  readonly userEmail: string;
+}
+
+// Proper types for verification states
+interface ChannelVerification {
+  [key: number]: boolean | null;
+}
+
+interface VerifyingChannels {
+  [key: number]: boolean;
 }
 
 export default function OnboardingPopup({
@@ -29,29 +37,17 @@ export default function OnboardingPopup({
   userEmail,
 }: OnboardingPopupProps) {
   const {
-    step,
-    interests,
-    otherInterest,
-    digitalRightsInfo,
     channelInfo,
-    isVerifying,
     isSubmitting,
-    verificationCopied,
-    setStep,
-    setInterests,
-    setOtherInterest,
-    setDigitalRightsInfo,
     setChannelInfo,
-    setIsVerifying,
     setIsSubmitting,
-    setVerificationCopied,
   } = useOnboardingStore();
 
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isReferral, setIsReferral] = useState(false);
   
-  // Referral form state
+  // Referral form state - KEEPING EXACTLY THE SAME
   const [referralForm, setReferralForm] = useState({
     fullName: "",
     email: "",
@@ -59,30 +55,18 @@ export default function OnboardingPopup({
     referralCode: "",
   });
 
-  // Channel verification state
-  const [channelVerification, setChannelVerification] = useState({});
-  const [verifyingChannels, setVerifyingChannels] = useState({});
+  // Channel verification state with proper typing
+  const [channelVerification, setChannelVerification] = useState<ChannelVerification>({});
+  const [verifyingChannels, setVerifyingChannels] = useState<VerifyingChannels>({});
 
-  React.useEffect(() => {
-    if (!channelInfo.verificationCode) {
-      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
-      setChannelInfo((prev) => ({ ...prev, verificationCode: code }));
+  // Move useEffect to top level - always called
+  useEffect(() => {
+    if (user) {
+      isReferralUser(user.id).then((res) => {
+        setIsReferral(res);
+      });
     }
-  }, [channelInfo]);
-
-  const handleInterestChange = (interest: keyof typeof interests) => {
-    const newInterests = { ...interests, [interest]: !interests[interest] };
-    setInterests(newInterests);
-
-    // Clear YouTube links if both channelManagement and musicPartnerProgram are deselected
-    if (!newInterests.channelManagement && !newInterests.musicPartnerProgram) {
-      setChannelInfo((prev) => ({
-        ...prev,
-        youtubeLinks: [""],
-        verifiedChannels: {},
-      }));
-    }
-  };
+  }, [user]);
 
   const handleChannelInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -99,8 +83,8 @@ export default function OnboardingPopup({
     }
   };
 
-  // Verify YouTube channel exists
-  const verifyYouTubeChannel = async (url, index) => {
+  // KEEPING ALL REFERRAL FUNCTIONS with proper typing
+  const verifyYouTubeChannel = async (url: string, index: number): Promise<void> => {
     if (!url.trim()) {
       setChannelVerification(prev => ({
         ...prev,
@@ -115,7 +99,6 @@ export default function OnboardingPopup({
     }));
 
     try {
-      // Extract channel handle or ID from URL
       const channelMatch = url.match(/@([^/?]+)|\/channel\/([^/?]+)|\/c\/([^/?]+)|\/user\/([^/?]+)/);
       
       if (!channelMatch || !url.includes('youtube.com')) {
@@ -130,7 +113,6 @@ export default function OnboardingPopup({
         return;
       }
 
-      // Check if channel exists using your Supabase function
       const { data, error } = await supabase.rpc("check_youtube_link_exists", {
         link: url,
       });
@@ -142,11 +124,9 @@ export default function OnboardingPopup({
           [index]: false
         }));
       } else {
-        // If data is true, channel already exists (error case)
-        // If data is false, channel is available (success case)
         setChannelVerification(prev => ({
           ...prev,
-          [index]: !data // Invert because data=true means already exists
+          [index]: !data
         }));
       }
       
@@ -163,7 +143,8 @@ export default function OnboardingPopup({
       }));
     }
   };
-  // Referral form handlers
+
+  // KEEPING ALL REFERRAL HANDLERS EXACTLY THE SAME
   const handleReferralFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name.startsWith("youtubeChannel")) {
@@ -175,7 +156,6 @@ export default function OnboardingPopup({
         ),
       });
       
-      // Verify channel after a short delay
       setTimeout(() => {
         verifyYouTubeChannel(value, index);
       }, 500);
@@ -197,7 +177,6 @@ export default function OnboardingPopup({
       youtubeChannels: referralForm.youtubeChannels.filter((_, i) => i !== index),
     });
     
-    // Clean up verification state for removed channel
     setChannelVerification(prev => {
       const newState = { ...prev };
       delete newState[index];
@@ -210,7 +189,7 @@ export default function OnboardingPopup({
     });
   };
 
-  const validateReferralForm = () => {
+  const validateReferralForm = (): boolean => {
     if (!referralForm.fullName.trim()) {
       showUniqueToast("Please enter your full name", "error", "fullname-required");
       return false;
@@ -224,7 +203,6 @@ export default function OnboardingPopup({
       return false;
     }
     
-    // Check if any channels are invalid
     const hasInvalidChannels = referralForm.youtubeChannels.some((channel, index) => {
       return channel.trim() && channelVerification[index] === false;
     });
@@ -236,48 +214,45 @@ export default function OnboardingPopup({
     
     return true;
   };
-// Create the function call
-const updateReferralId = async (referrerUsername, userId) => {
-  try {
-    const { data, error } = await supabase
-      .rpc('update_referral_id', {
-        input_user_name: referrerUsername,
-        p_user_id: userId
-      });
 
-    if (error) {
-      throw error;
+  const updateReferralId = async (referrerUsername: string, userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('update_referral_id', {
+          input_user_name: referrerUsername,
+          p_user_id: userId
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      return { success: true, data };
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error updating referral ID:', errorMessage);
+      return { success: false, error: errorMessage };
     }
+  };
 
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error updating referral ID:', error?.message);
-    return { success: false, error: error?.message };
-  }
-};
-
-// Usage example
- 
   const handleReferralSubmit = () => {
     if (validateReferralForm()) {
-      // Handle referral form submission here
       handleFinalSubmit(
         setIsSubmitting,
         [],
         userId,
         "",
-        {},
+        null,
         {youtubeLinks:referralForm.youtubeChannels},
         user,
         userEmail,
         onClose
       );
       updateReferralId(referralForm.referralCode, userId);
-      // You can add your submission logic here
-  //    onClose();
     }
   };
 
+  // SIMPLIFIED MAIN FORM FUNCTIONS - REMOVED STEP LOGIC
   const addChannelField = () => {
     setChannelInfo({
       ...channelInfo,
@@ -292,7 +267,8 @@ const updateReferralId = async (referrerUsername, userId) => {
     });
   };
 
-  const validateStep2 = () => {
+  // SIMPLE VALIDATION - NO STEP LOGIC
+  const validateForm = (): boolean => {
     if (!channelInfo.name.trim()) {
       showUniqueToast("Please enter your name", "error", "name-required");
       return false;
@@ -302,35 +278,24 @@ const updateReferralId = async (referrerUsername, userId) => {
       return false;
     }
     if (!channelInfo.youtubeLinks[0]?.trim()) {
-      showUniqueToast(
-        "Please enter your YouTube channel link",
-        "error",
-        "youtube-required"
-      );
+      showUniqueToast("Please enter your YouTube channel link", "error", "youtube-required");
       return false;
     }
     return true;
   };
 
   if (!isOpen) return null;
-  
-  useEffect(() => {
-    if (user) {
-      isReferralUser(user.id).then((res) => {
-        setIsReferral(res);
-      });
-    }
-  }, [user]);
 
   return (
     <AnimatePresence mode="wait">
       {!isReferral ? (
+        // SIMPLIFIED MAIN FORM - REMOVED ALL STEP LOGIC
         <div className="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4 overflow-hidden">
           {/* Floating Cubes Background */}
           <div className="absolute inset-0 overflow-hidden">
             {[...Array(20)].map((_, i) => (
               <div
-                key={i}
+                key={`main-cube-${i}`}
                 className="absolute w-4 h-4 bg-indigo-500/10 animate-float"
                 style={{
                   left: `${Math.random() * 100}%`,
@@ -350,39 +315,26 @@ const updateReferralId = async (referrerUsername, userId) => {
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-slate-800/90 backdrop-blur-sm rounded-xl shadow-2xl max-w-md w-full flex flex-col border border-slate-700 relative z-10"
           >
-            {/* Header */}
+            {/* Header - SIMPLIFIED */}
             <div className="bg-slate-700 px-6 py-4 flex items-center justify-center border-b border-slate-600">
-              <h2 className="text-xl font-bold text-white">
-                {step === 1 ? "Welcome to MediaTiger!" : "Channel Information"}
-              </h2>
+              <h2 className="text-xl font-bold text-white">Welcome to MediaTiger!</h2>
             </div>
 
-            {/* Content */}
+            {/* Content - SIMPLIFIED STEPPER */}
             <div className="px-6 py-5 overflow-y-auto max-h-[calc(100vh-16rem)]">
               <Stepper
-                step={step}
-                interests={interests}
-                channelInfo={channelInfo}
-                digitalRightsInfo={digitalRightsInfo}
-                otherInterest={otherInterest}
-                isVerifying={isVerifying}
-                verificationCopied={verificationCopied}
-                user={user}
-                handleInterestChange={handleInterestChange}
+                channelInfo={{
+                  ...channelInfo,
+                  referralCode: channelInfo.referralCode || ""
+                }}
                 handleChannelInfoChange={handleChannelInfoChange}
-                setDigitalRightsInfo={setDigitalRightsInfo}
-                setOtherInterest={setOtherInterest}
+                setChannelInfo={setChannelInfo}
                 addChannelField={addChannelField}
                 removeChannelField={removeChannelField}
-                handleCopyVerification={handleCopyVerification}
-                setIsVerifying={setIsVerifying}
-                setChannelInfo={setChannelInfo}
-                verifyChannel={verifyChannel}
-                setVerificationCopied={setVerificationCopied}
               />
             </div>
 
-            {/* Footer */}
+            {/* Footer - SIMPLIFIED TO JUST SUBMIT */}
             <div className="bg-slate-700 px-6 py-4 flex justify-between items-center border-t border-slate-600 mt-auto">
               <button
                 onClick={() => {
@@ -393,66 +345,40 @@ const updateReferralId = async (referrerUsername, userId) => {
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </button>
-              {step === 1 ? (
-                <button
-                  onClick={() => {
-                    handleSubmitInterests(
-                      interests,
-                      otherInterest,
+              
+              {/* REMOVED CONTINUE BUTTON - ONLY SUBMIT */}
+              <button
+                onClick={() => {
+                  if (validateForm()) {
+                    handleFinalSubmit(
+                      setIsSubmitting,
+                      [], // No interests
+                      userId,
+                      "", // No other interest
+                      null, // No digital rights
                       channelInfo,
-                      digitalRightsInfo,
-                      setStep,
                       user,
-                      onClose,
-                      setIsSubmitting
+                      userEmail,
+                      onClose
                     );
-                  }}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? "Submitting..." : "Continue"}
-                </button>
-              ) : (
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => setStep(1)}
-                    className="px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-500 transition-colors"
-                  >
-                    Back
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (validateStep2()) {
-                        handleFinalSubmit(
-                          setIsSubmitting,
-                          interests,
-                          userId,
-                          otherInterest,
-                          digitalRightsInfo,
-                          channelInfo,
-                          user,
-                          userEmail,
-                          onClose
-                        );
-                      }
-                    }}
-                    disabled={isSubmitting}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit"}
-                  </button>
-                </div>
-              )}
+                  }
+                }}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
             </div>
           </motion.div>
         </div>
       ) : (
+        // REFERRAL FORM - KEEPING EXACTLY THE SAME
         <div className="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4 overflow-hidden">
           {/* Floating Cubes Background */}
           <div className="absolute inset-0 overflow-hidden">
             {[...Array(20)].map((_, i) => (
               <div
-                key={i}
+                key={`ref-cube-${i}`}
                 className="absolute w-4 h-4 bg-indigo-500/10 animate-float"
                 style={{
                   left: `${Math.random() * 100}%`,
@@ -477,16 +403,17 @@ const updateReferralId = async (referrerUsername, userId) => {
               <h2 className="text-xl font-bold text-white">Welcome to MediaTiger!</h2>
             </div>
 
-            {/* Referral Form Content */}
+            {/* Referral Form Content - EXACTLY THE SAME */}
             <div className="px-6 py-5 overflow-y-auto max-h-[calc(100vh-16rem)]">
               <div className="space-y-4">
                 {/* Full Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="referral-fullName" className="block text-sm font-medium text-gray-300 mb-2">
                     Full Name *
                   </label>
                   <input
                     type="text"
+                    id="referral-fullName"
                     name="fullName"
                     value={referralForm.fullName}
                     onChange={handleReferralFormChange}
@@ -497,11 +424,12 @@ const updateReferralId = async (referrerUsername, userId) => {
 
                 {/* Email Address */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="referral-email" className="block text-sm font-medium text-gray-300 mb-2">
                     Your Email Address *
                   </label>
                   <input
                     type="email"
+                    id="referral-email"
                     name="email"
                     value={referralForm.email}
                     onChange={handleReferralFormChange}
@@ -512,42 +440,47 @@ const updateReferralId = async (referrerUsername, userId) => {
 
                 {/* YouTube Channels */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="referral-youtube" className="block text-sm font-medium text-gray-300 mb-2">
                     YouTube Channels *
                   </label>
-                  {referralForm.youtubeChannels.map((channel, index) => (
-                    <div key={index} className="flex space-x-2 mb-2">
-                      <div className="flex-1 relative">
-                        <input
-                          type="url"
-                          name={`youtubeChannel${index}`}
-                          value={channel}
-                          onChange={handleReferralFormChange}
-                          className="w-full px-3 py-2 pr-10 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="https://youtube.com/@yourchannel"
-                        />
-                        {/* Verification icon */}
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                          {verifyingChannels[index] ? (
-                            <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                          ) : channelVerification[index] === true ? (
-                            <Check className="w-4 h-4 text-green-500" />
-                          ) : channelVerification[index] === false ? (
-                            <X className="w-4 h-4 text-red-500" />
-                          ) : null}
+                  {referralForm.youtubeChannels.map((channel, index) => {
+                    const verificationStatus = channelVerification[index];
+                    const isVerifying = verifyingChannels[index];
+                    
+                    return (
+                      <div key={`referral-channel-${index}`} className="flex space-x-2 mb-2">
+                        <div className="flex-1 relative">
+                          <input
+                            type="url"
+                            id={index === 0 ? "referral-youtube" : undefined}
+                            name={`youtubeChannel${index}`}
+                            value={channel}
+                            onChange={handleReferralFormChange}
+                            className="w-full px-3 py-2 pr-10 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder="https://youtube.com/@yourchannel"
+                          />
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            {isVerifying ? (
+                              <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                            ) : verificationStatus === true ? (
+                              <Check className="w-4 h-4 text-green-500" />
+                            ) : verificationStatus === false ? (
+                              <X className="w-4 h-4 text-red-500" />
+                            ) : null}
+                          </div>
                         </div>
+                        {referralForm.youtubeChannels.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeReferralChannelField(index)}
+                            className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                          >
+                            ×
+                          </button>
+                        )}
                       </div>
-                      {referralForm.youtubeChannels.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeReferralChannelField(index)}
-                          className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                   <button
                     type="button"
                     onClick={addReferralChannelField}
@@ -559,11 +492,12 @@ const updateReferralId = async (referrerUsername, userId) => {
 
                 {/* Referral Code */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="referral-code" className="block text-sm font-medium text-gray-300 mb-2">
                     Referral Code (Optional)
                   </label>
                   <input
                     type="text"
+                    id="referral-code"
                     name="referralCode"
                     value={referralForm.referralCode}
                     onChange={handleReferralFormChange}

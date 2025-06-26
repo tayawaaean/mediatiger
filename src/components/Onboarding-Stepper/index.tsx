@@ -1,8 +1,6 @@
-import axios from "axios";
 import React from "react";
 import toast from "react-hot-toast";
 import { supabase } from "../../lib/supabase";
-import { ChannelInfo } from "../../stores/onboardingStore";
 
 const shownToasts = new Set<string>();
 
@@ -28,197 +26,6 @@ export const showUniqueToast = (
   }
 };
 
-export const handleCopyVerification = (
-  setVerificationCopied: React.Dispatch<React.SetStateAction<boolean>>,
-  channelInfo: { verificationCode: string }
-): void => {
-  if (!channelInfo.verificationCode) {
-    showUniqueToast("No verification code to copy", "error", "no-code");
-    return;
-  }
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard
-      .writeText(channelInfo.verificationCode)
-      .then(() => {
-        setVerificationCopied(true);
-        setTimeout(() => setVerificationCopied(false), 2000);
-      })
-      .catch(() => {
-        showUniqueToast(
-          "Failed to copy verification code",
-          "error",
-          "copy-failed"
-        );
-      });
-  } else {
-    // Fallback for unsupported browsers
-    const textarea = document.createElement("textarea");
-    textarea.value = channelInfo.verificationCode;
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand("copy");
-      setVerificationCopied(true);
-      setTimeout(() => setVerificationCopied(false), 2000);
-    } catch {
-      showUniqueToast(
-        "Failed to copy verification code",
-        "error",
-        "copy-failed"
-      );
-    }
-    document.body.removeChild(textarea);
-  }
-};
-
-export const verifyChannel = async (
-  channelUrl: string,
-  setIsVerifying: React.Dispatch<React.SetStateAction<boolean>>,
-  channelInfo: ChannelInfo,
-  setChannelInfo: React.Dispatch<React.SetStateAction<ChannelInfo>>,
-  userId: string | null
-): Promise<void> => {
-  setIsVerifying(true);
-  console.log(
-    "[verifyChannel] Starting verification with state:",
-    JSON.stringify(channelInfo, null, 2)
-  );
-
-  if (!channelUrl || !channelUrl.toLowerCase().includes("youtube")) {
-    showUniqueToast("Enter a valid YouTube link.", "error", "invalid-url");
-    setIsVerifying(false);
-    return;
-  }
-
-  const youtubeApiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
-
-  try {
-    // First check if channel is already registered
-    const { data: existingRequest, error: checkError } = await supabase
-      .from("user_requests")
-      .select("id")
-      .filter("youtube_links", "cs", `{"${channelUrl}"}`)
-      .filter("status", "eq", "approved")
-      .not("user_id", "eq", userId)
-      .maybeSingle();
-
-    if (checkError) throw checkError;
-
-    if (existingRequest) {
-      showUniqueToast(
-        "This YouTube channel is already registered with another account",
-        "error",
-        "channel-exists"
-      );
-      setChannelInfo((prev) => ({
-        ...prev,
-        verifiedChannels: {
-          ...prev.verifiedChannels,
-          [channelUrl]: false,
-        },
-        youtubeLinks: [...prev.youtubeLinks],
-        name: prev.name || "",
-        email: prev.email || "",
-        verificationCode: prev.verificationCode,
-      }));
-      console.log(
-        "[Onboarding] -> verifyChannel -> Channel info: ",
-        JSON.stringify(channelInfo, null, 2)
-      );
-      setIsVerifying(false);
-      return;
-    }
-
-    let channelId: string | null = null;
-
-    if (channelUrl.includes("@")) {
-      const handle = channelUrl.split("@")[1];
-      const response = await axios.get(
-        `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${handle}&key=${youtubeApiKey}`
-      );
-      channelId = response.data.items?.[0]?.id || null;
-    } else if (channelUrl.includes("/channel/")) {
-      const channelIdMatch = channelUrl.match(/channel\/([a-zA-Z0-9_-]+)/);
-      channelId = channelIdMatch ? channelIdMatch[1] : null;
-    } else if (channelUrl.includes("/c/")) {
-      const customName = channelUrl.split("/c/")[1];
-      const response = await axios.get(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${customName}&key=${youtubeApiKey}`
-      );
-      channelId = response.data.items?.[0]?.snippet?.channelId || null;
-    }
-
-    if (!channelId) {
-      showUniqueToast("Invalid YouTube channel URL.", "error", "invalid-url");
-      setIsVerifying(false);
-      console.log(
-        "[Onboarding] -> verifyChannel -> Channel ID not found: ",
-        channelId
-      );
-      return;
-    }
-
-    const response = await axios.get(
-      `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${youtubeApiKey}`
-    );
-
-    const channel = response.data.items[0];
-    console.log("[Onboarding] -> verifyChannel -> Channel data: ", channel);
-    if (!channel) {
-      showUniqueToast("Channel not found.", "error", "channel-not-found");
-      setIsVerifying(false);
-      return;
-    }
-
-    const description = channel.snippet.description || "";
-    const verificationCode = channelInfo.verificationCode || "";
-
-    if (!description.trim()) {
-      showUniqueToast(
-        "The channel has no description.",
-        "error",
-        "no-description"
-      );
-      setIsVerifying(false);
-      return;
-    }
-
-    const isVerified = description.includes(verificationCode);
-
-    setChannelInfo((prev) => ({
-      ...prev,
-      verifiedChannels: {
-        ...prev.verifiedChannels,
-        [channelUrl]: isVerified,
-      },
-    }));
-
-    if (isVerified) {
-      showUniqueToast(
-        "Channel verified successfully!",
-        "success",
-        "channel-verified"
-      );
-    } else {
-      showUniqueToast(
-        "Verification code not found in channel description.",
-        "error",
-        "verification-failed"
-      );
-      console.log(
-        "[Onboarding] -> verifyChannel -> Verification code not found in channel description: ",
-        description
-      );
-    }
-  } catch (error) {
-    console.error("Error verifying channel:", error);
-    showUniqueToast("Failed to verify channel.", "error", "verification-error");
-  } finally {
-    setIsVerifying(false);
-  }
-};
-
 export const handleSignOut = async (
   signOut: () => Promise<void>,
   navigate: (path: string) => void
@@ -240,7 +47,7 @@ export const handleFinalSubmit = async (
   digitalRightsInfo: { website: string; youtubeChannels: string[] } | null,
   channelInfo: {
     youtubeLinks: string[];
-    verifiedChannels: Record<string, boolean>;
+    verifiedChannels?: Record<string, boolean>;
     name?: string;
     email?: string;
   },
@@ -254,20 +61,14 @@ export const handleFinalSubmit = async (
 ): Promise<void> => {
   setIsSubmitting(true);
   try {
-    // Create submission data
-    const selectedInterests = Object.entries(interests)
-      .filter(([, selected]) => selected)
-      .map(([interest]) => interest);
-
+    // Simplified submission - no complex interest logic needed anymore
     const { error } = await supabase.from("user_requests").insert([
       {
         user_id: userId,
-        interests: selectedInterests,
-        other_interest: interests.other ? otherInterest : null,
-        website: interests.digitalRights ? digitalRightsInfo?.website : null,
-        youtube_channel: interests.digitalRights
-          ? digitalRightsInfo?.youtubeChannels[0]
-          : null,
+        interests: [], // Always empty now since we removed interest selection
+        other_interest: null,
+        website: null,
+        youtube_channel: null,
         name: channelInfo.name || user?.user_metadata?.full_name || "",
         email: channelInfo.email || userEmail,
         youtube_links: channelInfo.youtubeLinks.filter(
@@ -338,150 +139,5 @@ export const handleFinalSubmit = async (
     );
   } finally {
     setIsSubmitting(false);
-  }
-};
-
-export const handleSubmitInterests = async (
-  interests: { [key: string]: boolean },
-  otherInterest: string,
-  channelInfo: {
-    youtubeLinks: string[];
-    verifiedChannels: Record<string, boolean>;
-  },
-  digitalRightsInfo: { website: string; youtubeChannels: string[] },
-  setStep: React.Dispatch<React.SetStateAction<number>>,
-  user: { id: string; email: string } | null,
-  onClose: () => void,
-  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>
-): Promise<void> => {
-  // Check if at least one interest is selected
-  if (
-    !interests.channelManagement &&
-    !interests.musicPartnerProgram &&
-    !interests.digitalRights &&
-    !interests.other
-  ) {
-    showUniqueToast(
-      "Please select at least one option",
-      "error",
-      "interests-required"
-    );
-    return;
-  }
-
-  // If other is selected but no text is provided
-  if (interests.other && !otherInterest.trim()) {
-    showUniqueToast(
-      "Please specify your other interest",
-      "error",
-      "other-interest-required"
-    );
-    return;
-  }
-
-  // If Channel Management or Music Partner Program is selected, validate YouTube URLs and verification
-  if (
-    (interests.channelManagement || interests.musicPartnerProgram) &&
-    !channelInfo.youtubeLinks[0]
-  ) {
-    showUniqueToast(
-      "Please provide your YouTube channel URL",
-      "error",
-      "youtube-required"
-    );
-    return;
-  }
-
-  let chanelsLinks = channelInfo?.youtubeLinks.filter((c) => c !== "");
-  // Assuming channelsLinks is an array of YouTube links
-try {
-  for (const link of chanelsLinks) {
-    const { data, error } = await supabase.rpc("check_youtube_link_exists", {
-      link,
-    });
-
-    if (error) {
-      console.error("Error validating channel:", error);
-      throw new Error("Failed to validate channel");
-    }
-
-    if (data) {
-      showUniqueToast(
-        `${link} is already linked!`,
-        "error",
-        "youtube-required"
-      );
-      return; // Exit the entire function if any link exists
-    }
-  }
-} catch (error) {
-  console.error("Error in channel validation:", error);
-  showUniqueToast(
-    "Error validating channels. Please try again.",
-    "error",
-    "validation-error"
-  );
-  return;
-}
-  // Check if all channels are verified
-  // if (interests.channelManagement || interests.musicPartnerProgram) {
-  //   const unverifiedChannels = channelInfo.youtubeLinks.filter(
-  //     (link) => link.trim() && !channelInfo.verifiedChannels[link]
-  //   );
-
-  // if (unverifiedChannels.length > 0) {
-  //   showUniqueToast(
-  //     "Please verify all YouTube channels before continuing",
-  //     "error",
-  //     "unverified-channels"
-  //   );
-  //   return;
-  // }
-  // }
-
-  // Validate Digital Rights fields if selected
-  if (interests.digitalRights) {
-    if (!digitalRightsInfo.website.trim()) {
-      showUniqueToast(
-        "Please provide your website URL",
-        "error",
-        "website-required"
-      );
-      return;
-    }
-    if (!digitalRightsInfo.youtubeChannels[0]?.trim()) {
-      showUniqueToast(
-        "Please provide your YouTube channel URL",
-        "error",
-        "youtube-required"
-      );
-      return;
-    }
-  }
-
-  // Proceed to step 2 for additional info
-  if (
-    ((interests.channelManagement || interests.musicPartnerProgram) &&
-      channelInfo.youtubeLinks[0]) ||
-    interests.digitalRights
-  ) {
-    setStep(2);
-  } else {
-    // If only "other" is selected, submit directly
-    await handleFinalSubmit(
-      setIsSubmitting,
-      interests,
-      user?.id || "",
-      otherInterest,
-      null, // digitalRightsInfo not needed for "other" interest
-      {
-        ...channelInfo,
-        name: user?.email || "",
-        email: user?.email || "",
-      },
-      user,
-      user?.email,
-      onClose
-    );
   }
 };
