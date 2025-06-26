@@ -243,7 +243,7 @@ const MessageList = ({
             {group.messages.map((message) => (
               <div
                 key={message.id}
-                className={`w-full flex ${
+                className={`flex ${
                   (isAdmin && message.sender === "other") ||
                   (!isAdmin && message.sender === "user")
                     ? "justify-end"
@@ -280,7 +280,7 @@ const MessageList = ({
 
                   {/* Message content */}
                   <div
-                    className={`flex flex-col min-w-0 ${
+                    className={`flex flex-col ${
                       (message.sender === "other" && isAdmin) ||
                       (message.sender === "user" && !isAdmin)
                         ? "items-end"
@@ -293,7 +293,7 @@ const MessageList = ({
                       className={`
                         group relative rounded-2xl px-4 py-2.5
                         break-words hyphens-auto
-                        min-w-min max-w-2xl
+                        w-fit max-w-md
                         ${
                           (isAdmin && message.sender === "other") ||
                           (!isAdmin && message.sender === "user")
@@ -379,7 +379,7 @@ const MessageList = ({
                               }}
                               onMouseLeave={() =>
                                 setShowEmojiPicker(
-                                    showEmojiPicker === message?.id
+                                  showEmojiPicker === message?.id
                                     ? null
                                     : message.id
                                 )
@@ -408,7 +408,7 @@ const MessageList = ({
                                         aspect-square flex items-center justify-center 
                                         rounded-md transition-all text-base
                                         ${
-                                            hasReacted
+                                          hasReacted
                                             ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30"
                                             : "hover:bg-slate-700/50"
                                         }
@@ -540,19 +540,26 @@ const MessageList = ({
 
       {/* Image Lightbox Modal */}
       {selectedImage && (
-        <div onClick={() => setSelectedImage(null)}
+        <div
+          onClick={() => setSelectedImage(null)}
           className="fixed inset-0 top-[-3%] z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm"
         >
-            <button onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 bg-white/5 text-white rounded-full w-10 h-10 hover:bg-black/80 transition-colors"
-            >×</button>
-            <div onClick={(e) => e.stopPropagation()}
-                // className="relative max-w-3xl w-full flex items-center justify-center"
-                className="relative max-w-max w-full flex items-center justify-center"
-            >
-                <img src={selectedImage} alt="Full preview"
-                    className="rounded-lg shadow-2xl max-h-[80vh] max-w-full"
-                />
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-4 right-4 bg-white/5 text-white rounded-full w-10 h-10 hover:bg-black/80 transition-colors"
+          >
+            ×
+          </button>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            // className="relative max-w-3xl w-full flex items-center justify-center"
+            className="relative max-w-max w-full flex items-center justify-center"
+          >
+            <img
+              src={selectedImage}
+              alt="Full preview"
+              className="rounded-lg shadow-2xl max-h-[80vh] max-w-full"
+            />
           </div>
         </div>
       )}
