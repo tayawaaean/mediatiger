@@ -192,13 +192,15 @@ export default function Dashboard(): JSX.Element {
           !isPending && (
             <Sidebar
               user={user}
-              username={username}
+              username={username || ""}
               profileImage={profileImage}
               uploadingImage={uploadingImage}
               handleImageUpload={handleImageUpload}
               navigationItems={navigationItems}
               setActiveSection={setActiveSection}
               showTuto={showTutorial}
+              isMobileMenuOpen={isMobileMenuOpen}
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
             />
           )
         }

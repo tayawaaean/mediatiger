@@ -167,194 +167,198 @@ export default function AdminPanel(): JSX.Element {
     }
   };
 
-    // Admin dashboard
-    return (
-        <AnimatePresence mode="wait">
-             <motion.div
-                key="admin-panel-root"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-            >
-                <div className="min-h-screen bg-slate-900 p-2 md:p-8">
-                    <div className="max-w-7xl mx-auto">
-                        <AdminHeader handleSignOut={handleSignOut}/>      
-                        <div
-                            className={`bg-slate-800/90 backdrop-blur-sm rounded-xl 
+  // Admin dashboard
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="admin-panel-root"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <div className="min-h-screen bg-slate-900 p-2 sm:p-4 md:p-8">
+          <div className="max-w-7xl mx-auto">
+            <AdminHeader handleSignOut={handleSignOut} />
+            <div
+              className={`bg-slate-800/90 backdrop-blur-sm rounded-xl 
                             shadow-xl border border-slate-700/50 relative overflow-hidden ${
-                                activeTab == "users" ? "min-h-[90vh]" : ""
+                              activeTab == "users" ? "min-h-[90vh]" : ""
                             } `}
-                        >
-                            {/* Background gradient effects */}
-                            <div
-                                className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-slate-500/5"></div>
-                            <div
-                                className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-500/10 rounded-full filter blur-3xl"></div>
-                            <div
-                                className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full filter blur-3xl"></div>
+            >
+              {/* Background gradient effects */}
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-slate-500/5"></div>
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-500/10 rounded-full filter blur-3xl"></div>
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full filter blur-3xl"></div>
 
-                            {/* Content */}
-                            <div
-                                className={`relative z-10 ${
-                                    activeTab == "messages" ? "h-full flex flex-col" : ""
-                                }`}
-                            >
-                                <div
-                                    className={`p-4 ${activeTab == "messages" ? "bg-slate-800/80" : ""}`}
-                                >
-                                    <AdminTabs
-                                        navigate={navigate}
-                                        activeTab={activeTab}
-                                        setActiveTab={setActiveTab}
-                                    />       
-                                </div>
-
-                                <div
-                                    className={`${
-                                        activeTab == "messages" ? "flex-1 overflow-hidden" : ""
-                                    }`}
-                                >
-                                    {/* Applications tab */}
-                                    <AnimatePresence mode="wait">
-                                        {activeTab === "applications" && (
-                                            <motion.div
-                                                key="applications"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.4 }}
-                                            >
-                                                <ApplicationsTab
-                                                    handleApplicationStatus={(id, status, reason) => {
-                                                        handleApplicationStatus({
-                                                            id: id,
-                                                            status: status,
-                                                            adminId: adminId,
-                                                            reason: reason ?? "rejected",
-                                                            activeTab: activeTab,
-                                                            onSuccess: {
-                                                                loadApplications: loadApplications,
-                                                                setRejectionReason: setRejectionReason,
-                                                                setSelectedApplicationId: setSelectedApplicationId,
-                                                                setShowRejectionModal: setShowRejectionModal,
-                                                            },
-                                                        });
-                                                    }}
-                                                    applicationFilter={applicationFilter}
-                                                    applications={applications}
-                                                    isLoadingApplications={isLoadingApplications}
-                                                    loadApplications={loadApplications}
-                                                    setApplicationFilter={setApplicationFilter}
-                                                    showRejectionModal={showRejectionModal}
-                                                    rejectionReason={rejectionReason}
-                                                    setRejectionReason={setRejectionReason}
-                                                    setShowRejectionModal={setShowRejectionModal}
-                                                />
-                                            </motion.div>
-                                        )}
-
-                                        {/* Notifications tab */}
-                                        {activeTab === "notifications" && (
-                                            <motion.div
-                                                key="notifications"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.4 }}
-                                            >
-                                                <NotificationsTab/>
-                                            </motion.div>
-                                        )}
-                                        {activeTab === "yt-channels" && (
-                                            <motion.div
-                                                key="yt-channels"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.4 }}
-                                            >
-                                            <YouTubeChannelsTab
-                                                applicationFilter={applicationFilter}
-                                                setApplicationFilter={setApplicationFilter}
-                                                loadApplications={loadApplications}
-                                                isLoadingApplications={isLoadingApplications}
-                                                channelsRequests={channelsRequests}
-                                                handleApplicationStatus={(id, status, reason) => {
-                                                    console.log(id, status, reason);
-                                                    handleApplicationStatus({
-                                                        id: id,
-                                                        status: status,
-                                                        adminId: adminId,
-                                                        reason: reason,
-                                                        activeTab: activeTab,
-                                                        onSuccess: {
-                                                            loadApplications: loadApplications,
-                                                            loadRequests: loadRequests,
-                                                            setRejectionReason: setRejectionReason,
-                                                            setSelectedApplicationId: setSelectedApplicationId,
-                                                            setShowRejectionModal: setShowRejectionModal,
-                                                            setShowRejectionModalChannel: setShowRejectionModalChannel
-                                                        },
-                                                    });
-                                                }}
-                                                handleReject={handleReject}
-                                                showRejectionModalChannel={showRejectionModalChannel}
-                                                setShowRejectionModalChannel={setShowRejectionModalChannel}
-                                            />
-                                            </motion.div>
-                                        )}
-                                        {activeTab == "users" && (
-                                            <motion.div
-                                            key="users"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 0.4 }}
-                                            >
-                                                <UsersPanel/>
-                                            </motion.div>
-                                        )}
-                                        {activeTab == "messages" && (
-                                            <motion.div
-                                                key="messages"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.4 }}
-                                        >
-                                            <Messages/>
-                                        </motion.div>
-                                        )}
-                                        {activeTab == "announcement" && (
-                                            <motion.div
-                                                key="announcement"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.4 }}
-                                            >
-                                                <AnnouncementManager/>
-                                            </motion.div>    
-                                        )}
-                                        {activeTab == "music" && (
-                                            <motion.div
-                                                key="music"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.4 }}
-                                            >
-                                                <MusicManager/>
-                                            </motion.div> 
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              {/* Content */}
+              <div
+                className={`relative z-10 ${
+                  activeTab == "messages" ? "h-full flex flex-col" : ""
+                }`}
+              >
+                <div
+                  className={`p-2 sm:p-4 ${
+                    activeTab == "messages" ? "bg-slate-800/80" : ""
+                  }`}
+                >
+                  <AdminTabs
+                    navigate={navigate}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                  />
                 </div>
-            </motion.div>
-        </AnimatePresence>
-    );
+
+                <div
+                  className={`${
+                    activeTab == "messages" ? "flex-1 overflow-hidden" : ""
+                  }`}
+                >
+                  {/* Applications tab */}
+                  <AnimatePresence mode="wait">
+                    {activeTab === "applications" && (
+                      <motion.div
+                        key="applications"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <ApplicationsTab
+                          handleApplicationStatus={(id, status, reason) => {
+                            handleApplicationStatus({
+                              id: id,
+                              status: status,
+                              adminId: adminId,
+                              reason: reason ?? "rejected",
+                              activeTab: activeTab,
+                              onSuccess: {
+                                loadApplications: loadApplications,
+                                setRejectionReason: setRejectionReason,
+                                setSelectedApplicationId:
+                                  setSelectedApplicationId,
+                                setShowRejectionModal: setShowRejectionModal,
+                              },
+                            });
+                          }}
+                          applicationFilter={applicationFilter}
+                          applications={applications}
+                          isLoadingApplications={isLoadingApplications}
+                          loadApplications={loadApplications}
+                          setApplicationFilter={setApplicationFilter}
+                          showRejectionModal={showRejectionModal}
+                          rejectionReason={rejectionReason}
+                          setRejectionReason={setRejectionReason}
+                          setShowRejectionModal={setShowRejectionModal}
+                        />
+                      </motion.div>
+                    )}
+
+                    {/* Notifications tab */}
+                    {activeTab === "notifications" && (
+                      <motion.div
+                        key="notifications"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <NotificationsTab />
+                      </motion.div>
+                    )}
+                    {activeTab === "yt-channels" && (
+                      <motion.div
+                        key="yt-channels"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <YouTubeChannelsTab
+                          applicationFilter={applicationFilter}
+                          setApplicationFilter={setApplicationFilter}
+                          loadApplications={loadApplications}
+                          isLoadingApplications={isLoadingApplications}
+                          channelsRequests={channelsRequests}
+                          handleApplicationStatus={(id, status, reason) => {
+                            console.log(id, status, reason);
+                            handleApplicationStatus({
+                              id: id,
+                              status: status,
+                              adminId: adminId,
+                              reason: reason,
+                              activeTab: activeTab,
+                              onSuccess: {
+                                loadApplications: loadApplications,
+                                loadRequests: loadRequests,
+                                setRejectionReason: setRejectionReason,
+                                setSelectedApplicationId:
+                                  setSelectedApplicationId,
+                                setShowRejectionModal: setShowRejectionModal,
+                                setShowRejectionModalChannel:
+                                  setShowRejectionModalChannel,
+                              },
+                            });
+                          }}
+                          handleReject={handleReject}
+                          showRejectionModalChannel={showRejectionModalChannel}
+                          setShowRejectionModalChannel={
+                            setShowRejectionModalChannel
+                          }
+                        />
+                      </motion.div>
+                    )}
+                    {activeTab == "users" && (
+                      <motion.div
+                        key="users"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <UsersPanel />
+                      </motion.div>
+                    )}
+                    {activeTab == "messages" && (
+                      <motion.div
+                        key="messages"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <Messages />
+                      </motion.div>
+                    )}
+                    {activeTab == "announcement" && (
+                      <motion.div
+                        key="announcement"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <AnnouncementManager />
+                      </motion.div>
+                    )}
+                    {activeTab == "music" && (
+                      <motion.div
+                        key="music"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <MusicManager />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
 }

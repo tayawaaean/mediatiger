@@ -23,24 +23,26 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
 }) => {
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-slate-700/50 hover:border-indigo-500/50 transition-all duration-300 group">
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
-        <div>
-          <h3 className="text-lg font-medium text-white">{app.name}</h3>
-          <p className="text-slate-400">{app.email}</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4">
+        <div className="w-full sm:w-auto">
+          <h3 className="text-lg font-medium text-white break-words">
+            {app.name}
+          </h3>
+          <p className="text-slate-400 break-all">{app.email}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto mt-2 sm:mt-0">
           {app.status === "pending" && (
             <>
               <button
                 onClick={() => onApprove?.(app.id, "approve")}
-                className="px-4 py-2 bg-green-600/90 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-lg shadow-green-500/10 hover:shadow-green-500/20"
+                className="px-4 py-2 bg-green-600/90 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-lg shadow-green-500/10 hover:shadow-green-500/20 w-full sm:w-auto justify-center sm:justify-start"
               >
                 <UserCheck className="h-4 w-4 mr-1" />
                 Approve
               </button>
               <button
                 onClick={() => onReject?.(app.id, "reject")}
-                className="px-4 py-2 bg-red-600/90 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center shadow-lg shadow-red-500/10 hover:shadow-red-500/20"
+                className="px-4 py-2 bg-red-600/90 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center shadow-lg shadow-red-500/10 hover:shadow-red-500/20 w-full sm:w-auto justify-center sm:justify-start"
               >
                 <UserX className="h-4 w-4 mr-1" />
                 Reject
@@ -50,7 +52,7 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
         <div>
           <h4 className="text-sm font-medium text-slate-400 mb-2">Interests</h4>
           <div className="flex flex-wrap gap-2">
@@ -64,7 +66,7 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
             ))}
           </div>
           {app.other_interest && (
-            <p className="mt-2 text-sm text-slate-300">
+            <p className="mt-2 text-sm text-slate-300 break-words">
               Other: {app.other_interest}
             </p>
           )}
@@ -86,7 +88,7 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
                       href={link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-indigo-400 hover:text-indigo-300 truncate max-w-full"
+                      className="text-sm text-indigo-400 hover:text-indigo-300 truncate max-w-full break-all"
                     >
                       {link}
                     </a>
@@ -97,10 +99,10 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
         </div>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-slate-700/50 flex items-center justify-between text-xs text-slate-400">
+      <div className="mt-6 pt-4 border-t border-slate-700/50 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-slate-400 gap-2">
         <span>Submitted: {new Date(app.created_at).toLocaleString()}</span>
         <span
-          className={`px-2 py-1 rounded-full ${
+          className={`px-2 py-1 rounded-full text-center ${
             app.status === "pending"
               ? "bg-yellow-500/20 text-yellow-300"
               : app.status === "approved"

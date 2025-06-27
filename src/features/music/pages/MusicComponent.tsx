@@ -127,10 +127,6 @@ const MusicComponent = () => {
     setSearchTerm(term);
   };
 
-  const handleApplyMood = () => {
-    filterMusic();
-  };
-
   const handlePlay = (item: MusicItem) => {
     setNowPlaying(item);
   };
@@ -254,13 +250,13 @@ const MusicComponent = () => {
           Background Music List
         </h1>
 
-        <div className="grid grid-cols-7 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
           <div
             ref={contentRef}
-            className="col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-8 min-h-[600px] main-content"
+            className="col-span-1 md:col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 sm:p-8 min-h-[600px] main-content"
           >
-            <div className="flex justify-between items-center mb-6 search-container">
-              <div className="flex gap-4 w-full">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 search-container gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 w-full">
                 <div className="relative">
                   <select
                     value={sortBy}
@@ -325,7 +321,7 @@ const MusicComponent = () => {
             {renderContent()}
           </div>
 
-          <div className="col-span-3 space-y-6">
+          <div className="col-span-1 md:col-span-3 space-y-6 mt-6 md:mt-0">
             <FavoritesList
               items={filteredMusic.filter((item) => item.favorite)}
             />
