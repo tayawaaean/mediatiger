@@ -222,7 +222,7 @@ const MessageList = ({
   }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 max-h-[calc(100vh-410px)]">
       {messageGroups.map((group) => {
         // Safe key generation
         const groupKey =

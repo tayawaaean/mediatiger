@@ -39,16 +39,16 @@ export const YouTubeChannelsTab: React.FC<YouTubeChannelsTabProps> = ({
   return (
     <div>
       <div className="bg-slate-700/30 backdrop-blur-sm rounded-xl p-3 md:p-6 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <h2 className="text-lg font-semibold text-white flex items-center">
             <FileSpreadsheet className="h-5 w-5 text-indigo-400 mr-2" />
             {translate("youtubeChannels.channelsRequests")}
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <select
               value={applicationFilter}
               onChange={(e) => setApplicationFilter(e.target.value)}
-              className="flex-1 md:flex-none bg-slate-800/50 border border-slate-600/50 rounded-lg px-3 py-1.5 md:px-4 md:py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors hover:border-indigo-500/50"
+              className="flex-1 sm:flex-none bg-slate-800/50 border border-slate-600/50 rounded-lg px-3 py-1.5 md:px-4 md:py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors hover:border-indigo-500/50"
             >
               <option value="pending">
                 {translate("youtubeChannels.pending")}
@@ -63,7 +63,7 @@ export const YouTubeChannelsTab: React.FC<YouTubeChannelsTabProps> = ({
             <button
               onClick={loadApplications}
               disabled={isLoadingApplications}
-              className="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-slate-700/50 rounded-lg transition-colors"
+              className="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-slate-700/50 rounded-lg transition-colors flex-shrink-0"
             >
               <RefreshCw
                 className={`h-5 w-5 ${
@@ -108,8 +108,8 @@ export const YouTubeChannelsTab: React.FC<YouTubeChannelsTabProps> = ({
         )}
 
         {showRejectionModalChannel && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-slate-800 rounded-xl p-4 sm:p-6 max-w-md w-full mx-auto">
               <h3 className="text-lg font-semibold text-white mb-4">
                 {translate("youtubeChannels.provideRejectionReason")}
               </h3>
@@ -121,13 +121,13 @@ export const YouTubeChannelsTab: React.FC<YouTubeChannelsTabProps> = ({
                   "youtubeChannels.enterReasonForRejection"
                 )}
               />
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-2 mt-4">
                 <button
                   onClick={() => {
                     setShowRejectionModalChannel(false);
                     setRejectionReason("");
                   }}
-                  className="px-4 py-2 text-slate-300 hover:text-white transition-colors"
+                  className="px-4 py-2 text-slate-300 hover:text-white transition-colors order-2 sm:order-1"
                 >
                   {translate("common.cancel")}
                 </button>
@@ -135,7 +135,7 @@ export const YouTubeChannelsTab: React.FC<YouTubeChannelsTabProps> = ({
                   onClick={() =>
                     handleReject(selectedChannelId, rejectionReason)
                   }
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors order-1 sm:order-2"
                 >
                   {translate("youtubeChannels.rejectChannel")}
                 </button>
@@ -167,9 +167,9 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-slate-700/50 hover:border-indigo-500/50 transition-all duration-300 group">
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
-        <div>
-          <h3 className="text-lg font-medium text-white">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4">
+        <div className="w-full sm:w-auto">
+          <h3 className="text-lg font-medium text-white break-words">
             {app.channel_name ||
               (app.link &&
                 app.link.replace(
@@ -177,9 +177,9 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
                   ""
                 ))}
           </h3>
-          <p className="text-slate-400">{app.email}</p>
+          <p className="text-slate-400 break-all">{app.email}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto mt-2 sm:mt-0">
           {app.status === "pending" && (
             <>
               <button
@@ -190,13 +190,13 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
                     translate("youtubeChannels.approved")
                   )
                 }
-                className="px-4 py-2 bg-green-600/90 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-lg shadow-green-500/10 hover:shadow-green-500/20"
+                className="px-4 py-2 bg-green-600/90 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center shadow-lg shadow-green-500/10 hover:shadow-green-500/20 w-full sm:w-auto justify-center sm:justify-start"
               >
                 <UserCheck className="h-4 w-4 mr-1" />
                 {translate("youtubeChannels.approve")}
               </button>
               <button
-                className="px-4 py-2 bg-red-600/90 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center shadow-lg shadow-red-500/10 hover:shadow-red-500/20"
+                className="px-4 py-2 bg-red-600/90 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center shadow-lg shadow-red-500/10 hover:shadow-red-500/20 w-full sm:w-auto justify-center sm:justify-start"
                 onClick={() => handleReject(app.id)}
               >
                 <UserX className="h-4 w-4 mr-1" />

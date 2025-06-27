@@ -245,30 +245,30 @@ const Hero: React.FC<HeroProps & { loadingState: LoadingState }> = ({
               }`}
               style={{ transitionDelay: "900ms" }}
             >
-              <div className="relative bg-slate-800/95 backdrop-blur-sm p-6 rounded-2xl shadow-2xl ring-1 ring-white/10 hover:shadow-3xl transition-all duration-300 transform hover:scale-[1.02]">
+              <div className="relative bg-slate-800/95 backdrop-blur-sm p-4 md:p-6 rounded-2xl shadow-2xl ring-1 ring-white/10 hover:shadow-3xl transition-all duration-300 transform hover:scale-[1.02]">
                 {/* Header */}
-                <div className="mb-6">
-                  <h2 className="inline-block bg-indigo-500 text-white text-xl md:text-2xl font-bold px-4 py-2 rounded-lg shadow-lg ring-1 ring-indigo-400/50 transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+                <div className="mb-4 md:mb-6">
+                  <h2 className="inline-block bg-indigo-500 text-white text-lg md:text-xl lg:text-2xl font-bold px-3 md:px-4 py-2 rounded-lg shadow-lg ring-1 ring-indigo-400/50 transform -rotate-1 hover:rotate-0 transition-transform duration-300">
                     WATCH HOW IT WORKS
                   </h2>
                 </div>
 
                 {/* Description */}
-                <p className="text-base md:text-lg font-bold text-white mb-8 leading-tight">
+                <p className="text-sm md:text-base lg:text-lg font-bold text-white mb-6 md:mb-8 leading-tight">
                   See how creators are earning an extra{" "}
                   <span className="text-green-400">$5K-$20K+/MONTH</span> from
                   Shorts.
                 </p>
 
                 {/* Video placeholder with demo button */}
-                <div className="relative bg-slate-700/95 backdrop-blur-sm p-10 rounded-xl shadow-inner ring-1 ring-white/10 min-h-[180px] flex items-center justify-center">
+                <div className="relative bg-slate-700/95 backdrop-blur-sm p-6 md:p-10 rounded-xl shadow-inner ring-1 ring-white/10 min-h-[140px] md:min-h-[180px] flex items-center justify-center">
                   <button
                     onClick={openVideoModal}
-                    className="relative bg-purple-500 hover:bg-purple-600 text-white text-lg md:text-xl font-bold px-8 py-4 rounded-lg shadow-xl ring-1 ring-purple-400/50 hover:shadow-2xl transition-all duration-200 transform hover:scale-105 group"
+                    className="relative bg-purple-500 hover:bg-purple-600 text-white text-base md:text-lg lg:text-xl font-bold px-6 md:px-8 py-3 md:py-4 rounded-lg shadow-xl ring-1 ring-purple-400/50 hover:shadow-2xl transition-all duration-200 transform hover:scale-105 group"
                   >
                     <span className="flex items-center">
                       <svg
-                        className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
+                        className="w-4 h-4 md:w-5 md:h-5 mr-2 group-hover:scale-110 transition-transform"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >

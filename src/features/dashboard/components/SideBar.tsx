@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, UserCircle, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import { useLanguage } from "../../../contexts/LanguageContext"; // Import useLanguage hook
+import { ExtendedUser } from "../../../types/user";
 
 interface NavigationItem {
   name: string;
@@ -12,7 +13,7 @@ interface NavigationItem {
 }
 
 interface SidebarProps {
-  user: any;
+  user: ExtendedUser | null;
   username: string;
   profileImage: string | null;
   uploadingImage: boolean;
@@ -20,18 +21,22 @@ interface SidebarProps {
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   navigationItems: NavigationItem[];
   setActiveSection: (section: string) => void;
+  isMobileMenuOpen?: boolean;
+  setIsMobileMenuOpen?: (value: boolean) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-                                           user,
-                                           username,
-                                           profileImage,
-                                           uploadingImage,
-                                           showTuto,
-                                           handleImageUpload,
-                                           navigationItems,
-                                           setActiveSection,
-                                         }) => {
+  user,
+  username,
+  profileImage,
+  uploadingImage,
+  showTuto,
+  handleImageUpload,
+  navigationItems,
+  setActiveSection,
+  isMobileMenuOpen = false,
+  setIsMobileMenuOpen = () => {},
+}) => {
   const { translate } = useLanguage(); // Get the translate function
   const [showTutorial, setShowTutorial] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -42,16 +47,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   const tutorialSteps = [
     {
       id: "profile-section",
-      title: translate('yourProfile'),
-      content: translate('profileTutorialContent'),
+      title: translate("yourProfile"),
+      content: translate("profileTutorialContent"),
       position: "right",
     },
     ...navigationItems.map((item) => ({
       id: `nav-item-${item.section}`,
       title: item.name,
       content:
-          item.tutorialContent ||
-          translate('sectionTutorialContent', { section: item.name.toLowerCase() }),
+        item.tutorialContent ||
+        translate("sectionTutorialContent", {
+          section: item.name.toLowerCase(),
+        }),
       position: "right" as const,
     })),
   ];
@@ -63,12 +70,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       try {
         // Check user metadata for tutorial preference
-        const showTutorialPreference = user.user_metadata?.show_tutorial;
+        const showTutorialPreference = user?.user_metadata?.show_tutorial;
 
         // Only show tutorial if it hasn't been shown before
         if (
-            showTutorialPreference === undefined ||
-            user.user_metadata?.show_tutorial == false
+          showTutorialPreference === undefined ||
+          user?.user_metadata?.show_tutorial == false
         ) {
           setShowTutorial(true);
           const { error: metadataError } = await supabase.auth.updateUser({
@@ -84,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       }
     };
     updateTutorialState();
-  }, [showTuto]);
+  }, [showTuto, user]);
   // Update position when step changes
   useEffect(() => {
     if (!showTutorial) return;
@@ -163,168 +170,285 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-      <>
-        {/* Tutorial Overlay */}
-        {showTutorial && elementPosition && (
-            <div
-                ref={overlayRef}
-                className="fixed inset-0 z-50 bg-black bg-opacity-70 overflow-hidden"
-            >
-              {/* Highlighted element overlay */}
-              <div
-                  className="absolute border-2 border-purple-400 rounded-md shadow-lg transition-all duration-300"
-                  style={{
-                    top: `${elementPosition.top}px`,
-                    left: `${elementPosition.left}px`,
-                    width: `${elementPosition.width}px`,
-                    height: `${elementPosition.height}px`,
-                  }}
-              />
+    <>
+      {/* Tutorial Overlay */}
+      {showTutorial && elementPosition && (
+        <div
+          ref={overlayRef}
+          className="fixed inset-0 z-50 bg-black bg-opacity-70 overflow-hidden"
+        >
+          {/* Highlighted element overlay */}
+          <div
+            className="absolute border-2 border-purple-400 rounded-md shadow-lg transition-all duration-300"
+            style={{
+              top: `${elementPosition.top}px`,
+              left: `${elementPosition.left}px`,
+              width: `${elementPosition.width}px`,
+              height: `${elementPosition.height}px`,
+            }}
+          />
 
-              {/* Tooltip */}
-              <div
-                  className="absolute bg-white rounded-lg shadow-xl max-w-sm p-4 z-50"
-                  style={getTooltipPosition()}
+          {/* Tooltip */}
+          <div
+            className="absolute bg-white rounded-lg shadow-xl max-w-sm p-4 z-50"
+            style={getTooltipPosition()}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-bold text-lg">
+                {tutorialSteps[currentStep].title}
+              </h3>
+              <button
+                onClick={() => setShowTutorial(false)}
+                className="text-gray-500 hover:text-gray-700 ml-2"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-lg">
-                    {tutorialSteps[currentStep].title}
-                  </h3>
+                <X size={20} />
+              </button>
+            </div>
+            <p className="text-gray-700 mb-4">
+              {tutorialSteps[currentStep].content}
+            </p>
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-gray-500">
+                {translate("step")} {currentStep + 1} {translate("of")}{" "}
+                {tutorialSteps.length}
+              </div>
+              <div className="flex space-x-2">
+                {currentStep > 0 && (
                   <button
-                      onClick={() => setShowTutorial(false)}
-                      className="text-gray-500 hover:text-gray-700 ml-2"
+                    onClick={handlePrev}
+                    className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
                   >
-                    <X size={20} />
+                    <ChevronLeft size={20} />
                   </button>
-                </div>
-                <p className="text-gray-700 mb-4">
-                  {tutorialSteps[currentStep].content}
-                </p>
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-gray-500">
-                    {translate('step')} {currentStep + 1} {translate('of')} {tutorialSteps.length}
-                  </div>
-                  <div className="flex space-x-2">
-                    {currentStep > 0 && (
-                        <button
-                            onClick={handlePrev}
-                            className="p-2 bg-gray-100 rounded-md hover:bg-gray-200"
-                        >
-                          <ChevronLeft size={20} />
-                        </button>
-                    )}
-                    <button
-                        onClick={handleNext}
-                        className="p-2 bg-purple-500 text-white rounded-md hover:bg-purple-600"
-                    >
-                      {currentStep === tutorialSteps.length - 1 ? (
-                          translate('finish')
-                      ) : (
-                          <ChevronRight size={20} />
-                      )}
-                    </button>
-                  </div>
-                </div>
+                )}
+                <button
+                  onClick={handleNext}
+                  className="p-2 bg-purple-500 text-white rounded-md hover:bg-purple-600"
+                >
+                  {currentStep === tutorialSteps.length - 1 ? (
+                    translate("finish")
+                  ) : (
+                    <ChevronRight size={20} />
+                  )}
+                </button>
               </div>
             </div>
-        )}
+          </div>
+        </div>
+      )}
 
-        {/* Sidebar */}
-        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
-          <div className="flex min-h-0 flex-1 flex-col bg-slate-800">
-            <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
+        <div className="flex min-h-0 flex-1 flex-col bg-slate-800">
+          <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
+            {/* User Profile Summary */}
+            <div id="profile-section" className="px-6 py-8 text-center">
+              <div className="relative group">
+                <div className="h-24 w-24 rounded-full bg-indigo-600 mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold relative overflow-hidden">
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt={translate("profileAlt")}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    user?.user_metadata?.full_name?.[0]?.toUpperCase() || (
+                      <UserCircle className="h-16 w-16" />
+                    )
+                  )}
+
+                  {/* Upload overlay */}
+                  <label className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity duration-200">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                    />
+                    {uploadingImage ? (
+                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
+                    ) : (
+                      <span className="text-white text-sm">
+                        {translate("update")}
+                      </span>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              <h2 className="text-xl font-bold text-white mb-1">
+                {translate("welcomedashboard")},{" "}
+                {user?.user_metadata?.full_name?.split(" ")[0] ||
+                  translate("user")}
+                !
+              </h2>
+              <p className="text-sm text-slate-400 mb-4">
+                {username && <span>@{username}</span>}
+              </p>
+            </div>
+
+            {/* NavBar Buttons */}
+            <nav className="mt-5 flex-1 space-y-2 px-4">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.name}
+                  id={`nav-item-${item.section}`}
+                  onClick={() => {
+                    setActiveSection(item.section);
+                    if (showTutorial) {
+                      const stepIndex = tutorialSteps.findIndex(
+                        (step) => step.id === `nav-item-${item.section}`
+                      );
+                      if (stepIndex !== -1) setCurrentStep(stepIndex);
+                    }
+                  }}
+                  className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-300 relative overflow-hidden hover:shadow-lg hover:shadow-indigo-500/10 hover:scale-[1.02] hover:-translate-y-0.5 w-full justify-between
+                    ${
+                      showTutorial &&
+                      currentStep ===
+                        tutorialSteps.findIndex(
+                          (step) => step.id === `nav-item-${item.section}`
+                        )
+                        ? "ring-2 ring-yellow-400"
+                        : ""
+                    }`}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative z-10 flex items-center">
+                    <span className="transform transition-transform duration-300 group-hover:scale-110">
+                      {item.icon}
+                    </span>
+                    <span className="ml-3 transform transition-transform duration-300 group-hover:translate-x-1">
+                      {item.name}
+                    </span>
+                  </div>
+                  {item.count && (
+                    <span className="relative z-10 bg-slate-900 py-0.5 px-2 rounded-full text-xs transform transition-all duration-300 group-hover:bg-indigo-900 group-hover:text-white">
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </nav>
+
+            {/* Tutorial Trigger Button */}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-40 flex md:hidden">
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
+          {/* Sidebar panel */}
+          <div className="relative flex flex-col w-64 h-full bg-slate-800 shadow-xl transition-transform duration-300 transform translate-x-0">
+            {/* Close button */}
+            <button
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <X size={28} />
+            </button>
+            {/* Sidebar content (copy from desktop) */}
+            <div className="flex-1 flex flex-col overflow-y-auto pt-5 pb-4">
               {/* User Profile Summary */}
               <div id="profile-section" className="px-6 py-8 text-center">
                 <div className="relative group">
                   <div className="h-24 w-24 rounded-full bg-indigo-600 mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold relative overflow-hidden">
                     {profileImage ? (
-                        <img
-                            src={profileImage}
-                            alt={translate('profileAlt')}
-                            className="h-full w-full object-cover"
-                        />
+                      <img
+                        src={profileImage}
+                        alt={translate("profileAlt")}
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
-                        user?.user_metadata?.full_name?.[0]?.toUpperCase() || (
-                            <UserCircle className="h-16 w-16" />
-                        )
+                      user?.user_metadata?.full_name?.[0]?.toUpperCase() || (
+                        <UserCircle className="h-16 w-16" />
+                      )
                     )}
-
                     {/* Upload overlay */}
                     <label className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity duration-200">
                       <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleImageUpload}
-                          disabled={uploadingImage}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
                       />
                       {uploadingImage ? (
-                          <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
+                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
                       ) : (
-                          <span className="text-white text-sm">{translate('update')}</span>
+                        <span className="text-white text-sm">
+                          {translate("update")}
+                        </span>
                       )}
                     </label>
                   </div>
                 </div>
-
                 <h2 className="text-xl font-bold text-white mb-1">
-                  {translate('welcomedashboard')},{" "}
-                  {user?.user_metadata?.full_name?.split(" ")[0] || translate('user')}!
+                  {translate("welcomedashboard")},{" "}
+                  {user?.user_metadata?.full_name?.split(" ")[0] ||
+                    translate("user")}
+                  !
                 </h2>
                 <p className="text-sm text-slate-400 mb-4">
                   {username && <span>@{username}</span>}
                 </p>
               </div>
-
               {/* NavBar Buttons */}
               <nav className="mt-5 flex-1 space-y-2 px-4">
                 {navigationItems.map((item) => (
-                    <button
-                        key={item.name}
-                        id={`nav-item-${item.section}`}
-                        onClick={() => {
-                          setActiveSection(item.section);
-                          if (showTutorial) {
-                            const stepIndex = tutorialSteps.findIndex(
-                                (step) => step.id === `nav-item-${item.section}`
-                            );
-                            if (stepIndex !== -1) setCurrentStep(stepIndex);
-                          }
-                        }}
-                        className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-300 relative overflow-hidden hover:shadow-lg hover:shadow-indigo-500/10 hover:scale-[1.02] hover:-translate-y-0.5 w-full justify-between
-                    ${
-                            showTutorial &&
-                            currentStep ===
+                  <button
+                    key={item.name}
+                    id={`nav-item-${item.section}`}
+                    onClick={() => {
+                      setActiveSection(item.section);
+                      setIsMobileMenuOpen(false);
+                      if (showTutorial) {
+                        const stepIndex = tutorialSteps.findIndex(
+                          (step) => step.id === `nav-item-${item.section}`
+                        );
+                        if (stepIndex !== -1) setCurrentStep(stepIndex);
+                      }
+                    }}
+                    className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-300 relative overflow-hidden hover:shadow-lg hover:shadow-indigo-500/10 hover:scale-[1.02] hover:-translate-y-0.5 w-full justify-between
+                        ${
+                          showTutorial &&
+                          currentStep ===
                             tutorialSteps.findIndex(
-                                (step) => step.id === `nav-item-${item.section}`
+                              (step) => step.id === `nav-item-${item.section}`
                             )
-                                ? "ring-2 ring-yellow-400"
-                                : ""
+                            ? "ring-2 ring-yellow-400"
+                            : ""
                         }`}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="relative z-10 flex items-center">
-                    <span className="transform transition-transform duration-300 group-hover:scale-110">
-                      {item.icon}
-                    </span>
-                        <span className="ml-3 transform transition-transform duration-300 group-hover:translate-x-1">
-                      {item.name}
-                    </span>
-                      </div>
-                      {item.count && (
-                          <span className="relative z-10 bg-slate-900 py-0.5 px-2 rounded-full text-xs transform transition-all duration-300 group-hover:bg-indigo-900 group-hover:text-white">
-                      {item.count}
-                    </span>
-                      )}
-                    </button>
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative z-10 flex items-center">
+                      <span className="transform transition-transform duration-300 group-hover:scale-110">
+                        {item.icon}
+                      </span>
+                      <span className="ml-3 transform transition-transform duration-300 group-hover:translate-x-1">
+                        {item.name}
+                      </span>
+                    </div>
+                    {item.count && (
+                      <span className="relative z-10 bg-slate-900 py-0.5 px-2 rounded-full text-xs transform transition-all duration-300 group-hover:bg-indigo-900 group-hover:text-white">
+                        {item.count}
+                      </span>
+                    )}
+                  </button>
                 ))}
               </nav>
-
-              {/* Tutorial Trigger Button */}
             </div>
           </div>
         </div>
-      </>
+      )}
+    </>
   );
 };
 
