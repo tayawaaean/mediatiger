@@ -1,0 +1,341 @@
+/* Mobile-specific optimizations for music page */
+
+/* Enhanced touch targets for mobile */
+@media (max-width: 768px) {
+  .music-item button {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 8px;
+  }
+
+  .favorite-btn,
+  .download-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Improved scrolling on mobile */
+  .music-list-container {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Better typography scaling */
+  .music-title {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .music-category-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  /* Improved grid layout for mobile music list */
+  .music-list-mobile {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 12px;
+    padding: 12px 8px;
+    align-items: center;
+  }
+
+  /* Enhanced mobile player */
+  .music-player-mobile {
+    padding: 12px 16px;
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(12px);
+  }
+
+  .music-player-mobile .progress-bar {
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  .music-player-mobile .track-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .music-player-mobile .track-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .music-player-mobile .track-tags {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .music-player-mobile .track-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(148, 163, 184, 1);
+    white-space: nowrap;
+  }
+
+  .music-player-mobile .track-tag:first-child {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Mobile sidebar optimizations */
+  .favorites-mobile,
+  .custom-request-mobile {
+    margin-top: 24px;
+  }
+
+  .favorites-mobile .favorites-list {
+    max-height: 240px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .favorites-mobile .favorite-item {
+    padding: 8px 12px;
+    gap: 12px;
+  }
+
+  .favorites-mobile .favorite-cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .favorites-mobile .favorite-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .favorites-mobile .favorite-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .favorites-mobile .favorite-tags {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .favorites-mobile .favorite-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(148, 163, 184, 1);
+    white-space: nowrap;
+  }
+
+  /* Mobile search and filter optimizations */
+  .search-controls-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .search-controls-mobile .filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .search-controls-mobile .filter-select {
+    width: 100%;
+    min-width: 140px;
+    padding: 8px 12px;
+    padding-right: 32px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(100, 116, 139, 0.5);
+    color: rgba(203, 213, 225, 1);
+    font-size: 14px;
+  }
+
+  .search-controls-mobile .search-input {
+    width: 100%;
+    padding: 8px 12px;
+    padding-left: 40px;
+    padding-right: 40px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(100, 116, 139, 0.5);
+    color: rgba(203, 213, 225, 1);
+    font-size: 14px;
+  }
+
+  .search-controls-mobile .search-input::placeholder {
+    color: rgba(148, 163, 184, 1);
+  }
+
+  .search-controls-mobile .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: rgba(148, 163, 184, 1);
+  }
+
+  .search-controls-mobile .clear-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: rgba(148, 163, 184, 1);
+    cursor: pointer;
+  }
+
+  .search-controls-mobile .clear-icon:hover {
+    color: white;
+  }
+}
+
+/* Extra small screens (< 475px) */
+@media (max-width: 475px) {
+  .music-player-mobile {
+    padding: 10px 12px;
+  }
+
+  .music-player-mobile .track-info {
+    margin-right: 8px;
+  }
+
+  .music-player-mobile .controls {
+    gap: 8px;
+  }
+
+  .music-player-mobile .play-button {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+  }
+
+  .music-player-mobile .favorite-button {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+  }
+
+  .music-list-mobile {
+    grid-template-columns: 36px 1fr auto;
+    gap: 10px;
+    padding: 10px 6px;
+  }
+
+  .music-list-mobile .cover-image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .search-controls-mobile .filter-row {
+    gap: 10px;
+  }
+
+  .search-controls-mobile .filter-select,
+  .search-controls-mobile .search-input {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .search-controls-mobile .search-input {
+    padding-left: 36px;
+    padding-right: 36px;
+  }
+
+  .favorites-mobile .favorite-item {
+    padding: 6px 10px;
+    gap: 10px;
+  }
+
+  .favorites-mobile .favorite-cover {
+    width: 36px;
+    height: 36px;
+  }
+
+  .favorites-mobile .favorite-title {
+    font-size: 13px;
+  }
+
+  .favorites-mobile .favorite-tag {
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .music-player-mobile {
+    padding: 8px 16px;
+  }
+
+  .music-player-mobile .track-tags {
+    display: none; /* Hide tags in landscape to save space */
+  }
+
+  .favorites-mobile .favorites-list {
+    max-height: 180px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .music-player-mobile .progress-bar {
+    height: 2px;
+  }
+
+  .music-list-mobile button {
+    border: none;
+    outline: none;
+  }
+}
+
+/* Focus states for accessibility */
+@media (max-width: 768px) {
+  .music-list-mobile button:focus,
+  .music-player-mobile button:focus,
+  .search-controls-mobile input:focus,
+  .search-controls-mobile select:focus {
+    outline: 2px solid rgba(16, 185, 129, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) and (max-width: 768px) {
+  .music-player-mobile {
+    background: rgba(15, 23, 42, 0.95);
+  }
+
+  .search-controls-mobile .filter-select,
+  .search-controls-mobile .search-input {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(71, 85, 105, 0.5);
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .music-item,
+  .favorite-item,
+  .music-player-mobile * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

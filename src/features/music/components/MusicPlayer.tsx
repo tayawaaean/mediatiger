@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { MusicItem } from '../../../utils/data';
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { MusicItem } from "../../../utils/data";
 
 interface MusicPlayerProps {
   currentTrack: MusicItem | null;
@@ -19,11 +19,11 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
     const formatTime = (seconds: number) => {
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = Math.floor(seconds % 60);
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+      return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
     };
 
     const parseDuration = (durationStr: string): number => {
-      const [minutes, seconds] = durationStr.split(':').map(Number);
+      const [minutes, seconds] = durationStr.split(":").map(Number);
       return (minutes || 0) * 60 + (seconds || 0);
     };
 
@@ -34,7 +34,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
           setIsPlaying(false);
         } else {
           audioRef.current.play().catch((err) => {
-            console.error('Playback error:', err);
+            console.error("Playback error:", err);
             setIsPlaying(false);
           });
           setIsPlaying(true);
@@ -42,26 +42,31 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
       }
     }, [isPlaying]);
 
-    const handleProgressBarClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-      if (!audioRef.current) return;
-      const progressBar = e.currentTarget;
-      const clickPosition = e.nativeEvent.offsetX;
-      const progressBarWidth = progressBar.clientWidth;
-      const progressPercentage = (clickPosition / progressBarWidth) * 100;
-      const newTime = (progressPercentage / 100) * audioRef.current.duration;
-      audioRef.current.currentTime = newTime;
-      setCurrentProgress(progressPercentage);
-      if (!isPlaying) {
-        audioRef.current.play().catch((err) => console.error('Playback error:', err));
-        setIsPlaying(true);
-      }
-    }, [isPlaying]);
+    const handleProgressBarClick = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!audioRef.current) return;
+        const progressBar = e.currentTarget;
+        const clickPosition = e.nativeEvent.offsetX;
+        const progressBarWidth = progressBar.clientWidth;
+        const progressPercentage = (clickPosition / progressBarWidth) * 100;
+        const newTime = (progressPercentage / 100) * audioRef.current.duration;
+        audioRef.current.currentTime = newTime;
+        setCurrentProgress(progressPercentage);
+        if (!isPlaying) {
+          audioRef.current
+            .play()
+            .catch((err) => console.error("Playback error:", err));
+          setIsPlaying(true);
+        }
+      },
+      [isPlaying]
+    );
 
     useEffect(() => {
       if (!currentTrack || !audioRef.current) return;
 
       if (currentTrack.id !== lastTrackId.current) {
-        audioRef.current.src = currentTrack.music || '';
+        audioRef.current.src = currentTrack.music || "";
         audioRef.current.load();
         setCurrentProgress(0);
         setIsPlaying(false);
@@ -70,12 +75,15 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
         setIsFavorite(currentTrack.favorite);
 
         setTimeout(() => {
-          audioRef.current?.play().then(() => {
-            setIsPlaying(true);
-          }).catch((err) => {
-            console.error('Auto-play error:', err);
-            setIsPlaying(false);
-          });
+          audioRef.current
+            ?.play()
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch((err) => {
+              console.error("Auto-play error:", err);
+              setIsPlaying(false);
+            });
         }, 100);
       }
     }, [currentTrack]);
@@ -95,7 +103,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
       };
 
       const handleLoadedMetadata = () => {
-        if (currentTrack && onUpdateDuration && audio.duration && !isNaN(audio.duration)) {
+        if (
+          currentTrack &&
+          onUpdateDuration &&
+          audio.duration &&
+          !isNaN(audio.duration)
+        ) {
           setTimeout(() => {
             const duration = formatTime(audio.duration);
             setTotalDuration(audio.duration);
@@ -104,14 +117,14 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
         }
       };
 
-      audio.addEventListener('timeupdate', updateProgress);
-      audio.addEventListener('ended', handleEnded);
-      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.addEventListener("timeupdate", updateProgress);
+      audio.addEventListener("ended", handleEnded);
+      audio.addEventListener("loadedmetadata", handleLoadedMetadata);
 
       return () => {
-        audio.removeEventListener('timeupdate', updateProgress);
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.removeEventListener("timeupdate", updateProgress);
+        audio.removeEventListener("ended", handleEnded);
+        audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       };
     }, [currentTrack, onUpdateDuration]);
 
@@ -127,86 +140,203 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
 
     return (
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-lg border-t border-slate-700/50 transition-transform duration-300 ${
-          currentTrack ? 'translate-y-0' : 'translate-y-full'
+        className={`fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-lg border-t border-slate-700/50 transition-transform duration-300 z-50 ${
+          currentTrack ? "translate-y-0" : "translate-y-full"
         }`}
       >
         <audio ref={audioRef} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {currentTrack && (
-                <>
-                  <img
-                    src={currentTrack.cover}
-                    alt={currentTrack.title}
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                  <div className="text-left">
-                    <h3 className="text-white text-sm font-medium">{currentTrack.title}</h3>
-                    <div className="flex gap-2 mt-1.5">
-                      {currentTrack.category.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+        {/* Mobile Layout */}
+        <div className="block md:hidden">
+          <div className="px-4 py-3">
+            {currentTrack && (
+              <>
+                {/* Track Info */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <img
+                      src={currentTrack.cover}
+                      alt={currentTrack.title}
+                      className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-white text-sm font-medium truncate">
+                        {currentTrack.title}
+                      </h3>
+                      <div className="flex gap-1 mt-1 overflow-hidden">
+                        {currentTrack.category.slice(0, 2).map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 truncate"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {currentTrack.category.length > 2 && (
+                          <span className="text-xs px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400">
+                            +{currentTrack.category.length - 2}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </>
-              )}
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                className="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
-                onClick={handleFavoriteToggle}
-              >
-                <svg
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill={isFavorite ? 'currentColor' : 'none'}
-                  stroke={isFavorite ? 'white' : 'currentColor'}
-                  strokeWidth="2"
-                >
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-              </button>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-400">{formatTime(currentTime)}</span>
-                <div
-                  className="w-96 h-1 bg-slate-700 rounded-full overflow-hidden cursor-pointer"
-                  onClick={handleProgressBarClick}
-                >
-                  <div
-                    className="h-full bg-white/90 transition-all duration-100"
-                    style={{ width: `${currentProgress}%` }}
-                  />
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      className="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+                      onClick={handleFavoriteToggle}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill={isFavorite ? "currentColor" : "none"}
+                        stroke={isFavorite ? "white" : "currentColor"}
+                        strokeWidth="2"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    </button>
+                    <button
+                      className="p-2 rounded-full bg-white/90 hover:bg-white transition-colors"
+                      onClick={togglePlayState}
+                      aria-label={isPlaying ? "Pause" : "Play"}
+                    >
+                      {isPlaying ? (
+                        <svg
+                          className="w-5 h-5 text-black"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <rect x="6" y="4" width="4" height="16" />
+                          <rect x="14" y="4" width="4" height="16" />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-5 h-5 text-black"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <polygon points="5 3 19 12 5 21" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <span className="text-sm text-slate-400">{formatTime(totalDuration)}</span>
-              </div>
-              <button
-                className="p-2 rounded-full bg-white/90 hover:bg-white transition-colors"
-                onClick={togglePlayState}
-                aria-label={isPlaying ? 'Pause' : 'Play'}
-              >
-                {isPlaying ? (
-                  <svg className="w-6 h-6 text-black" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="4" width="4" height="16" />
-                    <rect x="14" y="4" width="4" height="16" />
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6 text-black" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="5 3 19 12 5 21" />
-                  </svg>
+
+                {/* Progress Bar */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400 w-8 text-right">
+                    {formatTime(currentTime)}
+                  </span>
+                  <div
+                    className="flex-1 h-1 bg-slate-700 rounded-full overflow-hidden cursor-pointer"
+                    onClick={handleProgressBarClick}
+                  >
+                    <div
+                      className="h-full bg-white/90 transition-all duration-100"
+                      style={{ width: `${currentProgress}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-slate-400 w-8">
+                    {formatTime(totalDuration)}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:block">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 min-w-0 flex-1">
+                {currentTrack && (
+                  <>
+                    <img
+                      src={currentTrack.cover}
+                      alt={currentTrack.title}
+                      className="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div className="text-left min-w-0">
+                      <h3 className="text-white text-sm font-medium truncate">
+                        {currentTrack.title}
+                      </h3>
+                      <div className="flex gap-2 mt-1.5 overflow-hidden">
+                        {currentTrack.category.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 truncate"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </>
                 )}
-              </button>
+              </div>
+              <div className="flex items-center gap-4">
+                <button
+                  className="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+                  onClick={handleFavoriteToggle}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill={isFavorite ? "currentColor" : "none"}
+                    stroke={isFavorite ? "white" : "currentColor"}
+                    strokeWidth="2"
+                  >
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-400">
+                    {formatTime(currentTime)}
+                  </span>
+                  <div
+                    className="w-64 lg:w-96 h-1 bg-slate-700 rounded-full overflow-hidden cursor-pointer"
+                    onClick={handleProgressBarClick}
+                  >
+                    <div
+                      className="h-full bg-white/90 transition-all duration-100"
+                      style={{ width: `${currentProgress}%` }}
+                    />
+                  </div>
+                  <span className="text-sm text-slate-400">
+                    {formatTime(totalDuration)}
+                  </span>
+                </div>
+                <button
+                  className="p-2 rounded-full bg-white/90 hover:bg-white transition-colors"
+                  onClick={togglePlayState}
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? (
+                    <svg
+                      className="w-6 h-6 text-black"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <rect x="6" y="4" width="4" height="16" />
+                      <rect x="14" y="4" width="4" height="16" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-6 h-6 text-black"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <polygon points="5 3 19 12 5 21" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     );
   },
-  (prevProps, nextProps) => prevProps.currentTrack?.id === nextProps.currentTrack?.id
+  (prevProps, nextProps) =>
+    prevProps.currentTrack?.id === nextProps.currentTrack?.id
 );

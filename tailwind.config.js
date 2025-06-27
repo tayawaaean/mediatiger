@@ -86,11 +86,26 @@ export default {
           },
           "50%": { filter: "drop-shadow(0 0 20px rgba(253, 224, 71, 0.7))" },
         },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        slideUp: {
+          "0%": { transform: "translateY(20px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        scaleIn: {
+          "0%": { transform: "scale(0.9)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         glow: "glow 2.5s ease-in-out infinite",
+        "fade-in": "fadeIn 0.5s ease-in-out",
+        "slide-up": "slideUp 0.5s ease-out",
+        "scale-in": "scaleIn 0.3s ease-out",
       },
       dropShadow: {
         "glow-teal": "0 0 10px rgba(13, 148, 136, 0.7)",
@@ -100,6 +115,10 @@ export default {
         "glow-sky": "0 0 10px rgba(14, 165, 233, 0.7)",
         "glow-rose": "0 0 10px rgba(244, 63, 94, 0.7)",
         "glow-subtle": "0 0 8px rgba(253, 224, 71, 0.25)", // Soft yellow glow
+      },
+      screens: {
+        xs: "475px",
+        // ... other breakpoints
       },
     },
   },

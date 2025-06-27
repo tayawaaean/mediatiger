@@ -16,62 +16,79 @@ export const MusicList: React.FC<MusicListProps> = ({
   onCopyISRC,
 }) => {
   return (
-    <div className="mt-8">
-      <div className="grid grid-cols-[60px_1fr_120px_80px] gap-2 px-2 py-2 text-slate-400 text-xs font-medium sm:grid-cols-[80px_1fr_200px_100px] sm:gap-4 sm:px-4 sm:text-sm">
+    <div className="mt-6 md:mt-8">
+      {/* Header - Hidden on very small screens, shown on larger mobile */}
+      <div className="hidden xs:grid grid-cols-[50px_1fr_100px_70px] sm:grid-cols-[60px_1fr_120px_80px] md:grid-cols-[80px_1fr_200px_100px] gap-2 md:gap-4 px-2 md:px-4 py-2 text-slate-400 text-xs md:text-sm font-medium">
         <div>Cover</div>
         <div>Title</div>
-        <div className="text-right pr-4 sm:pr-8">ISRC</div>
-        <div className="flex justify-center">Music File</div>
+        <div className="text-right pr-2 sm:pr-4 md:pr-8">ISRC</div>
+        <div className="flex justify-center">Actions</div>
       </div>
-      <div className="space-y-2 mt-4" id="musicList">
+
+      <div className="space-y-2 mt-2 md:mt-4" id="musicList">
         {items.map((item, index) => (
           <FadeInUp key={item.id} delay={index * 80}>
             <div
-              className="grid grid-cols-[60px_1fr_120px_80px] gap-2 items-center px-2 py-2 hover:bg-slate-700/30 rounded-lg transition-colors cursor-pointer group sm:grid-cols-[80px_1fr_200px_100px] sm:gap-4 sm:px-4 sm:py-3"
+              className="grid grid-cols-[50px_1fr_auto] xs:grid-cols-[50px_1fr_100px_70px] sm:grid-cols-[60px_1fr_120px_80px] md:grid-cols-[80px_1fr_200px_100px] gap-2 md:gap-4 items-center px-2 md:px-4 py-3 hover:bg-slate-700/30 rounded-lg transition-colors cursor-pointer group"
               onClick={() => onPlay(item)}
             >
+              {/* Cover Image */}
               <img
                 src={item.cover}
                 alt={item.title}
-                className="w-10 h-10 rounded-lg object-cover sm:w-12 sm:h-12"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
               />
+
+              {/* Title and Tags */}
               <div className="flex flex-col min-w-0">
-                <h3 className="text-white text-xs font-medium truncate sm:text-sm">
+                <h3 className="text-white text-sm md:text-base font-medium truncate">
                   {item.title}
                 </h3>
-                <div className="flex flex-wrap gap-1 mt-1 max-h-10 overflow-hidden sm:gap-2 sm:mt-1.5 sm:max-h-12">
-                  {item.category.map((tag) => (
+                <div className="flex flex-wrap gap-1 md:gap-2 mt-1 max-h-8 md:max-h-10 overflow-hidden">
+                  {item.category.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
-                      className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 whitespace-nowrap truncate max-w-[100px] sm:text-xs sm:px-2 sm:max-w-[120px]"
+                      className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 whitespace-nowrap truncate max-w-[80px] md:max-w-[120px]"
                     >
                       {tag}
                     </span>
                   ))}
+                  {item.category.length > 3 && (
+                    <span className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full bg-white/5 text-slate-400">
+                      +{item.category.length - 3}
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {/* ISRC - Hidden on smallest screens */}
               <button
                 type="button"
-                className="text-xs text-slate-400 font-mono tracking-wider text-right pr-4 cursor-pointer hover:text-white transition-colors bg-transparent border-none outline-none sm:text-sm sm:pr-8"
+                className="hidden xs:block text-[10px] md:text-sm text-slate-400 font-mono tracking-wider text-right pr-2 md:pr-8 cursor-pointer hover:text-white transition-colors bg-transparent border-none outline-none truncate max-w-[100px] md:max-w-full"
                 onClick={(e) => {
                   e.stopPropagation();
                   onCopyISRC(item.id);
                 }}
-                title="Click to copy"
+                title="Click to copy ISRC"
                 tabIndex={0}
               >
                 {item.id}
               </button>
-              <div className="flex gap-1 justify-center sm:gap-2">
+
+              {/* Actions */}
+              <div className="flex gap-1 md:gap-2 justify-center">
                 <button
-                  className="favorite-btn p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors sm:p-2"
+                  className="favorite-btn p-1.5 md:p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors min-w-[32px] min-h-[32px] md:min-w-[36px] md:min-h-[36px] flex items-center justify-center"
                   onClick={(e) => {
                     e.stopPropagation();
                     onFavorite(item.id, !item.favorite);
                   }}
+                  title={
+                    item.favorite ? "Remove from favorites" : "Add to favorites"
+                  }
                 >
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    className="w-4 h-4 md:w-5 md:h-5"
                     viewBox="0 0 24 24"
                     fill={item.favorite ? "currentColor" : "none"}
                     stroke="currentColor"
@@ -81,7 +98,7 @@ export const MusicList: React.FC<MusicListProps> = ({
                   </svg>
                 </button>
                 <button
-                  className="download-btn p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors sm:p-2"
+                  className="download-btn p-1.5 md:p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors min-w-[32px] min-h-[32px] md:min-w-[36px] md:min-h-[36px] flex items-center justify-center"
                   title="Download"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -94,7 +111,7 @@ export const MusicList: React.FC<MusicListProps> = ({
                   }}
                 >
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    className="w-4 h-4 md:w-5 md:h-5"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -104,6 +121,22 @@ export const MusicList: React.FC<MusicListProps> = ({
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
+                </button>
+              </div>
+
+              {/* Mobile ISRC overlay - shown only on smallest screens */}
+              <div className="xs:hidden col-span-3 mt-2 pt-2 border-t border-slate-700/30">
+                <button
+                  type="button"
+                  className="text-[10px] text-slate-400 font-mono tracking-wider cursor-pointer hover:text-white transition-colors bg-transparent border-none outline-none"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCopyISRC(item.id);
+                  }}
+                  title="Click to copy ISRC"
+                  tabIndex={0}
+                >
+                  ISRC: {item.id}
                 </button>
               </div>
             </div>

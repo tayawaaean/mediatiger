@@ -95,12 +95,12 @@ export const AdminMessagesView: React.FC<AdminMessagesViewProps> = ({
   console.log("selectedUser", selectedUser);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-h-0">
       <ImagePreview
         previewImage={previewImage}
         setPreviewImage={setPreviewImage}
       />
-      <div className="flex">
+      <div className="flex flex-1 min-h-0">
         <UsersList
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -108,25 +108,26 @@ export const AdminMessagesView: React.FC<AdminMessagesViewProps> = ({
           selectedUser={selectedUser}
           setSelectedUser={setSelectedUser}
         />
-
-        <ChatPage
-          previewImage={previewImage}
-          setPreviewImage={setPreviewImage}
-          isLoading={isLoading}
-          messages={messages}
-          renderMessage={renderMessage}
-          messagesEndRef={messagesEndRef}
-          newMessage={newMessage}
-          setNewMessage={setNewMessage}
-          handleSendMessage={handleSendMessage}
-          selectedFile={selectedFile}
-          handleFileSelect={handleFileSelectForChat}
-          setSelectedFile={setSelectedFile}
-          isAdmin={true}
-          onTogglePin={onTogglePin}
-          onAddReaction={onAddReaction}
-          selectedUser={selectedUser}
-        />
+        <div className="flex-1 min-h-0 flex flex-col">
+          <ChatPage
+            previewImage={previewImage}
+            setPreviewImage={setPreviewImage}
+            isLoading={isLoading}
+            messages={messages}
+            renderMessage={renderMessage}
+            messagesEndRef={messagesEndRef}
+            newMessage={newMessage}
+            setNewMessage={setNewMessage}
+            handleSendMessage={handleSendMessage}
+            selectedFile={selectedFile}
+            handleFileSelect={handleFileSelectForChat}
+            setSelectedFile={setSelectedFile}
+            isAdmin={true}
+            onTogglePin={onTogglePin}
+            onAddReaction={onAddReaction}
+            selectedUser={selectedUser}
+          />
+        </div>
       </div>
     </div>
   );
@@ -148,8 +149,8 @@ const UsersList: React.FC<UsersListProps> = ({
   setSelectedUser,
 }) => {
   return (
-    <div className="bg-slate-800/60 backdrop-blur-lg rounded-xl shadow-xl border border-slate-700/50 overflow-hidden w-96 md:w-[28rem] flex flex-col">
-      <div className="p-4 border-b border-slate-700/50">
+    <div className="bg-slate-800/60 backdrop-blur-lg rounded-xl shadow-xl border border-slate-700/50 overflow-hidden w-16 sm:w-96 md:w-[28rem] min-w-16 flex flex-col">
+      <div className="p-4 border-b border-slate-700/50 hidden sm:block">
         <div className="relative">
           <input
             type="text"
@@ -169,22 +170,28 @@ const UsersList: React.FC<UsersListProps> = ({
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-2 p-4 max-h-[600px] overflow-y-auto">
+      <div className="flex flex-col gap-2 p-2 sm:p-4 max-h-[600px] overflow-y-auto">
         {filteredUsers.map((u) => (
           <div
             key={u.id}
             className={`
-              p-3 flex items-center gap-3 rounded-lg cursor-pointer transition-all
+              flex items-center justify-center sm:justify-start p-2 sm:p-3 rounded-lg cursor-pointer transition-all
               ${
                 selectedUser?.id === u.id
-                  ? "bg-slate-700/50"
+                  ? "sm:bg-slate-700/50"
                   : "hover:bg-slate-700/30"
               }
             `}
             onClick={() => setSelectedUser(u)}
           >
-            <div className="relative flex-shrink-0 w-10 h-10">
-              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-medium overflow-hidden">
+            <div className="relative flex-shrink-0">
+              <div
+                className={`w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-medium overflow-hidden transition-all ${
+                  selectedUser?.id === u.id
+                    ? "ring-4 ring-white ring-offset-2 ring-offset-slate-800 sm:ring-0 sm:ring-offset-0"
+                    : ""
+                }`}
+              >
                 {u.user_metadata.avatar_url ? (
                   <img
                     src={u.user_metadata.avatar_url}
@@ -199,7 +206,7 @@ const UsersList: React.FC<UsersListProps> = ({
                 <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 border-2 border-slate-800"></div>
               )}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="hidden sm:flex flex-1 min-w-0 flex-col ml-3">
               <h3 className="font-medium text-slate-200 truncate">
                 {u.full_name}
               </h3>
@@ -208,14 +215,14 @@ const UsersList: React.FC<UsersListProps> = ({
               </p>
             </div>
             {u.unread_count && u.unread_count > 0 && (
-              <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-indigo-600 text-white rounded-full">
+              <span className="hidden sm:inline ml-2 px-2 py-0.5 text-xs font-medium bg-indigo-600 text-white rounded-full">
                 {u.unread_count}
               </span>
             )}
           </div>
         ))}
         {filteredUsers.length === 0 && (
-          <div className="text-center py-6 text-slate-400 text-sm">
+          <div className="text-center py-6 text-slate-400 text-sm hidden sm:block">
             No users found
           </div>
         )}
@@ -253,26 +260,30 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   setSelectedFile,
 }) => {
   return (
-    <div className="flex-1 flex flex-col bg-slate-900/95">
+    <div className="flex-1 flex flex-col bg-slate-900/95 min-h-0">
       {selectedUser ? (
         <>
           <ChatHeader user={selectedUser} />
-          <div className="flex-1 relative">
-            <MessageList
-              isLoading={isLoading}
-              messages={messages}
-              renderMessage={renderMessage}
-              messagesEndRef={messagesEndRef}
-            />
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto">
+              <MessageList
+                isLoading={isLoading}
+                messages={messages}
+                renderMessage={renderMessage}
+                messagesEndRef={messagesEndRef}
+              />
+            </div>
+            <div className="shrink-0">
+              <MessageInput
+                onSendMessage={handleSendMessage}
+                newMessage={newMessage}
+                setNewMessage={setNewMessage}
+                selectedFile={selectedFile}
+                onFileSelect={handleFileSelect}
+                onClearFile={() => setSelectedFile(null)}
+              />
+            </div>
           </div>
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            newMessage={newMessage}
-            setNewMessage={setNewMessage}
-            selectedFile={selectedFile}
-            onFileSelect={handleFileSelect}
-            onClearFile={() => setSelectedFile(null)}
-          />
         </>
       ) : (
         <div className="flex items-center justify-center h-full text-slate-400 flex-col p-8">

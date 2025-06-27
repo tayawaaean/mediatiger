@@ -239,31 +239,34 @@ const MusicComponent = () => {
 
   return (
     <div
-      className="bg-slate-900 text-white pb-24 font-sans"
+      className="bg-slate-900 text-white pb-32 md:pb-24 font-sans"
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       <div
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 header"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 header"
         id="main-content"
       >
-        <h1 className="text-3xl font-bold text-white mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">
           Background Music List
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
+        <div className="space-y-6 lg:grid lg:grid-cols-7 lg:gap-6 lg:space-y-0">
+          {/* Main Content */}
           <div
             ref={contentRef}
-            className="col-span-1 md:col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 sm:p-8 min-h-[600px] main-content"
+            className="lg:col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 md:p-6 lg:p-8 min-h-[500px] md:min-h-[600px] main-content"
           >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 search-container gap-4">
-              <div className="flex flex-col sm:flex-row gap-4 w-full">
-                <div className="relative">
+            {/* Search and Filter Controls */}
+            <div className="flex flex-col gap-4 mb-6 search-container">
+              {/* Sort and Mood Selection Row */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div className="relative flex-shrink-0">
                   <select
                     value={sortBy}
                     onChange={(e) =>
                       setSortBy(e.target.value as "recent" | "mood")
                     }
-                    className="appearance-none bg-white/5 text-slate-300 pl-4 pr-10 py-2 rounded-full border border-slate-700/50 cursor-pointer hover:bg-white/10 transition-colors"
+                    className="appearance-none bg-white/5 text-slate-300 pl-4 pr-10 py-2 rounded-full border border-slate-700/50 cursor-pointer hover:bg-white/10 transition-colors w-full sm:w-auto min-w-[140px]"
                   >
                     <option value="recent">Sort by Recent</option>
                     <option value="mood">Sort by Mood</option>
@@ -282,38 +285,50 @@ const MusicComponent = () => {
                 </div>
 
                 {sortBy === "mood" && (
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <select
-                        value={selectedMood}
-                        onChange={(e) => setSelectedMood(e.target.value)}
-                        className="appearance-none bg-white/5 text-slate-300 pl-4 pr-10 py-2 rounded-full border border-slate-700/50 cursor-pointer hover:bg-white/10 transition-colors"
+                  <div className="relative flex-1 sm:flex-initial">
+                    <select
+                      value={selectedMood}
+                      onChange={(e) => setSelectedMood(e.target.value)}
+                      className="appearance-none bg-white/5 text-slate-300 pl-4 pr-10 py-2 rounded-full border border-slate-700/50 cursor-pointer hover:bg-white/10 transition-colors w-full sm:w-auto min-w-[140px]"
+                    >
+                      <option value="">Select Mood</option>
+                      <option value="cheerful">Cheerful</option>
+                      <option value="horror">Horror</option>
+                      <option value="lovely">Lovely</option>
+                      <option value="groovy">Groovy</option>
+                      <option value="tense">Tense</option>
+                      <option value="dramatic">Dramatic</option>
+                      <option value="romantic">Romantic</option>
+                      <option value="dreamy">Dreamy</option>
+                      <option value="scary">Scary</option>
+                      <option value="bright">Bright</option>
+                      <option value="determined">Determined</option>
+                      <option value="sad">Sad</option>
+                      <option value="exciting">Exciting</option>
+                      <option value="mysterious">Mysterious</option>
+                      <option value="wistful">Wistful</option>
+                      <option value="epic">Epic</option>
+                      <option value="relaxing">Relaxing</option>
+                      <option value="entertaining">Entertaining</option>
+                      <option value="refreshing">Refreshing</option>
+                    </select>
+                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                      <svg
+                        className="w-4 h-4 text-slate-400"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                       >
-                        <option value="">Select Mood</option>
-                        <option value="cheerful">Cheerful</option>
-                        <option value="horror">Horror</option>
-                        <option value="lovely">Lovely</option>
-                        <option value="groovy">Groovy</option>
-                        <option value="tense">Tense</option>
-                        <option value="dramatic">Dramatic</option>
-                        <option value="romantic">Romantic</option>
-                        <option value="dreamy">Dreamy</option>
-                        <option value="scary">Scary</option>
-                        <option value="bright">Bright</option>
-                        <option value="determined">Determined</option>
-                        <option value="sad">Sad</option>
-                        <option value="exciting">Exciting</option>
-                        <option value="mysterious">Mysterious</option>
-                        <option value="wistful">Wistful</option>
-                        <option value="epic">Epic</option>
-                        <option value="relaxing">Relaxing</option>
-                        <option value="entertaining">Entertaining</option>
-                        <option value="refreshing">Refreshing</option>
-                      </select>
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
                     </div>
                   </div>
                 )}
+              </div>
 
+              {/* Search Bar Row */}
+              <div className="w-full">
                 <SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
               </div>
             </div>
@@ -321,7 +336,8 @@ const MusicComponent = () => {
             {renderContent()}
           </div>
 
-          <div className="col-span-1 md:col-span-3 space-y-6 mt-6 md:mt-0">
+          {/* Sidebar */}
+          <div className="lg:col-span-3 space-y-6">
             <FavoritesList
               items={filteredMusic.filter((item) => item.favorite)}
             />
