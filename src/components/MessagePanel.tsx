@@ -18,6 +18,7 @@ interface User {
   username: string;
   email: string;
   profile_image?: string;
+  unreadCount?: number;
 }
 
 interface Message {
@@ -37,7 +38,8 @@ interface MessagePanelProps {
   userName: string;
 }
 
-// UserSearch Component
+type UnreadCountRow = { sender_id: string; count: number };
+
 export function UserSearch({
   userId,
   onSelectUser,
@@ -50,20 +52,38 @@ export function UserSearch({
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch all users
   useEffect(() => {
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
+        const { data: usersData, error: usersError } = await supabase
           .from("users")
           .select("*")
-          .neq("id", userId); // Exclude current user
+          .neq("id", userId);
 
-        if (error) throw error;
-        setUsers(data || []);
+        if (usersError) throw usersError;
+
+        const { data: unreadMessages, error: unreadError } = await supabase
+          .from("messages")
+          .select("sender_id")
+          .eq("receiver_id", userId)
+          .is("read_at", null);
+
+        if (unreadError) throw unreadError;
+
+        const unreadMap: Record<string, number> = {};
+        ((unreadMessages as UnreadCountRow[]) || []).forEach((row) => {
+          unreadMap[row.sender_id] = (unreadMap[row.sender_id] || 0) + 1;
+        });
+
+        const usersWithUnread = (usersData || []).map((user: User) => ({
+          ...user,
+          unreadCount: unreadMap[user.id] || 0,
+        }));
+
+        setUsers(usersWithUnread);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching users or unread counts:", error);
         toast.error("Failed to load users");
       } finally {
         setIsLoading(false);
@@ -73,7 +93,6 @@ export function UserSearch({
     fetchUsers();
   }, [userId]);
 
-  // Filter users based on search term
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredUsers(users);
@@ -126,7 +145,7 @@ export function UserSearch({
             <div
               key={user.id}
               onClick={() => onSelectUser(user)}
-              className="flex items-center p-4 hover:bg-slate-700 cursor-pointer transition-colors"
+              className="flex items-center p-4 hover:bg-slate-700 cursor-pointer transition-colors relative"
             >
               {user.profile_image ? (
                 <img
@@ -136,6 +155,11 @@ export function UserSearch({
                 />
               ) : (
                 <UserCircle className="h-10 w-10 text-slate-500 mr-4" />
+              )}
+              {user.unreadCount && user.unreadCount > 0 && (
+                <span className="absolute left-8 top-3 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center">
+                  {user.unreadCount}
+                </span>
               )}
               <div>
                 <h4 className="text-white font-semibold">{user.username}</h4>

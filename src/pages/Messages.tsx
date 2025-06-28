@@ -6,10 +6,23 @@ import { useAuth } from "../contexts/AuthContext";
 import { adminId } from "../features/admin/pages/AdminPanel";
 import { supabase } from "../lib/supabase";
 import { Message, MessageInput } from "@/components/chat/ChatPage";
+import { User as AdminUser } from "../components/messages/AdminMessagesView";
 
 export default function Messages() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<any[]>([]);
+  interface Message {
+    id: string;
+    sender_id: string;
+    receiver_id: string;
+    content: string;
+    image_url?: string;
+    created_at: string;
+    read_at?: string;
+    isPinned?: boolean;
+    replyTo?: string;
+    reactions?: any[];
+  }
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newMessage, setNewMessage] = useState<MessageInput>({
     content: "",
@@ -21,8 +34,8 @@ export default function Messages() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Add new state for users, selected user, and search
-  const [users, setUsers] = useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Check if current user is admin
@@ -79,40 +92,47 @@ export default function Messages() {
       console.log("Auth users:", authUsers);
 
       // Create user objects with data from auth.users
-      const usersWithMessages = messageUserIds.map((userId) => {
-        const authUser = authUsers?.find((u) => u.id === userId);
+      const usersWithMessages: AdminUser[] = messageUserIds.map(
+        (userId: string) => {
+          const authUser = authUsers?.find((u: any) => u.id === userId);
 
-        // Find the most recent message for this user
-        const userMessages =
-          messages?.filter(
-            (m) => m.sender_id === userId || m.receiver_id === userId
-          ) || [];
+          // Find the most recent message for this user
+          const userMessages =
+            messages?.filter(
+              (m) => m.sender_id === userId || m.receiver_id === userId
+            ) || [];
 
-        const lastMessage = userMessages[0]; // Already sorted by created_at desc
+          const lastMessage = userMessages[0]; // Already sorted by created_at desc
 
-        console.log(`User ${userId} auth data:`, authUser);
-        console.log(`Raw meta data:`, authUser?.raw_user_meta_data);
+          // Count unread messages from this user to admin
+          const unread_count = userMessages.filter(
+            (m) =>
+              m.sender_id === userId && m.receiver_id === user.id && !m.read_at
+          ).length;
 
-        // Create user object from auth data
-        const userObject = {
-          id: userId,
-          email: authUser?.email || `user-${userId.slice(0, 8)}`,
-          full_name:
-            authUser?.raw_user_meta_data?.fullname ||
-            authUser?.raw_user_meta_data?.full_name ||
-            authUser?.email?.split("@")[0] ||
-            `User ${userId.slice(0, 8)}`,
-          user_metadata: authUser?.raw_user_meta_data || { role: "user" },
-        };
+          console.log(`User ${userId} auth data:`, authUser);
+          console.log(`Raw meta data:`, authUser?.raw_user_meta_data);
 
-        console.log(`Final user object for ${userId}:`, userObject);
+          // Create user object from auth data
+          const userObject: AdminUser = {
+            id: userId,
+            email: authUser?.email || `user-${userId.slice(0, 8)}`,
+            full_name:
+              authUser?.raw_user_meta_data?.fullname ||
+              authUser?.raw_user_meta_data?.full_name ||
+              authUser?.email?.split("@")[0] ||
+              `User ${userId.slice(0, 8)}`,
+            user_metadata: authUser?.raw_user_meta_data || { role: "user" },
+            unread_count,
+            last_message: lastMessage?.content || "",
+            last_message_time: lastMessage?.created_at || "",
+          };
 
-        return {
-          ...userObject,
-          last_message: lastMessage?.content || "",
-          last_message_time: lastMessage?.created_at || "",
-        };
-      });
+          console.log(`Final user object for ${userId}:`, userObject);
+
+          return userObject;
+        }
+      );
 
       // Sort by most recent message
       const sortedUsers = usersWithMessages.sort(
@@ -447,6 +467,30 @@ export default function Messages() {
       subscription.unsubscribe();
     };
   }, [user, selectedUser, isAdmin]);
+
+  // When selectedUser changes, mark their messages as read
+  useEffect(() => {
+    const markMessagesRead = async () => {
+      if (user && isAdmin && selectedUser) {
+        // Get all unread messages from selectedUser to admin
+        const { data: unreadMessages, error } = await supabase
+          .from("messages")
+          .select("id")
+          .eq("sender_id", selectedUser.id)
+          .eq("receiver_id", user.id)
+          .is("read_at", null);
+        if (!error && unreadMessages && unreadMessages.length > 0) {
+          // Mark each as read
+          for (const msg of unreadMessages) {
+            await supabase.rpc("mark_message_read", { message_id: msg.id });
+          }
+          // Refresh users list to update unread badge
+          await fetchUsers();
+        }
+      }
+    };
+    markMessagesRead();
+  }, [selectedUser, user, isAdmin]);
 
   // Early returns
   if (!user) {

@@ -201,6 +201,11 @@ const UsersList: React.FC<UsersListProps> = ({
                 ) : (
                   u.full_name.charAt(0).toUpperCase()
                 )}
+                {typeof u.unread_count === "number" && u.unread_count > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 min-w-[18px] h-5 flex items-center justify-center border-2 border-slate-800 z-10 flex sm:hidden">
+                    {u.unread_count}
+                  </span>
+                )}
               </div>
               {u.online && (
                 <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 border-2 border-slate-800"></div>
@@ -214,8 +219,8 @@ const UsersList: React.FC<UsersListProps> = ({
                 {u.user_metadata.username}
               </p>
             </div>
-            {u.unread_count && u.unread_count > 0 && (
-              <span className="hidden sm:inline ml-2 px-2 py-0.5 text-xs font-medium bg-indigo-600 text-white rounded-full">
+            {typeof u.unread_count === "number" && u.unread_count > 0 && (
+              <span className="hidden sm:inline ml-2 px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full min-w-[20px] text-center">
                 {u.unread_count}
               </span>
             )}
