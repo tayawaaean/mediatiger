@@ -187,7 +187,7 @@ const WhyCreatorsLove: React.FC = () => {
         {/* Benefits grid */}
         <div
           ref={benefitsRef}
-          className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 max-w-full sm:max-w-6xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-4 max-w-full md:max-w-[70%] mx-auto"
         >
           {benefits.map((benefit, index) => (
             <div key={index} className={getItemClasses(index)}>
