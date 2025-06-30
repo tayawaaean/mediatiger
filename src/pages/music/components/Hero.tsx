@@ -39,7 +39,7 @@ const Hero: React.FC<HeroProps & { loadingState: LoadingState }> = ({
   };
 
   const videoUrl =
-    "https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/videos/freecompress-mediatiger%20music%20revenue%20new..mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjIwY2U2Mi0zNDQwLTQyNjAtOTZjNy04MGQ2YWYzZTY2NDgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ2aWRlb3MvZnJlZWNvbXByZXNzLW1lZGlhdGlnZXIgbXVzaWMgcmV2ZW51ZSBuZXcuLm1wNCIsImlhdCI6MTc0OTcxNDY4NSwiZXhwIjoxNzgxMjUwNjg1fQ.cXohIdYwR38Mu_ZIy5h5UsVa0hBvD85fRqxEdU-3T8U";
+    "https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/videos/freecompress-mediatiger%20music%20revenue%20new..mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJ2aWRlb3MvZnJlZWNvbXByZXNzLW1lZGlhdGlnZXIgbXVzaWMgcmV2ZW51ZSBuZXcuLm1wNCIsImlhdCI6MTc1MTI2NzY0MCwiZXhwIjoxODQ1ODc1NjQwfQ.9EI8gYtFKaZQmQMrCl2vBKoft7ekJ-7pIRPk_ihfjC4";
 
   return (
     <>
