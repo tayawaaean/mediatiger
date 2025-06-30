@@ -25,8 +25,8 @@ const BenefitItem: React.FC<BenefitItemProps> = ({ icon, text, index }) => (
   >
     {/* Icon container with premium styling */}
     <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-300 group-hover:scale-110">
-      <div className="text-white transform group-hover:scale-110 transition-transform duration-300">
-        <div className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6">{icon}</div>
+      <div className="text-white transform group-hover:scale-110 transition-transform duration-300 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6">
+        {icon}
       </div>
     </div>
 
