@@ -1,5 +1,5 @@
-import React from 'react';
-import { X } from 'lucide-react';
+import React from "react";
+import { X } from "lucide-react";
 
 interface VideoModalProps {
   isOpen: boolean;
@@ -7,7 +7,11 @@ interface VideoModalProps {
   videoUrl: string;
 }
 
-const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl }) => {
+const VideoModal: React.FC<VideoModalProps> = ({
+  isOpen,
+  onClose,
+  videoUrl,
+}) => {
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -16,8 +20,10 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl }) =>
     }
   };
 
+  console.log(videoUrl);
+
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
@@ -39,7 +45,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl }) =>
             autoPlay
             className="w-full h-full object-cover"
             onError={(e) => {
-              console.error('Video failed to load:', e);
+              console.error("Video failed to load:", e);
             }}
           >
             Your browser does not support the video tag.
@@ -52,7 +58,8 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl }) =>
             How MediaTiger Helps Creators Earn More
           </h3>
           <p className="text-slate-300">
-            Watch how creators are earning an extra $5K-$20K+ per month from their YouTube Shorts utilizing MediaTiger.
+            Watch how creators are earning an extra $5K-$20K+ per month from
+            their YouTube Shorts utilizing MediaTiger.
           </p>
         </div>
       </div>

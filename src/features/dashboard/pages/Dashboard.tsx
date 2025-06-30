@@ -140,19 +140,23 @@ export default function Dashboard(): JSX.Element {
     isPending
   );
 
+  const hideMessages = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setShowMessage(false);
+    }
+  };
+
   return (
     <>
       {showMessages && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-          onClick={(e) => {
-            // Close messages if clicking outside the messages container
-            if (e.target === e.currentTarget) {
-              setShowMessage(false);
-            }
-          }}
+          onClick={hideMessages}
         >
-          <div className="w-full h-full max-w-4xl rounded-lg shadow-xl overflow-auto flex items-center">
+          <div
+            className="w-full h-full max-w-4xl rounded-lg shadow-xl overflow-auto flex items-center"
+            onClick={hideMessages}
+          >
             <Messages />
           </div>
         </div>
