@@ -259,7 +259,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
               </Button>
             </div>
           )}
-          <br />
           <Button
             variant="link"
             size="sm"

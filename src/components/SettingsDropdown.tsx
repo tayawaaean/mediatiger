@@ -120,7 +120,6 @@ export const SettingsDropdown: React.FC<SettingsDropdownProps> = ({
 
         {/* Security Section */}
         <SecuritySection />
-
         {/* Preferences Section */}
         <PreferencesSection
           initialLanguage={user?.user_metadata?.preferred_language || "en"}

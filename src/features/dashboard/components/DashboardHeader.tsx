@@ -156,6 +156,7 @@ export function DashboardHeader({
             triggerClassName="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors duration-200"
           />
         </div>
+        <br />
         <div
           ref={settingsButtonRef}
           className="settings-button p-2 rounded-full text-slate-400 hover:bg-slate-700/50 transition-colors duration-200"
@@ -181,6 +182,7 @@ export function DashboardHeader({
             />
           )}
         </div>
+        <br />
         <button
           ref={messageButtonRef}
           onMouseEnter={() => {
