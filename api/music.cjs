@@ -2,6 +2,9 @@ const axios = require('axios');
 
 module.exports = async (req, res) => {
   try {
+    return res.status(200).json({
+      success: true,
+    });;
     console.log('API handler started');
     console.log('Method:', req.method);
 

@@ -12,7 +12,7 @@ export default defineConfig({
     strictPort: true,
     cors: true,
     proxy: {
-      '/api': {
+      '/apis': {
         target: 'http://18.142.174.87:3000',
         changeOrigin: true,
         rewrite: (path) => path,
