@@ -13,7 +13,7 @@ export default defineConfig({
     cors: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://18.142.174.87:3000',
         changeOrigin: true,
         rewrite: (path) => path,
       },
