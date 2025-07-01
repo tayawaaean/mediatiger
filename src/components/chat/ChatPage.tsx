@@ -165,7 +165,6 @@ export const ChatPage: React.FC<ChatPageProps> = ({
           recipientName={isAdmin ? "Chat" : "Live Support"}
           onSearch={setSearchQuery}
         />
-
         {/* Loading indicator */}
         {isLoading && (
           <div className="px-6 py-3 bg-slate-700/30 border-b border-slate-700/50">
@@ -175,7 +174,6 @@ export const ChatPage: React.FC<ChatPageProps> = ({
             </div>
           </div>
         )}
-
         {/* Pinned messages */}
         {pinnedMessages && pinnedMessages.length > 0 && (
           <div className="px-6 py-3 bg-slate-700/30 border-b border-slate-700/50">
@@ -214,7 +212,6 @@ export const ChatPage: React.FC<ChatPageProps> = ({
             </div>
           </div>
         )}
-
         <MessageList
           messages={regularMessages || []}
           searchQuery={searchQuery}
@@ -225,7 +222,6 @@ export const ChatPage: React.FC<ChatPageProps> = ({
           setNewMessage={setNewMessage}
           selectedUser={selectedUser}
         />
-
         <MessageInput
           onSendMessage={handleSendMessageInternal}
           replyingTo={replyingTo}
