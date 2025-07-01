@@ -23,13 +23,13 @@ module.exports = async (req, res) => {
     }
 
     // Accept both GET and POST requests
-    if (req.method !== 'GET' && req.method !== 'POST') {
-      console.log('Method not allowed:', req.method);
-      return res.status(405).json({
-        error: 'Method Not Allowed',
-        details: 'Only GET and POST requests are supported',
-      });
-    }
+    // if (req.method !== 'GET' && req.method !== 'POST') {
+    //   console.log('Method not allowed:', req.method);
+    //   return res.status(405).json({
+    //     error: 'Method Not Allowed',
+    //     details: 'Only GET and POST requests are supported',
+    //   });
+    // }
 
     // Test response
     if (req.query.test === 'true') {
