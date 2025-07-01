@@ -134,7 +134,7 @@ export function DashboardHeader({
       </h1>
 
       {/* Top Right Icons */}
-      <div className="flex items-center gap-2 relative z-50">
+      <div className="flex items-center gap-2 relative ">
         <div className="icon-container">
           <NotificationDropdown
             showNotifications={showNotifications}
@@ -158,12 +158,8 @@ export function DashboardHeader({
         </div>
         <div
           ref={settingsButtonRef}
-          className="settings-button p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors duration-200 cursor-pointer"
-          onMouseEnter={() => {
-            setShowNotifications(false);
-          }}
-          onClick={(e) => {
-            stopPropagation(e);
+          className="settings-button p-2 rounded-full text-slate-400 hover:bg-slate-700/50 transition-colors duration-200"
+          onClick={() => {
             setShowSettings(!showSettings);
             setShowNotifications(false);
           }}
