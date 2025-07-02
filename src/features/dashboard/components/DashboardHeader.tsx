@@ -28,6 +28,7 @@ interface DashboardHeaderProps {
   setHasNewNotification: (value: boolean) => void;
   setNotifications: (notifications: Notification[]) => void;
   setNotifNumber: (value: number) => void;
+  handleUnreadMessages: () => void;
 }
 
 export function DashboardHeader({
@@ -50,6 +51,7 @@ export function DashboardHeader({
   setHasNewNotification,
   setNotifications,
   setNotifNumber,
+  handleUnreadMessages,
 }: DashboardHeaderProps) {
   const { translate } = useLanguage();
   const settingsButtonRef = useRef<HTMLDivElement>(null);
@@ -134,7 +136,7 @@ export function DashboardHeader({
       </h1>
 
       {/* Top Right Icons */}
-      <div className="flex items-center gap-2 relative z-50">
+      <div className="flex items-center gap-2 relative ">
         <div className="icon-container">
           <NotificationDropdown
             showNotifications={showNotifications}
@@ -156,14 +158,11 @@ export function DashboardHeader({
             triggerClassName="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors duration-200"
           />
         </div>
+        <br />
         <div
           ref={settingsButtonRef}
-          className="settings-button p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors duration-200 cursor-pointer"
-          onMouseEnter={() => {
-            setShowNotifications(false);
-          }}
-          onClick={(e) => {
-            stopPropagation(e);
+          className="settings-button p-2 rounded-full text-slate-400 hover:bg-slate-700/50 transition-colors duration-200"
+          onClick={() => {
             setShowSettings(!showSettings);
             setShowNotifications(false);
           }}
@@ -185,6 +184,7 @@ export function DashboardHeader({
             />
           )}
         </div>
+        <br />
         <button
           ref={messageButtonRef}
           onMouseEnter={() => {
@@ -194,6 +194,33 @@ export function DashboardHeader({
           onClick={(e) => {
             stopPropagation(e);
             setShowMessage((prev) => !prev);
+            handleUnreadMessages();
+            // Added logic to mark messages as read when the button is clicked
+            if (hasUnreadMessages && user) {
+              setHasNewNotification(false);
+              setNotifNumber(0);
+              setShowNotifications(false);
+              setShowSettings(false);
+              // Update the read_at field for the user
+              // This assumes that the user object has an id property
+              // and that the messages table has a read_at field
+              // and a receiver_id field that matches the user's id
+              // Adjust the query as necessary based on your database schema
+              if (!user.id) return; // Ensure user.id is defined
+
+              supabase
+                .from("messages")
+                .update({ read_at: new Date() })
+                .eq("receiver_id", user.id)
+                .then(({ error }) => {
+                  if (error) {
+                    console.error("Error marking messages as read:", error);
+                  } else {
+                    console.log("Messages marked as read successfully");
+                  }
+                });
+              // Call the handleUnreadMessages function to update the state
+            }
           }}
           className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors duration-200"
           style={{

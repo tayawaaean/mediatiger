@@ -1,6 +1,5 @@
-import React from 'react';
-import { Avatar } from '../ui/Avatar';
-import { Settings } from 'lucide-react';
+import React from "react";
+import { Settings } from "lucide-react";
 
 export const SettingsHeader: React.FC = () => {
   return (
