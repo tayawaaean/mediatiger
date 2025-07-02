@@ -84,7 +84,12 @@ export default function Dashboard(): JSX.Element {
     setNotifNumber,
   } = useNotifications();
 
-  const { showMessages, setShowMessage, hasUnreadMessages } = useMessages(user);
+  const {
+    showMessages,
+    setShowMessage,
+    hasUnreadMessages,
+    setHasUnreadMessages,
+  } = useMessages(user);
 
   const {
     uploadingImage,
@@ -232,6 +237,9 @@ export default function Dashboard(): JSX.Element {
               setHasNewNotification={setHasNewNotification}
               setNotifications={setNotifications}
               setNotifNumber={setNotifNumber}
+              handleUnreadMessages={() => {
+                setHasUnreadMessages(false);
+              }}
             />
           )
         }

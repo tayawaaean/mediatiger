@@ -52,5 +52,6 @@ export function useMessages(user) {
     showMessages,
     setShowMessage,
     hasUnreadMessages,
+    setHasUnreadMessages,
   };
 }
