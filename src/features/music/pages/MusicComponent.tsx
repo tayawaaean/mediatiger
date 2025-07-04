@@ -297,6 +297,7 @@ const MusicComponent = () => {
                       <option value="lovely">Lovely</option>
                       <option value="groovy">Groovy</option>
                       <option value="tense">Tense</option>
+                      <option value="simple">Simple</option>
                       <option value="dramatic">Dramatic</option>
                       <option value="romantic">Romantic</option>
                       <option value="dreamy">Dreamy</option>
@@ -311,6 +312,10 @@ const MusicComponent = () => {
                       <option value="relaxing">Relaxing</option>
                       <option value="entertaining">Entertaining</option>
                       <option value="refreshing">Refreshing</option>
+                      <option value="comic">Comic</option>
+                      <option value="peaceful">Peaceful</option>
+                      <option value="happy">Happy</option>
+                      <option value="hopeful">Hopeful</option>
                     </select>
                     <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
                       <svg
