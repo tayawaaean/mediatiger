@@ -57,8 +57,6 @@ export default function ChannelManagement() {
     };
   };
 
-  console.info("myconsole", "channels", channels);
-
   const fetchChannels = async () => {
     try {
       setIsLoading(true);
