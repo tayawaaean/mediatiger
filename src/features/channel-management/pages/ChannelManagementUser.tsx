@@ -22,6 +22,8 @@ interface Channel {
   subscribers: number;
   growth: number;
   status?: string;
+  profileImage?: string;
+  title?: string;
 }
 
 export default function ChannelManagement() {
@@ -32,6 +34,28 @@ export default function ChannelManagement() {
   const [error, setError] = useState<string | null>(null);
   const [showAddChannelModal, setShowAddChannelModal] = useState(false);
   const { translate } = useLanguage();
+
+  const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+
+  const getChannelInfo = async (url: string) => {
+    const handle = url.split("youtube.com/@")[1]?.split("/")[0];
+
+    if (!handle) return { title: "Unknown", profileImage: "", channelId: "" };
+
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=@${handle}&key=${YOUTUBE_API_KEY}`
+    );
+
+    const data = await res.json();
+    const snippet = data?.items?.[0]?.snippet;
+    const channelId = data?.items?.[0]?.id?.channelId;
+
+    return {
+      channelId: channelId || "",
+      profileImage: snippet?.thumbnails?.high?.url || "",
+      title: snippet?.title || "Unknown",
+    };
+  };
 
   const fetchChannels = async () => {
     try {
@@ -67,23 +91,30 @@ export default function ChannelManagement() {
 
       if (viewsError) throw viewsError;
 
-      const mainChannel = youtubeLinks.map((url: string) => {
-        const channelViews =
-          viewsData?.filter((v) => v.channel_id === url) || [];
-        const currentMonthViews = channelViews[0]?.views || 0;
-        const lastMonthViews = channelViews[1]?.views || 0;
-        const growth = lastMonthViews
-          ? ((currentMonthViews - lastMonthViews) / lastMonthViews) * 100
-          : 0;
-        return {
-          url,
-          views: channelViews.reduce((sum, v) => sum + v.views, 0),
-          monthlyViews: currentMonthViews,
-          subscribers: Math.floor(Math.random() * 1000000),
-          growth,
-          status: "approved",
-        };
-      });
+      const mainChannel = await Promise.all(
+        youtubeLinks.map(async (url: string) => {
+          const { profileImage, title } = await getChannelInfo(url);
+
+          const channelViews =
+            viewsData?.filter((v) => v.channel_id === url) || [];
+          const currentMonthViews = channelViews[0]?.views || 0;
+          const lastMonthViews = channelViews[1]?.views || 0;
+          const growth = lastMonthViews
+            ? ((currentMonthViews - lastMonthViews) / lastMonthViews) * 100
+            : 0;
+
+          return {
+            url,
+            views: channelViews.reduce((sum, v) => sum + v.views, 0),
+            monthlyViews: currentMonthViews,
+            subscribers: Math.floor(Math.random() * 1000000),
+            growth,
+            status: "approved",
+            profileImage,
+            title,
+          };
+        })
+      );
 
       interface ChannelData {
         link: string;
@@ -237,7 +268,11 @@ export default function ChannelManagement() {
                   >
                     <div className="flex items-center">
                       <div className="h-10 w-10 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0">
-                        <Youtube className="h-5 w-5 text-white" />
+                        <img
+                          src={channel.profileImage}
+                          alt="channel avatar"
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
                       </div>
                       <div className="ml-3 overflow-hidden">
                         <div className="flex items-center space-x-1">
@@ -259,10 +294,7 @@ export default function ChannelManagement() {
                             </Tooltip>
                           )}
                           <span className="text-white font-medium truncate">
-                            {channel.url.replace(
-                              /^https?:\/\/(www\.)?(youtube\.com\/|youtu\.be\/)/,
-                              ""
-                            )}
+                            {channel.title}
                           </span>
                         </div>
                         <p className="text-sm text-slate-400">
