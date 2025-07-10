@@ -10,6 +10,7 @@ import { animatePageLoad } from "../utils/musicAnimations";
 import { SearchBar } from "../components/SearchBar";
 import { MusicItem } from "../../../utils/data";
 import "../../../styles/music.css";
+import { fetchFavorites, toggleFavorite } from "../services/api";
 
 interface MusicResponse {
   success: boolean;
@@ -33,8 +34,54 @@ const MusicComponent = () => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const contentRef = useRef<HTMLDivElement>(null);
   const musicListRef = useRef<HTMLDivElement>(null);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favoriteLoading, setFavoriteLoading] = useState<boolean>(true);
+  const [mergedMusic, setMergedMusic] = useState<MusicItem[]>([]);
+  const [favoritingIds, setFavoritingIds] = useState<Set<string>>(new Set());
 
   const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "/api/music";
+
+  useEffect(() => {
+    fetchMusicData();
+
+    animatePageLoad();
+  }, []);
+
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const res = await fetchFavorites();
+        if (res.success) {
+          setFavorites(res.data);
+        }
+      } catch (error) {
+        console.error("Failed to load favorites:", error);
+        toast.error("Failed to load favorites. Please try again later.");
+      } finally {
+        setFavoriteLoading(false);
+      }
+    };
+
+    loadFavorites();
+  }, []);
+
+  useEffect(() => {
+    if (!favorites.length || !allMusic.length) {
+      setMergedMusic([]);
+      return;
+    }
+
+    const favSet = new Set(favorites);
+    setMergedMusic(
+      allMusic.map((item) => ({
+        ...item,
+        favorite: favSet.has(item.id),
+        category: favSet.has(item.id)
+          ? [...item.category, "favorited"]
+          : item.category.filter((cat) => cat !== "favorited"),
+      }))
+    );
+  }, [favorites]);
 
   const fetchMusicData = async (newPage = 1, append = false) => {
     setLoading(true);
@@ -88,7 +135,7 @@ const MusicComponent = () => {
   };
 
   const filterMusic = () => {
-    let filtered = [...allMusic];
+    let filtered = [...mergedMusic];
 
     if (searchTerm) {
       filtered = filtered.filter(
@@ -115,13 +162,8 @@ const MusicComponent = () => {
   };
 
   useEffect(() => {
-    fetchMusicData();
-    animatePageLoad();
-  }, []);
-
-  useEffect(() => {
     filterMusic();
-  }, [allMusic, searchTerm, sortBy, selectedMood]);
+  }, [allMusic, mergedMusic, searchTerm, sortBy, selectedMood]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -131,9 +173,10 @@ const MusicComponent = () => {
     setNowPlaying(item);
   };
 
-  const handleFavorite = (id: string, isFavorite: boolean) => {
+  const handleFavorite = async (id: string, isFavorite: boolean) => {
+    if (favoritingIds.has(id)) return;
     if (isFavorite) {
-      const favoriteCount = allMusic.filter((item) => item.favorite).length;
+      const favoriteCount = mergedMusic.filter((item) => item.favorite).length;
       if (favoriteCount >= 15) {
         toast.error(
           "You can only favorite up to 15 songs. Please unfavorite some songs to add new ones."
@@ -142,20 +185,39 @@ const MusicComponent = () => {
       }
     }
 
-    const updatedAllMusic = allMusic.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            favorite: isFavorite,
-            category: isFavorite
-              ? [...item.category, "favorited"]
-              : item.category.filter((cat) => cat !== "favorited"),
-          }
-        : item
-    );
-    setAllMusic(updatedAllMusic);
-    if (nowPlaying?.id === id) {
-      setNowPlaying({ ...nowPlaying, favorite: isFavorite });
+    setFavoritingIds((prev) => new Set(prev).add(id));
+
+    try {
+      const res = await toggleFavorite(id);
+      if (res.success) {
+        const updatedAllMusic = mergedMusic.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                favorite: isFavorite,
+                category: isFavorite
+                  ? [...item.category, "favorited"]
+                  : item.category.filter((cat) => cat !== "favorited"),
+              }
+            : item
+        );
+
+        if (nowPlaying?.id === id) {
+          setNowPlaying({ ...nowPlaying, favorite: isFavorite });
+        }
+
+        setMergedMusic(updatedAllMusic);
+      } else {
+        toast.error(res.message || "Failed to toggle favorite.");
+      }
+    } catch (err) {
+      toast.error("Failed to update favorite.");
+    } finally {
+      setFavoritingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
   };
 
@@ -180,7 +242,7 @@ const MusicComponent = () => {
   };
 
   const renderContent = () => {
-    if (loading && page === 1) {
+    if ((loading && page === 1) || favoriteLoading) {
       return (
         <div className="text-center py-16 text-slate-400">
           Loading music tracks...
@@ -221,6 +283,7 @@ const MusicComponent = () => {
           onPlay={handlePlay}
           onFavorite={handleFavorite}
           onCopyISRC={handleCopyISRC}
+          favoritingIds={favoritingIds}
         />
         {!searchTerm && hasMore && filteredMusic.length >= displayedItems && (
           <div className="text-center mt-8">
@@ -345,6 +408,8 @@ const MusicComponent = () => {
           <div className="lg:col-span-3 space-y-6">
             <FavoritesList
               items={filteredMusic.filter((item) => item.favorite)}
+              favoriteLoading={favoriteLoading}
+              onPlay={handlePlay}
             />
             <CustomTrackRequest />
           </div>
@@ -354,6 +419,7 @@ const MusicComponent = () => {
         currentTrack={nowPlaying}
         onFavoriteToggle={handleFavorite}
         onUpdateDuration={handleUpdateDuration}
+        // favoritingIds={favoritingIds}
       />
     </div>
   );

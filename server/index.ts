@@ -41,39 +41,52 @@ app.use((req: Request, res: Response, next) => {
   next();
 });
 
-app.post('/api/music', async (req: Request, res: Response) => {
+app.get('/api/music', async (req: Request, res: Response) => {
   console.log('Received POST request at /api/music', req.body);
   if (!process.env.PLAYIST_API_KEY || !process.env.PLAYIST_API_URL) {
-    console.log('Missing env variables:', { PLAYIST_API_KEY: process.env.PLAYIST_API_KEY, PLAYIST_API_URL: process.env.PLAYIST_API_URL });
-    res.status(500).json({ error: 'Missing API key or URL in environment variables' });
+    console.log('Missing env variables:', {
+      PLAYIST_API_KEY: process.env.PLAYIST_API_KEY,
+      PLAYIST_API_URL: process.env.PLAYIST_API_URL,
+    });
+    res
+      .status(500)
+      .json({ error: 'Missing API key or URL in environment variables' });
     return;
   }
 
   try {
     const { page = 1, size = 15 } = req.body || {};
 
-    console.log(`Calling Playist API: ${process.env.PLAYIST_API_URL} with page=${page}, size=${size}`);
-    const response = await axios.get<ApiResponse>(process.env.PLAYIST_API_URL || 'https://api.playist.studio/public/v1/music/list', {
-      headers: {
-        'ZS-API-Auth': process.env.PLAYIST_API_KEY,
-        'Accept-Language': 'en',
-      },
-      params: {
-        page,
-        size,
-      },
-    });
+    console.log(
+      `Calling Playist API: ${process.env.PLAYIST_API_URL} with page=${page}, size=${size}`
+    );
+    const response = await axios.get<ApiResponse>(
+      process.env.PLAYIST_API_URL ||
+        'https://api.playist.studio/public/v1/music/list',
+      {
+        headers: {
+          'ZS-API-Auth': process.env.PLAYIST_API_KEY,
+          'Accept-Language': 'en',
+        },
+        params: {
+          page,
+          size,
+        },
+      }
+    );
 
     console.log('Playist API response:', response.data);
     if (response.data.success && response.data.response_code === 0) {
       const tracks: MusicItem[] = response.data.datas.map((item: any) => ({
         id: item.isrc,
         title: item.name,
-        artist: item.artist || 'Unknown Artist',
+        artist: item.artist,
         cover: item.thumbnail || 'https://via.placeholder.com/100',
         duration: '0:00',
         favorite: false,
-        category: item.tags ? item.tags.map((tag: any) => tag.name.toLowerCase()) : [],
+        category: item.tags
+          ? item.tags.map((tag: any) => tag.name.toLowerCase())
+          : [],
         music: item.music || '',
       }));
 
