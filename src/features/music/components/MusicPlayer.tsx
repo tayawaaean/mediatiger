@@ -72,7 +72,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
         setIsPlaying(false);
         setTotalDuration(parseDuration(currentTrack.duration));
         lastTrackId.current = currentTrack.id;
-        setIsFavorite(currentTrack.favorite);
 
         setTimeout(() => {
           audioRef.current
@@ -86,6 +85,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
             });
         }, 100);
       }
+      setIsFavorite(currentTrack.favorite);
     }, [currentTrack]);
 
     useEffect(() => {
@@ -183,6 +183,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
                     <button
                       className="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
                       onClick={handleFavoriteToggle}
+                      // disabled={favoritingIds.has(currentTrack.id)}
+                      // style={{
+                      //   opacity: favoritingIds.has(currentTrack.id) ? 0.4 : 1,
+                      // }}
                     >
                       <svg
                         className="w-4 h-4"
@@ -337,6 +341,17 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
       </div>
     );
   },
-  (prevProps, nextProps) =>
-    prevProps.currentTrack?.id === nextProps.currentTrack?.id
+  (prevProps, nextProps) => {
+    const prev = prevProps.currentTrack;
+    const next = nextProps.currentTrack;
+
+    if (!prev || !next) return prev === next;
+
+    return (
+      prev.id === next.id &&
+      prev.music === next.music &&
+      prev.favorite === next.favorite &&
+      prev.duration === next.duration
+    );
+  }
 );
