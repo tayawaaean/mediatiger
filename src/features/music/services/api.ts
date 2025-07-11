@@ -383,7 +383,7 @@ export const toggleFavorite = async (
       .select("id")
       .eq("user_id", user.id)
       .eq("music_id", musicId)
-      .maybeSingle();
+      .single();
 
     if (fetchError && fetchError.code !== "PGRST116") {
       // PGRST116 means "row not found", which is expected if not yet favorited
@@ -394,8 +394,7 @@ export const toggleFavorite = async (
       const { error } = await supabase
         .from("music_favorites")
         .delete()
-        .eq("id", existing.id)
-        .select("id");
+        .eq("id", existing.id);
 
       if (error) {
         return { success: false, message: error.message, data: undefined };
@@ -405,8 +404,7 @@ export const toggleFavorite = async (
     } else {
       const { error } = await supabase
         .from("music_favorites")
-        .insert({ user_id: user.id, music_id: musicId })
-        .select("id");
+        .insert({ user_id: user.id, music_id: musicId });
 
       if (error) {
         return { success: false, message: error.message, data: undefined };
