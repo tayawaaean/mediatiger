@@ -1,5 +1,5 @@
-import React from "react";
-import { MusicItem } from "../../../utils/data";
+import React from 'react';
+import { MusicItem } from '../../../utils/data';
 
 interface FavoritesListProps {
   items: MusicItem[];
@@ -51,7 +51,11 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
                 <h3 className="text-white text-sm md:text-base font-medium truncate">
                   {item.title}
                 </h3>
-
+                {item.artist && (
+                  <p className="text-slate-400 text-xs md:text-sm truncate">
+                    {item.artist}
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-1 md:gap-2 mt-1 max-h-8 md:max-h-10 overflow-hidden">
                   {item.category.slice(0, 2).map((tag) => (
                     <span

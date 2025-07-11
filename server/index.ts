@@ -1,10 +1,10 @@
-import express, { Request, Response } from "express";
-import axios, { AxiosError } from "axios";
-import dotenv from "dotenv";
-import path from "path";
+import express, { Request, Response } from 'express';
+import axios, { AxiosError } from 'axios';
+import dotenv from 'dotenv';
+import path from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-console.log("Loaded ENV:", process.env); // Debug env variables
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+console.log('Loaded ENV:', process.env); // Debug env variables
 
 const app = express();
 app.use(express.json());
@@ -30,27 +30,27 @@ interface ApiResponse {
 
 app.use((req: Request, res: Response, next) => {
   console.log(`Incoming request: ${req.method} ${req.url} from ${req.ip}`);
-  res.setHeader("Access-Control-Allow-Origin", process.env.FRONTEND_URL || "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") {
-    console.log("OPTIONS request handled");
+  res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    console.log('OPTIONS request handled');
     res.status(200).end();
     return;
   }
   next();
 });
 
-app.post("/api/music", async (req: Request, res: Response) => {
-  console.log("Received POST request at /api/music", req.body);
+app.get('/api/music', async (req: Request, res: Response) => {
+  console.log('Received POST request at /api/music', req.body);
   if (!process.env.PLAYIST_API_KEY || !process.env.PLAYIST_API_URL) {
-    console.log("Missing env variables:", {
+    console.log('Missing env variables:', {
       PLAYIST_API_KEY: process.env.PLAYIST_API_KEY,
       PLAYIST_API_URL: process.env.PLAYIST_API_URL,
     });
     res
       .status(500)
-      .json({ error: "Missing API key or URL in environment variables" });
+      .json({ error: 'Missing API key or URL in environment variables' });
     return;
   }
 
@@ -62,11 +62,11 @@ app.post("/api/music", async (req: Request, res: Response) => {
     );
     const response = await axios.get<ApiResponse>(
       process.env.PLAYIST_API_URL ||
-        "https://api.playist.studio/public/v1/music/list",
+        'https://api.playist.studio/public/v1/music/list',
       {
         headers: {
-          "ZS-API-Auth": process.env.PLAYIST_API_KEY,
-          "Accept-Language": "en",
+          'ZS-API-Auth': process.env.PLAYIST_API_KEY,
+          'Accept-Language': 'en',
         },
         params: {
           page,
@@ -75,19 +75,19 @@ app.post("/api/music", async (req: Request, res: Response) => {
       }
     );
 
-    console.log("Playist API response:", response.data);
+    console.log('Playist API response:', response.data);
     if (response.data.success && response.data.response_code === 0) {
       const tracks: MusicItem[] = response.data.datas.map((item: any) => ({
         id: item.isrc,
         title: item.name,
         artist: item.artist,
-        cover: item.thumbnail || "https://via.placeholder.com/100",
-        duration: "0:00",
+        cover: item.thumbnail || 'https://via.placeholder.com/100',
+        duration: '0:00',
         favorite: false,
         category: item.tags
           ? item.tags.map((tag: any) => tag.name.toLowerCase())
           : [],
-        music: item.music || "",
+        music: item.music || '',
       }));
 
       res.status(200).json({
@@ -97,16 +97,16 @@ app.post("/api/music", async (req: Request, res: Response) => {
       });
     } else {
       res.status(400).json({
-        error: response.data.message || "Failed to fetch music tracks",
+        error: response.data.message || 'Failed to fetch music tracks',
       });
     }
   } catch (error) {
-    console.error("Error fetching music:", error);
-    let message = "Failed to fetch music from API";
+    console.error('Error fetching music:', error);
+    let message = 'Failed to fetch music from API';
     if (axios.isAxiosError(error) && error.response?.status === 429) {
-      message = "Rate limit exceeded. Please try again later.";
+      message = 'Rate limit exceeded. Please try again later.';
     } else if (axios.isAxiosError(error) && error.response?.status === 403) {
-      message = "Access denied. Check IP whitelisting.";
+      message = 'Access denied. Check IP whitelisting.';
     } else if (axios.isAxiosError(error)) {
       message = `API error: ${error.response?.status} - ${error.message}`;
     }
@@ -114,7 +114,7 @@ app.post("/api/music", async (req: Request, res: Response) => {
   }
 });
 
-const PORT = parseInt(process.env.PORT || "3000", 10);
+const PORT = parseInt(process.env.PORT || '3000', 10);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
