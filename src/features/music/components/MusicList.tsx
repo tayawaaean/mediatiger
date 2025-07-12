@@ -7,7 +7,6 @@ interface MusicListProps {
   onPlay: (item: MusicItem) => void;
   onFavorite: (id: string, isFavorite: boolean) => void;
   onCopyISRC: (id: string) => void;
-  favoritingIds: Set<string>;
 }
 
 export const MusicList: React.FC<MusicListProps> = ({
@@ -15,7 +14,6 @@ export const MusicList: React.FC<MusicListProps> = ({
   onPlay,
   onFavorite,
   onCopyISRC,
-  favoritingIds,
 }) => {
   return (
     <div className="mt-6 md:mt-8">
@@ -85,13 +83,9 @@ export const MusicList: React.FC<MusicListProps> = ({
                     e.stopPropagation();
                     onFavorite(item.id, !item.favorite);
                   }}
-                  disabled={favoritingIds.has(item.id)}
                   title={
                     item.favorite ? "Remove from favorites" : "Add to favorites"
                   }
-                  style={{
-                    opacity: favoritingIds.has(item.id) ? 0.4 : 1,
-                  }}
                 >
                   <svg
                     className="w-4 h-4 md:w-5 md:h-5"
