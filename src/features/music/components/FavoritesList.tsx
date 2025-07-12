@@ -1,29 +1,24 @@
-import React from 'react';
-import { MusicItem } from '../../../utils/data';
+import React from "react";
+import { MusicItem } from "../../../utils/data";
 
 interface FavoritesListProps {
   items: MusicItem[];
-  favoriteLoading: boolean;
-  onPlay: (item: MusicItem) => void;
 }
 
-export const FavoritesList: React.FC<FavoritesListProps> = ({
-  items,
-  favoriteLoading,
-  onPlay,
-}) => {
+export const FavoritesList: React.FC<FavoritesListProps> = ({ items }) => {
   const favorites = items.filter((item) => item.favorite).slice(0, 15);
 
-  const renderContent = () => {
-    if (favoriteLoading) {
-      return (
-        <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-        </div>
-      );
-    }
+  return (
+    <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 md:p-6 lg:p-8 animate-section">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 md:mb-6 gap-2">
+        <h2 className="text-lg md:text-xl font-semibold text-white">
+          Favorites
+        </h2>
+        <span className="text-xs md:text-sm text-slate-400">
+          Save up to 15 songs ({favorites.length}/15)
+        </span>
+      </div>
 
-    return (
       <div
         id="favoritesList"
         className="space-y-2 md:space-y-3 overflow-y-auto max-h-[300px] md:max-h-[400px] pr-1 md:pr-2"
@@ -40,7 +35,6 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
             <div
               key={item.id}
               className="flex items-center gap-3 md:gap-4 p-2 md:p-3 hover:bg-slate-700/30 rounded-lg transition-colors"
-              onClick={() => onPlay(item)}
             >
               <img
                 src={item.cover}
@@ -81,21 +75,6 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
           ))
         )}
       </div>
-    );
-  };
-
-  return (
-    <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 md:p-6 lg:p-8 animate-section">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 md:mb-6 gap-2">
-        <h2 className="text-lg md:text-xl font-semibold text-white">
-          Favorites
-        </h2>
-
-        <span className="text-xs md:text-sm text-slate-400">
-          Save up to 15 songs ({favorites.length}/15)
-        </span>
-      </div>
-      {renderContent()}
     </div>
   );
 };
