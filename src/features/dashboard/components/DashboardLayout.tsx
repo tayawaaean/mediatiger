@@ -28,7 +28,10 @@ export function DashboardLayout({
         </div>
 
         {/* Desktop header */}
-        <div className="hidden md:block sticky top-0 z-10 pl-1 pt-1 sm:pl-3 sm:pt-3">
+        <div
+          className="hidden md:block sticky top-0 z-10 pl-1 pt-1 sm:pl-3 sm:pt-3"
+          id="dashboard-header"
+        >
           {header}
         </div>
 

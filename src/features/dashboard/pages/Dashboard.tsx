@@ -34,6 +34,8 @@ import { useNotifications } from "../../../hooks/useNotifications"; // Import fr
 import { useUserProfile } from "../../../hooks/useUserProfile";
 import { useDashboardAuth } from "../hooks/useDashboardAuth";
 import { useDashboardData } from "../hooks/useDashboardData";
+import { TutorialProvider } from "../../../contexts/TutorialContext";
+import TutorialOverlay from "../../../../src/components/TutorialOverlay";
 
 // Register ChartJS components
 ChartJS.register(
@@ -194,70 +196,77 @@ export default function Dashboard(): JSX.Element {
           userEmail={user.email || ""}
         />
       )}
-
-      <DashboardLayout
-        sidebar={
-          !showOnboarding &&
-          !isPending && (
-            <Sidebar
-              user={user}
-              username={username || ""}
-              profileImage={profileImage}
-              uploadingImage={uploadingImage}
-              handleImageUpload={handleImageUpload}
-              navigationItems={navigationItems}
-              setActiveSection={setActiveSection}
-              showTuto={showTutorial}
-              isMobileMenuOpen={isMobileMenuOpen}
-              setIsMobileMenuOpen={setIsMobileMenuOpen}
-            />
-          )
-        }
-        header={
-          !showOnboarding &&
-          !isPending && (
-            <DashboardHeader
-              activeSection={activeSection}
-              isMobileMenuOpen={isMobileMenuOpen}
-              setIsMobileMenuOpen={setIsMobileMenuOpen}
-              showNotifications={showNotifications}
-              setShowNotifications={setShowNotifications}
-              showSettings={showSettings}
-              setShowSettings={setShowSettings}
-              hasUnreadMessages={hasUnreadMessages}
-              setShowMessage={setShowMessage}
-              notifications={notifications}
-              notifNumber={notifNumber}
-              user={user}
-              signOut={signOut}
-              isRejected={isRejected}
-              handleMarkAllAsRead={handleMarkAllAsRead}
-              handleClearNotifications={handleClearNotifications}
-              // Include these properties from the context
-              setHasNewNotification={setHasNewNotification}
-              setNotifications={setNotifications}
-              setNotifNumber={setNotifNumber}
-              handleUnreadMessages={() => {
-                setHasUnreadMessages(false);
-              }}
-            />
-          )
-        }
+      <TutorialProvider
+        user={user}
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        showTuto={showTutorial}
       >
-        {!showOnboarding && !isPending && (
-          <div className="w-full h-full">
-            <DashboardContent
-              activeSection={activeSection}
-              user={user}
-              linkedChannels={linkedChannels}
-              monthlyViews={monthlyViews}
-              realtimeViews={realtimeViews}
-              recentActivity={recentActivity}
-              performanceData={performanceData}
-            />
-          </div>
-        )}
-      </DashboardLayout>
+        <DashboardLayout
+          sidebar={
+            !showOnboarding &&
+            !isPending && (
+              <Sidebar
+                user={user}
+                username={username || ""}
+                profileImage={profileImage}
+                uploadingImage={uploadingImage}
+                handleImageUpload={handleImageUpload}
+                navigationItems={navigationItems}
+                setActiveSection={setActiveSection}
+                showTuto={showTutorial}
+                isMobileMenuOpen={isMobileMenuOpen}
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+              />
+            )
+          }
+          header={
+            !showOnboarding &&
+            !isPending && (
+              <DashboardHeader
+                activeSection={activeSection}
+                isMobileMenuOpen={isMobileMenuOpen}
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+                showNotifications={showNotifications}
+                setShowNotifications={setShowNotifications}
+                showSettings={showSettings}
+                setShowSettings={setShowSettings}
+                hasUnreadMessages={hasUnreadMessages}
+                setShowMessage={setShowMessage}
+                notifications={notifications}
+                notifNumber={notifNumber}
+                user={user}
+                signOut={signOut}
+                isRejected={isRejected}
+                handleMarkAllAsRead={handleMarkAllAsRead}
+                handleClearNotifications={handleClearNotifications}
+                // Include these properties from the context
+                setHasNewNotification={setHasNewNotification}
+                setNotifications={setNotifications}
+                setNotifNumber={setNotifNumber}
+                handleUnreadMessages={() => {
+                  setHasUnreadMessages(false);
+                }}
+              />
+            )
+          }
+        >
+          {!showOnboarding && !isPending && (
+            <div className="w-full h-full">
+              <DashboardContent
+                activeSection={activeSection}
+                user={user}
+                linkedChannels={linkedChannels}
+                monthlyViews={monthlyViews}
+                realtimeViews={realtimeViews}
+                recentActivity={recentActivity}
+                performanceData={performanceData}
+              />
+            </div>
+          )}
+        </DashboardLayout>
+        <TutorialOverlay />
+      </TutorialProvider>
     </>
   );
 }

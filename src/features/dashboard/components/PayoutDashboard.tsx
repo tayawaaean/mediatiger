@@ -589,7 +589,10 @@ const PayoutDashboard: React.FC<PayoutDashboardProps> = ({
             </div>
           </div>
         )}
-        <div className="rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white mb-6">
+        <div
+          id="balance-amount"
+          className="rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white mb-6"
+        >
           <div className="flex items-center mb-1">
             <DollarSign className="w-5 h-5 mr-2" />
             <h2 className="text-lg font-medium">

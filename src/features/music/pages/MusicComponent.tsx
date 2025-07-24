@@ -253,6 +253,7 @@ const MusicComponent = () => {
         <div className="space-y-6 lg:grid lg:grid-cols-7 lg:gap-6 lg:space-y-0">
           {/* Main Content */}
           <div
+            id="music-background-list"
             ref={contentRef}
             className="lg:col-span-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 md:p-6 lg:p-8 min-h-[500px] md:min-h-[600px] main-content"
           >
