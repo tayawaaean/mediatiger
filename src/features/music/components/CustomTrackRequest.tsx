@@ -38,7 +38,7 @@ export const CustomTrackRequest: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div id="music-background-request" className="space-y-6 md:space-y-8">
       <div
         className={`bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 md:p-6 lg:p-8 animate-section ${
           showCustomTracks ? "invert" : ""

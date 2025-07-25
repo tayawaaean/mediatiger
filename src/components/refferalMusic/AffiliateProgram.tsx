@@ -73,7 +73,10 @@ export const AffiliateProgram = () => {
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
-    <div className="bg-slate-800 rounded-xl p-6 mx-auto">
+    <div
+      id="channels-affiliate-view"
+      className="bg-slate-800 rounded-xl p-6 mx-auto"
+    >
       <div className="flex items-center mb-4">
         <h2 className="text-white text-lg font-medium mr-3">
           Affiliate Program

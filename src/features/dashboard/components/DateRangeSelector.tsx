@@ -93,11 +93,13 @@ export default function DateRangeSelector({
   return (
     <div className="relative inline-block text-left text-slate-200">
       <button
+        id="analytics-date-selector"
         onClick={() => setIsOpen(!isOpen)}
         className={`bg-slate-800 px-4 py-2 rounded-lg border border-slate-700/50 hover:border-indigo-500 flex flex-col items-start shadow-md transition-all duration-200 ${
           isLoading ? "opacity-50 cursor-wait" : ""
         }`}
-        disabled={isLoading}>
+        disabled={isLoading}
+      >
         <span className="text-sm font-medium">{formattedRange}</span>
         <span className="text-xs text-slate-400">{range.label}</span>
       </button>
@@ -110,7 +112,8 @@ export default function DateRangeSelector({
                 key={preset.label}
                 onClick={() => handleSelect(preset)}
                 className="w-full px-4 py-2 text-sm text-left text-slate-200 hover:bg-slate-700 transition-all duration-200"
-                disabled={isLoading}>
+                disabled={isLoading}
+              >
                 {preset.label}
               </button>
             ))}
@@ -121,13 +124,15 @@ export default function DateRangeSelector({
               <div className="mb-2 text-xs text-slate-400 flex justify-between items-center">
                 <button
                   onClick={() => setCalendarMonth(subDays(calendarMonth, 30))}
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   &lt;
                 </button>
                 <span>{format(calendarMonth, "MMMM yyyy")}</span>
                 <button
                   onClick={() => setCalendarMonth(addMonths(calendarMonth, 1))}
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   &gt;
                 </button>
               </div>
@@ -154,7 +159,8 @@ export default function DateRangeSelector({
                           : ""
                       }
                       ${!day ? "invisible" : ""}
-                      ${isLoading ? "opacity-50 cursor-wait" : ""}`}>
+                      ${isLoading ? "opacity-50 cursor-wait" : ""}`}
+                  >
                     {day ? day.getDate() : ""}
                   </button>
                 ))}
@@ -166,7 +172,8 @@ export default function DateRangeSelector({
                   !customStart || !customEnd || isLoading
                     ? "opacity-50 cursor-not-allowed"
                     : ""
-                }`}>
+                }`}
+              >
                 {isLoading ? "Applying..." : "Apply"}
               </button>
             </div>
