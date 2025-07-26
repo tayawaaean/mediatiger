@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { format, subDays, isSameDay, addMonths } from "date-fns";
+import { useState } from 'react';
+import { format, subDays, isSameDay, addMonths } from 'date-fns';
 
 const presets = [
-  { label: "Last 7 days", days: 7 },
-  { label: "Last 28 days", days: 28 },
-  { label: "Last 90 days", days: 90 },
-  { label: "Custom", days: 0 },
+  { label: 'Last 7 days', days: 7 },
+  { label: 'Last 28 days', days: 28 },
+  { label: 'Last 90 days', days: 90 },
+  { label: 'Custom', days: 0 },
 ];
 
 const generateMonthDays = (year: number, month: number) => {
@@ -29,7 +29,7 @@ export default function DateRangeSelector({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [range, setRange] = useState({
-    label: "Last 28 days",
+    label: 'Last 28 days',
     start: subDays(new Date(), 27),
     end: new Date(),
   });
@@ -45,7 +45,7 @@ export default function DateRangeSelector({
   );
 
   const handleSelect = async (preset: { label: string; days: number }) => {
-    if (preset.label === "Custom") {
+    if (preset.label === 'Custom') {
       setShowCustomPicker(true);
       return;
     }
@@ -76,7 +76,7 @@ export default function DateRangeSelector({
   const applyCustomRange = async () => {
     if (customStart && customEnd) {
       setIsLoading(true);
-      setRange({ label: "Custom", start: customStart, end: customEnd });
+      setRange({ label: 'Custom', start: customStart, end: customEnd });
       onRangeChange(customStart, customEnd);
       await new Promise((resolve) => setTimeout(resolve, 300)); // Simulate loading
       setIsLoading(false);
@@ -85,9 +85,9 @@ export default function DateRangeSelector({
     }
   };
 
-  const formattedRange = `${format(range.start, "MMM d")} – ${format(
+  const formattedRange = `${format(range.start, 'MMM d')} – ${format(
     range.end,
-    "MMM d, yyyy"
+    'MMM d, yyyy'
   )}`;
 
   return (
@@ -96,7 +96,7 @@ export default function DateRangeSelector({
         id="analytics-date-selector"
         onClick={() => setIsOpen(!isOpen)}
         className={`bg-slate-800 px-4 py-2 rounded-lg border border-slate-700/50 hover:border-indigo-500 flex flex-col items-start shadow-md transition-all duration-200 ${
-          isLoading ? "opacity-50 cursor-wait" : ""
+          isLoading ? 'opacity-50 cursor-wait' : ''
         }`}
         disabled={isLoading}
       >
@@ -128,7 +128,7 @@ export default function DateRangeSelector({
                 >
                   &lt;
                 </button>
-                <span>{format(calendarMonth, "MMMM yyyy")}</span>
+                <span>{format(calendarMonth, 'MMMM yyyy')}</span>
                 <button
                   onClick={() => setCalendarMonth(addMonths(calendarMonth, 1))}
                   disabled={isLoading}
@@ -137,7 +137,7 @@ export default function DateRangeSelector({
                 </button>
               </div>
               <div className="grid grid-cols-7 gap-1 text-center text-sm mb-1 text-slate-400">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                   <div key={d}>{d}</div>
                 ))}
               </div>
@@ -150,18 +150,18 @@ export default function DateRangeSelector({
                     className={`px-2 py-1 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-200
                       ${
                         day && customStart && isSameDay(day, customStart)
-                          ? "bg-indigo-500 text-white shadow-md"
-                          : ""
+                          ? 'bg-indigo-500 text-white shadow-md'
+                          : ''
                       }
                       ${
                         day && customEnd && isSameDay(day, customEnd)
-                          ? "bg-purple-500 text-white shadow-md"
-                          : ""
+                          ? 'bg-purple-500 text-white shadow-md'
+                          : ''
                       }
-                      ${!day ? "invisible" : ""}
-                      ${isLoading ? "opacity-50 cursor-wait" : ""}`}
+                      ${!day ? 'invisible' : ''}
+                      ${isLoading ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    {day ? day.getDate() : ""}
+                    {day ? day.getDate() : ''}
                   </button>
                 ))}
               </div>
@@ -170,11 +170,11 @@ export default function DateRangeSelector({
                 disabled={!customStart || !customEnd || isLoading}
                 className={`mt-3 w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm shadow-lg transition-all duration-200 ${
                   !customStart || !customEnd || isLoading
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
                 }`}
               >
-                {isLoading ? "Applying..." : "Apply"}
+                {isLoading ? 'Applying...' : 'Apply'}
               </button>
             </div>
           )}
