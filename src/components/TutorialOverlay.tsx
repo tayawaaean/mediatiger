@@ -17,8 +17,6 @@ const TutorialOverlay: React.FC = () => {
     imagesLoaded,
   } = useTutorial();
 
-  console.info('myconsole', 'tutorialSteps', tutorialSteps);
-
   useEffect(() => {
     if (!showTutorial) return;
 
@@ -32,11 +30,9 @@ const TutorialOverlay: React.FC = () => {
       }
 
       const element = document.getElementById(elementId);
-      console.info('myconsole', 'element', element);
 
       if (element) {
         const rect = element.getBoundingClientRect();
-        console.info('myconsole', 'rect', rect);
         setElementPosition(rect);
         // element.scrollIntoView({
         //   behavior: "smooth",
@@ -89,11 +85,24 @@ const TutorialOverlay: React.FC = () => {
         return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
     }
   };
-  // const handlePrev = () => {
-  //   if (currentStep > 0) {
-  //     setCurrentStep(currentStep - 1);
-  //   }
-  // };
+
+  const handlePrev = () => {
+    if (currentStep === 7) {
+      setCurrentStep(4);
+      setActiveSection('analytics');
+    } else if (currentStep === 10) {
+      setCurrentStep(7);
+      setActiveSection('channels');
+    } else if (currentStep === 13) {
+      setCurrentStep(10);
+      setActiveSection('music');
+    } else if (currentStep === 15) {
+      setCurrentStep(13);
+      setActiveSection('balance');
+    } else if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
 
   const handleNext = async () => {
     if (currentStep < tutorialSteps.length - 1) {
@@ -197,7 +206,7 @@ const TutorialOverlay: React.FC = () => {
           tutorialSteps[currentStep].position === 'top'
             ? '-mb-10'
             : tutorialSteps[currentStep].position === 'bottom'
-            ? '-mb-10 -mt-5'
+            ? '-mb-10 -mt-6'
             : '-ml-10 -mr-10'
         }
       `}
@@ -206,14 +215,31 @@ const TutorialOverlay: React.FC = () => {
 
           <div className="bg-[#1B103D] text-white rounded-xl shadow-xl max-w-sm p-6 relative">
             <p className="mb-4 text-lg">{tutorialSteps[currentStep].content}</p>
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-3 flex-nowrap">
+              {currentStep !== 0 && (
+                <button
+                  onClick={handlePrev}
+                  disabled={buttonDisabled}
+                  className={`whitespace-nowrap bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-md transition
+        ${
+          buttonDisabled
+            ? 'opacity-50 cursor-not-allowed'
+            : 'hover:brightness-110'
+        }`}
+                >
+                  ← Previous
+                </button>
+              )}
+
               <button
                 onClick={handleNext}
                 disabled={buttonDisabled}
-                className={`bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-md transition
-    ${
-      buttonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-110'
-    }`}
+                className={`whitespace-nowrap bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-md transition
+      ${
+        buttonDisabled
+          ? 'opacity-50 cursor-not-allowed'
+          : 'hover:brightness-110'
+      }`}
               >
                 {currentStep < tutorialSteps.length - 1 ? 'Next →' : 'Done'}
               </button>

@@ -42,15 +42,15 @@ export const TutorialProvider: React.FC<TutorialProviderProps> = ({
   showTuto,
 }) => {
   const handsbehind =
-    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/4.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzLzQucG5nIiwiaWF0IjoxNzUzMzQzODg0LCJleHAiOjE3ODQ4Nzk4ODR9.HmP4d0Ptb8_09L3eXBXg573PeMxWNJ33QU2D-s69SZ8';
+    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/new5.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzL25ldzUucG5nIiwiaWF0IjoxNzUzNTE3MjE5LCJleHAiOjE3ODUwNTMyMTl9.tReP7dhqi1AWJd5TReyRGQrW5mkvNkPGsQtQmgE-92c';
   const backpack =
-    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/1.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzLzEucG5nIiwiaWF0IjoxNzUzMzQzOTA4LCJleHAiOjE3ODQ4Nzk5MDh9.NGXa5z8EKI8oA6NgohJ-Myp8vqo-zk3ofQkpcnD0izM';
+    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/new1.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzL25ldzEucG5nIiwiaWF0IjoxNzUzNTE3MTk2LCJleHAiOjE3ODUwNTMxOTZ9.mKFkcuMaLrdhTa0vquXalB5Xmm-Oe7QatdOwoMwQQQY';
   const muscular =
-    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/Untitled%20design%20(3).png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzL1VudGl0bGVkIGRlc2lnbiAoMykucG5nIiwiaWF0IjoxNzUzMzQzOTQwLCJleHAiOjE3ODQ4Nzk5NDB9.D_dz3rQICz1hZ_mEPV4VgUKKyVXJNZXwBpw9OzE5Y1I';
+    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/new3.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzL25ldzMucG5nIiwiaWF0IjoxNzUzNTE3MjQwLCJleHAiOjE3ODUwNTMyNDB9.OimGKy6jLTEiBM4GeaHmoVVA9Je9YThgMkcadCes_4M';
   const pointingDown =
-    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/2.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzLzIucG5nIiwiaWF0IjoxNzUzMzQzODMxLCJleHAiOjE3ODQ4Nzk4MzF9.-TpdU8zd2Zs3UVK7Ptlqf6FVKMUwKwTEzEV1J5yOJNk';
+    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/new2.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzL25ldzIucG5nIiwiaWF0IjoxNzUzNTE3MTA3LCJleHAiOjE3ODUwNTMxMDd9.D6MwDuwI43E8IXNBsEH2RvwucybakrtFTtWWTTuz31o';
   const pointingUp =
-    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/3.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzLzMucG5nIiwiaWF0IjoxNzUzMzQzODU1LCJleHAiOjE3ODQ4Nzk4NTV9.0tWwY7qc0NsReQNR307I6mgyq0DqtzqZVShxrY1Vvl4';
+    'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/sign/mascots/new4.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81ZGIwODE4Yy03NDE2LTRhYjAtYTY1YS00MmMxZGJiOGVjOWEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtYXNjb3RzL25ldzQucG5nIiwiaWF0IjoxNzUzNTE3Mjg2LCJleHAiOjE3ODUwNTMyODZ9._miz5155wzDwyo-cI6y7yaelb7mat7LjPyzHMXvXLbs';
   const welcome =
     'https://vaeuvecjtnvismnobvyy.supabase.co/storage/v1/object/public/images//20250512_1824_Mascot%20Holding%20Welcome%20Sign_remix_01jv3ktyt8evrsjcd5x71rmdcb%20-%20Edited.png';
   const pointingLeft =
@@ -237,7 +237,6 @@ export const TutorialProvider: React.FC<TutorialProviderProps> = ({
     ];
 
     if (result && allowedSections.includes(result)) {
-      console.info('myconsole', 'result', result);
       setActiveSection(result);
 
       // Temporarily disable button for 800ms
@@ -259,12 +258,6 @@ export const TutorialProvider: React.FC<TutorialProviderProps> = ({
 
       try {
         const showTutorialPreference = user.user_metadata?.show_tutorial;
-
-        console.info(
-          'myconsole',
-          'showTutorialPreference',
-          showTutorialPreference
-        );
 
         if (
           showTutorialPreference === undefined ||
