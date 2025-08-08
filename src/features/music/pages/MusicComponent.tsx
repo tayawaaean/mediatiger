@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { CustomTrackRequest } from "../components/CustomTrackRequest";
@@ -40,14 +40,57 @@ const MusicComponent = () => {
   const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
   const [searchStatus, setSearchStatus] = useState<string>("");
   const [searchPage, setSearchPage] = useState<number>(1);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [rateLimited, setRateLimited] = useState<boolean>(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const musicListRef = useRef<HTMLDivElement>(null);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
+  const lastRequestTimeRef = useRef<number>(0);
+  const requestQueueRef = useRef<boolean>(false);
+  const isRequestingRef = useRef<boolean>(false);
 
   const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "/api/music";
+  const MIN_REQUEST_INTERVAL = 1000; // Minimum 1 second between requests
 
-  const fetchMusicData = async (newPage = 1, append = false, search = "") => {
-    setLoading(true);
+  const fetchMusicData = useCallback(async (newPage = 1, append = false, search = "") => {
+    // Prevent multiple simultaneous requests
+    if (isRequestingRef.current && append) {
+      console.log('Request already in progress, skipping');
+      return;
+    }
+    
+    // Rate limiting check
+    const now = Date.now();
+    const timeSinceLastRequest = now - lastRequestTimeRef.current;
+    
+    if (append && timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+      // Queue the request for later
+      requestQueueRef.current = true;
+      setRateLimited(true);
+      setTimeout(() => {
+        if (requestQueueRef.current && !isRequestingRef.current) {
+          requestQueueRef.current = false;
+          setRateLimited(false);
+          fetchMusicData(newPage, append, search);
+        }
+      }, MIN_REQUEST_INTERVAL - timeSinceLastRequest);
+      return;
+    }
+    
+    // Cancel any queued requests
+    requestQueueRef.current = false;
+    lastRequestTimeRef.current = now;
+    isRequestingRef.current = true;
+    if (append) {
+      // Don't set loadingMore here as it's already set in handleSeeMore
+      if (!loadingMore) {
+        setLoadingMore(true);
+      }
+    } else {
+      setLoading(true);
+    }
     try {
       const requestData: any = {
         page: newPage,
@@ -82,13 +125,6 @@ const MusicComponent = () => {
           return newAllMusic;
         });
         setHasMore(response.data.hasMore);
-
-        if (append && musicListRef.current) {
-          setTimeout(() => {
-            const scrollHeight = document.body.scrollHeight;
-            window.scrollTo({ top: scrollHeight, behavior: "smooth" });
-          }, 200);
-        }
       } else {
         setError(
           `Failed to fetch music tracks: ${
@@ -115,8 +151,11 @@ const MusicComponent = () => {
       console.error(err);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+      setRateLimited(false);
+      isRequestingRef.current = false;
     }
-  };
+  }, []);
 
   const filterMusic = () => {
     // When in search mode, don't apply client-side filtering
@@ -148,6 +187,91 @@ const MusicComponent = () => {
   useEffect(() => {
     filterMusic();
   }, [allMusic, sortBy, selectedMood, isSearchMode]);
+
+  const handleSeeMore = useCallback(() => {
+    console.log('handleSeeMore called', { loadingMore, hasMore, isSearchMode, searchPage, page });
+    if (loadingMore || !hasMore) {
+      console.log('handleSeeMore early return', { loadingMore, hasMore });
+      return;
+    }
+    
+    // Show loading state immediately
+    setLoadingMore(true);
+    
+    // Add deliberate delay before making the API call
+    setTimeout(() => {
+      if (isSearchMode) {
+        const nextPage = searchPage + 1;
+        setSearchPage(nextPage);
+        fetchMusicData(nextPage, true, searchTerm);
+      } else {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        setDisplayedItems((prev) => prev + 15);
+        fetchMusicData(nextPage, true);
+      }
+    }, 1000); // 1 second delay
+  }, [isSearchMode, searchPage, page, searchTerm, hasMore, loadingMore, fetchMusicData]);
+
+  // Infinite scroll effect
+  useEffect(() => {
+    console.log('Infinite scroll effect running', { hasMore, loading, loadingMore });
+    
+    const setupObserver = () => {
+      if (!hasMore || loading || loadingMore) {
+        console.log('Early return from infinite scroll', { hasMore, loading, loadingMore });
+        return;
+      }
+
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          console.log('Intersection observed', entries[0].isIntersecting);
+          if (entries[0].isIntersecting && hasMore && !loading && !loadingMore && !isRequestingRef.current) {
+            console.log('Triggering handleSeeMore');
+            handleSeeMore();
+            // Disconnect immediately after triggering to prevent multiple calls
+            if (observerRef.current && loadMoreTriggerRef.current) {
+              observerRef.current.unobserve(loadMoreTriggerRef.current);
+            }
+          }
+        },
+        {
+          root: null,
+          rootMargin: '50px', // Reduced from 100px to trigger closer to bottom
+          threshold: 0.1
+        }
+      );
+
+      if (loadMoreTriggerRef.current) {
+        console.log('Observing trigger element', loadMoreTriggerRef.current);
+        observerRef.current.observe(loadMoreTriggerRef.current);
+      } else {
+        console.log('Trigger element not found!');
+        // Try again in a moment
+        setTimeout(setupObserver, 100);
+      }
+    };
+
+    setupObserver();
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, loading, loadingMore, handleSeeMore]);
+
+  // Re-observe the trigger element after loading completes
+  useEffect(() => {
+    if (!loadingMore && !loading && hasMore && observerRef.current && loadMoreTriggerRef.current) {
+      console.log('Re-observing trigger element after load');
+      observerRef.current.observe(loadMoreTriggerRef.current);
+    }
+  }, [loadingMore, loading, hasMore]);
 
   // Handle search input changes with debouncing
   useEffect(() => {
@@ -190,16 +314,6 @@ const MusicComponent = () => {
   };
 
   const handleFavorite = (id: string, isFavorite: boolean) => {
-    if (isFavorite) {
-      const favoriteCount = allMusic.filter((item) => item.favorite).length;
-      if (favoriteCount >= 15) {
-        toast.error(
-          "You can only favorite up to 15 songs. Please unfavorite some songs to add new ones."
-        );
-        return;
-      }
-    }
-
     const updatedAllMusic = allMusic.map((item) =>
       item.id === id
         ? {
@@ -228,18 +342,6 @@ const MusicComponent = () => {
     );
     if (nowPlaying?.id === id) {
       setNowPlaying((prev) => (prev ? { ...prev, duration } : null));
-    }
-  };
-
-  const handleSeeMore = () => {
-    if (isSearchMode) {
-      const nextPage = searchPage + 1;
-      setSearchPage(nextPage);
-      fetchMusicData(nextPage, true, searchTerm);
-    } else {
-      setPage((prev) => prev + 1);
-      setDisplayedItems((prev) => prev + 15);
-      fetchMusicData(page + 1, true);
     }
   };
 
@@ -289,22 +391,40 @@ const MusicComponent = () => {
           onFavorite={handleFavorite}
           onCopyISRC={handleCopyISRC}
         />
-        {/* Show See More button for both search and normal mode */}
+        
+        {/* Infinite scroll trigger */}
         {hasMore && (
+          <div ref={loadMoreTriggerRef} className="h-10 mt-4" />
+        )}
+        
+        {/* Loading indicator */}
+        {(loadingMore || rateLimited) && (
           <div className="mt-8 text-center">
-            <button
-              onClick={handleSeeMore}
-              className="px-6 py-2 text-white transition-colors bg-purple-600 rounded-full hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading}
-            >
-              {loading ? "Loading..." : "See More"}
-            </button>
+            <div className="inline-flex items-center px-4 py-2 text-sm text-slate-400">
+              {rateLimited ? (
+                <>
+                  <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  Rate limit reached - waiting to load more...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 mr-3 animate-spin" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Loading more tracks...
+                </>
+              )}
+            </div>
           </div>
         )}
         
         {/* Show search status */}
         {isSearchMode && searchStatus && (
-          <div className="mt-4 text-center text-sm text-slate-400">
+          <div className="mt-4 text-sm text-center text-slate-400">
             {searchStatus}
           </div>
         )}
@@ -414,7 +534,7 @@ const MusicComponent = () => {
               <div className="w-full">
                 <SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
                 {isSearchMode && searchStatus && (
-                  <p className="mt-2 text-sm text-slate-400 text-center">
+                  <p className="mt-2 text-sm text-center text-slate-400">
                     {searchStatus}
                   </p>
                 )}

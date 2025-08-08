@@ -163,9 +163,9 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
                         {currentTrack.title}
                       </h3>
                       <div className="flex gap-1 mt-1 overflow-hidden">
-                        {currentTrack.category.slice(0, 2).map((tag) => (
+                        {currentTrack.category.slice(0, 2).map((tag, tagIndex) => (
                           <span
-                            key={tag}
+                            key={`player-tag-${tagIndex}`}
                             className="text-xs px-1.5 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 truncate"
                           >
                             {tag}
@@ -261,9 +261,9 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = React.memo(
                         {currentTrack.title}
                       </h3>
                       <div className="flex gap-2 mt-1.5 overflow-hidden">
-                        {currentTrack.category.map((tag) => (
+                        {currentTrack.category.map((tag, tagIndex) => (
                           <span
-                            key={tag}
+                            key={`expanded-tag-${tagIndex}`}
                             className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 truncate"
                           >
                             {tag}

@@ -6,7 +6,7 @@ interface FavoritesListProps {
 }
 
 export const FavoritesList: React.FC<FavoritesListProps> = ({ items }) => {
-  const favorites = items.filter((item) => item.favorite).slice(0, 15);
+  const favorites = items.filter((item) => item.favorite);
 
   return (
     <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 md:p-6 lg:p-8 animate-section">
@@ -15,7 +15,7 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({ items }) => {
           Favorites
         </h2>
         <span className="text-xs md:text-sm text-slate-400">
-          Save up to 15 songs ({favorites.length}/15)
+          {favorites.length} saved songs
         </span>
       </div>
 
@@ -51,9 +51,9 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({ items }) => {
                   </p>
                 )}
                 <div className="flex flex-wrap gap-1 md:gap-2 mt-1 max-h-8 md:max-h-10 overflow-hidden">
-                  {item.category.slice(0, 2).map((tag) => (
+                  {item.category.slice(0, 2).map((tag, tagIndex) => (
                     <span
-                      key={tag}
+                      key={`${item.id}-fav-tag-${tagIndex}`}
                       className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 truncate max-w-[80px] md:max-w-[120px]"
                     >
                       {tag}
