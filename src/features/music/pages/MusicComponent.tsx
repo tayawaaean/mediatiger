@@ -16,7 +16,14 @@ interface MusicResponse {
   tracks: MusicItem[];
   hasMore: boolean;
   error?: string;
+  totalAvailable?: number;
   searchInfo?: {
+    totalFound: number;
+    searchComplete: boolean;
+    totalAvailable?: number;
+    searchedThrough?: number;
+  };
+  moodInfo?: {
     totalFound: number;
     searchComplete: boolean;
     totalAvailable?: number;
@@ -31,7 +38,7 @@ const MusicComponent = () => {
   const [allMusic, setAllMusic] = useState<MusicItem[]>([]);
   const [filteredMusic, setFilteredMusic] = useState<MusicItem[]>([]);
   const [searchResults, setSearchResults] = useState<MusicItem[]>([]);
-  const [displayedItems, setDisplayedItems] = useState<number>(15);
+  const [displayedItems, setDisplayedItems] = useState<number>(50);
   const [nowPlaying, setNowPlaying] = useState<MusicItem | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -42,6 +49,8 @@ const MusicComponent = () => {
   const [searchPage, setSearchPage] = useState<number>(1);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [rateLimited, setRateLimited] = useState<boolean>(false);
+  const [isMoodFilterMode, setIsMoodFilterMode] = useState<boolean>(false);
+  const [moodPage, setMoodPage] = useState<number>(1);
   const contentRef = useRef<HTMLDivElement>(null);
   const musicListRef = useRef<HTMLDivElement>(null);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -54,7 +63,7 @@ const MusicComponent = () => {
   const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "/api/music";
   const MIN_REQUEST_INTERVAL = 1000; // Minimum 1 second between requests
 
-  const fetchMusicData = useCallback(async (newPage = 1, append = false, search = "") => {
+  const fetchMusicData = useCallback(async (newPage = 1, append = false, search = "", mood = "") => {
     // Prevent multiple simultaneous requests
     if (isRequestingRef.current && append) {
       console.log('Request already in progress, skipping');
@@ -94,12 +103,17 @@ const MusicComponent = () => {
     try {
       const requestData: any = {
         page: newPage,
-        size: 15,
+        size: 50,
       };
       
       // Add search parameter if provided
       if (search) {
         requestData.search = search;
+      }
+      
+      // Add mood parameter if provided
+      if (mood) {
+        requestData.mood = mood;
       }
       
       const response = await axios.post<MusicResponse>(API_URL_MUSIC_LIST, requestData);
@@ -112,11 +126,14 @@ const MusicComponent = () => {
           const { totalFound, searchComplete, totalAvailable } = response.data.searchInfo;
           if (newPage === 1) {
             setSearchStatus(`Found ${totalFound} results`);
-            if (!searchComplete) {
-              toast.loading(`Searching... Found ${totalFound} results so far`, { id: 'search-progress' });
-            } else {
-              toast.success(`Search complete! Found ${totalFound} results`, { id: 'search-progress' });
-            }
+          }
+        }
+        
+        // Handle mood info if present
+        if (response.data.moodInfo) {
+          const { totalFound, searchComplete } = response.data.moodInfo;
+          if (newPage === 1) {
+            setSearchStatus(`Found ${totalFound} tracks for this mood`);
           }
         }
         
@@ -125,6 +142,11 @@ const MusicComponent = () => {
           return newAllMusic;
         });
         setHasMore(response.data.hasMore);
+        
+        // Debug logging
+        if (response.data.totalAvailable) {
+          console.log(`Page ${newPage}: Total items loaded: ${append ? allMusic.length + tracks.length : tracks.length} / ${response.data.totalAvailable}`);
+        }
       } else {
         setError(
           `Failed to fetch music tracks: ${
@@ -158,25 +180,18 @@ const MusicComponent = () => {
   }, []);
 
   const filterMusic = () => {
-    // When in search mode, don't apply client-side filtering
-    if (isSearchMode) {
+    // When in search mode or mood filter mode, use server results directly
+    if (isSearchMode || selectedMood) {
       setFilteredMusic(allMusic);
       return;
     }
     
-    let filtered = [...allMusic];
+    const filtered = [...allMusic];
     
-    if (selectedMood) {
-      filtered = filtered.filter((item) =>
-        item.category.some(
-          (cat) => cat.toLowerCase() === selectedMood.toLowerCase()
-        )
-      );
-    }
     if (sortBy === "recent") {
       filtered.sort((a, b) => a.id.localeCompare(b.id));
     }
-    setFilteredMusic(filtered.length > 0 ? filtered : allMusic);
+    setFilteredMusic(filtered);
   };
 
   useEffect(() => {
@@ -186,10 +201,10 @@ const MusicComponent = () => {
 
   useEffect(() => {
     filterMusic();
-  }, [allMusic, sortBy, selectedMood, isSearchMode]);
+  }, [allMusic, sortBy, selectedMood, isSearchMode, isMoodFilterMode]);
 
   const handleSeeMore = useCallback(() => {
-    console.log('handleSeeMore called', { loadingMore, hasMore, isSearchMode, searchPage, page });
+    console.log('handleSeeMore called', { loadingMore, hasMore, isSearchMode, isMoodFilterMode, searchPage, moodPage, page });
     if (loadingMore || !hasMore) {
       console.log('handleSeeMore early return', { loadingMore, hasMore });
       return;
@@ -203,15 +218,19 @@ const MusicComponent = () => {
       if (isSearchMode) {
         const nextPage = searchPage + 1;
         setSearchPage(nextPage);
-        fetchMusicData(nextPage, true, searchTerm);
+        fetchMusicData(nextPage, true, searchTerm, selectedMood);
+      } else if (isMoodFilterMode) {
+        const nextPage = moodPage + 1;
+        setMoodPage(nextPage);
+        fetchMusicData(nextPage, true, "", selectedMood);
       } else {
         const nextPage = page + 1;
         setPage(nextPage);
-        setDisplayedItems((prev) => prev + 15);
+        setDisplayedItems((prev) => prev + 50);
         fetchMusicData(nextPage, true);
       }
     }, 1000); // 1 second delay
-  }, [isSearchMode, searchPage, page, searchTerm, hasMore, loadingMore, fetchMusicData]);
+  }, [isSearchMode, isMoodFilterMode, searchPage, moodPage, page, searchTerm, selectedMood, hasMore, loadingMore, fetchMusicData]);
 
   // Infinite scroll effect
   useEffect(() => {
@@ -282,20 +301,28 @@ const MusicComponent = () => {
     if (searchTerm.length >= 2) {
       // Start search mode
       setIsSearchMode(true);
+      setIsMoodFilterMode(false);
       setSearchPage(1);
       setPage(1);
       setAllMusic([]);
       setSearchStatus("Searching...");
       
       searchDebounceRef.current = setTimeout(() => {
-        fetchMusicData(1, false, searchTerm);
+        fetchMusicData(1, false, searchTerm, selectedMood);
       }, 500); // Debounce for 500ms
     } else if (searchTerm.length === 0 && isSearchMode) {
       // Exit search mode
       setIsSearchMode(false);
       setSearchStatus("");
       setPage(1);
-      fetchMusicData(1, false);
+      
+      // If mood is selected, fetch with mood filter
+      if (selectedMood) {
+        setIsMoodFilterMode(true);
+        fetchMusicData(1, false, "", selectedMood);
+      } else {
+        fetchMusicData(1, false);
+      }
     }
     
     return () => {
@@ -303,7 +330,27 @@ const MusicComponent = () => {
         clearTimeout(searchDebounceRef.current);
       }
     };
-  }, [searchTerm]);
+  }, [searchTerm, selectedMood]);
+
+  // Handle mood selection changes
+  useEffect(() => {
+    if (selectedMood && !searchTerm) {
+      // Start mood filter mode
+      setIsMoodFilterMode(true);
+      setIsSearchMode(false);
+      setMoodPage(1);
+      setPage(1);
+      setAllMusic([]);
+      setSearchStatus("Filtering by mood...");
+      fetchMusicData(1, false, "", selectedMood);
+    } else if (!selectedMood && isMoodFilterMode) {
+      // Exit mood filter mode
+      setIsMoodFilterMode(false);
+      setSearchStatus("");
+      setPage(1);
+      fetchMusicData(1, false);
+    }
+  }, [selectedMood]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -346,10 +393,12 @@ const MusicComponent = () => {
   };
 
   const renderContent = () => {
-    if (loading && ((isSearchMode && searchPage === 1) || (!isSearchMode && page === 1))) {
+    if (loading && ((isSearchMode && searchPage === 1) || (isMoodFilterMode && moodPage === 1) || (!isSearchMode && !isMoodFilterMode && page === 1))) {
       return (
         <div className="py-16 text-center text-slate-400">
-          {isSearchMode ? `Searching for "${searchTerm}"...` : "Loading music tracks..."}
+          {isSearchMode ? `Searching for "${searchTerm}"...` : 
+           isMoodFilterMode ? `Filtering by ${selectedMood} mood...` : 
+           "Loading music tracks..."}
         </div>
       );
     }
@@ -366,22 +415,30 @@ const MusicComponent = () => {
       );
     }
     
-    // In search mode, display all results; otherwise use filtered/paginated results
-    const itemsToDisplay = isSearchMode 
+    // In search mode or mood filter mode, display all results; otherwise use filtered/paginated results
+    const itemsToDisplay = (isSearchMode || isMoodFilterMode) 
       ? allMusic 
       : filteredMusic.slice(0, displayedItems);
       
     if (itemsToDisplay.length === 0) {
-      return isSearchMode ? (
-        <NoResults searchTerm={searchTerm} />
-      ) : (
-        <div className="py-16 text-center text-slate-400">
-          <p>No tracks found for this mood.</p>
-          <p className="mt-2 text-sm">
-            Try a different mood or sort by recent.
-          </p>
-        </div>
-      );
+      if (isSearchMode) {
+        return <NoResults searchTerm={searchTerm} />;
+      } else if (isMoodFilterMode) {
+        return (
+          <div className="py-16 text-center text-slate-400">
+            <p>No tracks found for "{selectedMood}" mood.</p>
+            <p className="mt-2 text-sm">
+              Try a different mood or clear the filter.
+            </p>
+          </div>
+        );
+      } else {
+        return (
+          <div className="py-16 text-center text-slate-400">
+            <p>No tracks available.</p>
+          </div>
+        );
+      }
     }
     return (
       <div ref={musicListRef}>
@@ -422,12 +479,6 @@ const MusicComponent = () => {
           </div>
         )}
         
-        {/* Show search status */}
-        {isSearchMode && searchStatus && (
-          <div className="mt-4 text-sm text-center text-slate-400">
-            {searchStatus}
-          </div>
-        )}
       </div>
     );
   };
@@ -459,9 +510,20 @@ const MusicComponent = () => {
                 <div className="relative flex-shrink-0">
                   <select
                     value={sortBy}
-                    onChange={(e) =>
-                      setSortBy(e.target.value as "recent" | "mood")
-                    }
+                    onChange={(e) => {
+                      const newSortBy = e.target.value as "recent" | "mood";
+                      setSortBy(newSortBy);
+                      // Reset to initial state when switching to recent
+                      if (newSortBy === "recent") {
+                        setSelectedMood("");
+                        setIsMoodFilterMode(false);
+                        setSearchStatus("");
+                        setPage(1);
+                        setMoodPage(1);
+                        // Fetch initial data
+                        fetchMusicData(1, false);
+                      }
+                    }}
                     disabled={isSearchMode}
                     className="appearance-none bg-white/5 text-slate-300 pl-4 pr-10 py-2 rounded-full border border-slate-700/50 cursor-pointer hover:bg-white/10 transition-colors w-full sm:w-auto min-w-[140px] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -533,8 +595,8 @@ const MusicComponent = () => {
               {/* Search Bar Row */}
               <div className="w-full">
                 <SearchBar searchTerm={searchTerm} onSearch={handleSearch} />
-                {isSearchMode && searchStatus && (
-                  <p className="mt-2 text-sm text-center text-slate-400">
+                {(isSearchMode || isMoodFilterMode) && searchStatus && allMusic.length > 0 && (
+                  <p className="mt-6 text-sm text-center text-slate-400">
                     {searchStatus}
                   </p>
                 )}
