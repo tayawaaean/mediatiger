@@ -51,6 +51,10 @@ const MusicComponent = () => {
   const [rateLimited, setRateLimited] = useState<boolean>(false);
   const [isMoodFilterMode, setIsMoodFilterMode] = useState<boolean>(false);
   const [moodPage, setMoodPage] = useState<number>(1);
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    const savedFavorites = localStorage.getItem('musicFavorites');
+    return savedFavorites ? new Set(JSON.parse(savedFavorites)) : new Set();
+  });
   const contentRef = useRef<HTMLDivElement>(null);
   const musicListRef = useRef<HTMLDivElement>(null);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -62,6 +66,11 @@ const MusicComponent = () => {
 
   const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "/api/music";
   const MIN_REQUEST_INTERVAL = 1000; // Minimum 1 second between requests
+
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('musicFavorites', JSON.stringify(Array.from(favorites)));
+  }, [favorites]);
 
   const fetchMusicData = useCallback(async (newPage = 1, append = false, search = "", mood = "") => {
     // Prevent multiple simultaneous requests
@@ -137,8 +146,14 @@ const MusicComponent = () => {
           }
         }
         
+        // Apply favorites to the fetched tracks
+        const tracksWithFavorites = tracks.map(track => ({
+          ...track,
+          favorite: favorites.has(track.id)
+        }));
+        
         setAllMusic((prev) => {
-          const newAllMusic = append ? [...prev, ...tracks] : tracks;
+          const newAllMusic = append ? [...prev, ...tracksWithFavorites] : tracksWithFavorites;
           return newAllMusic;
         });
         setHasMore(response.data.hasMore);
@@ -361,18 +376,34 @@ const MusicComponent = () => {
   };
 
   const handleFavorite = (id: string, isFavorite: boolean) => {
+    // Update favorites set
+    setFavorites((prev) => {
+      const newFavorites = new Set(prev);
+      if (isFavorite) {
+        newFavorites.add(id);
+      } else {
+        newFavorites.delete(id);
+      }
+      return newFavorites;
+    });
+    
+    // Update allMusic state
     const updatedAllMusic = allMusic.map((item) =>
       item.id === id
         ? {
             ...item,
             favorite: isFavorite,
-            category: isFavorite
+            category: isFavorite && !item.category.includes("favorited")
               ? [...item.category, "favorited"]
-              : item.category.filter((cat) => cat !== "favorited"),
+              : !isFavorite
+              ? item.category.filter((cat) => cat !== "favorited")
+              : item.category,
           }
         : item
     );
     setAllMusic(updatedAllMusic);
+    
+    // Update nowPlaying if it's the same track
     if (nowPlaying?.id === id) {
       setNowPlaying({ ...nowPlaying, favorite: isFavorite });
     }
