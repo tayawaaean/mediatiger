@@ -18,14 +18,6 @@ export const animatePageLoad = () => {
   setTimeout(() => {
     if (mainContent) {
       mainContent.classList.add('animate-fade-in');
-      
-      // Add staggered animation to music items
-      const musicItems = document.querySelectorAll('.music-item');
-      musicItems.forEach((item, index) => {
-        setTimeout(() => {
-          item.classList.add('animate-scale-in');
-        }, 300 + (index * 50));
-      });
     }
   }, 300);
 };

@@ -45,9 +45,9 @@ export const MusicList: React.FC<MusicListProps> = ({
                   {item.title}
                 </h3>
                 <div className="flex flex-wrap gap-1 md:gap-2 mt-1">
-                  {item.category.slice(0, 3).map((tag) => (
+                  {item.category.slice(0, 3).map((tag, tagIndex) => (
                     <span
-                      key={tag}
+                      key={`${item.id}-tag-${tagIndex}`}
                       className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full bg-white/5 text-slate-400 first:bg-white/10 whitespace-nowrap truncate max-w-[80px] md:max-w-[120px]"
                     >
                       {tag}

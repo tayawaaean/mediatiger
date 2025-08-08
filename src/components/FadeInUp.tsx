@@ -19,40 +19,11 @@ export default function FadeInUp({
   style = {},
   as: Component = "div",
 }: FadeInUpProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [hasAnimated, setHasAnimated] = useState(false);
   const elementRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated) {
-          setIsVisible(true);
-          setHasAnimated(true);
-        }
-      },
-      {
-        threshold,
-        rootMargin: "0px 0px -50px 0px",
-      }
-    );
-
-    const currentElement = elementRef.current;
-    if (currentElement) {
-      observer.observe(currentElement);
-    }
-
-    return () => {
-      if (currentElement) {
-        observer.unobserve(currentElement);
-      }
-    };
-  }, [threshold, hasAnimated]);
-
   const animationStyle: React.CSSProperties = {
-    opacity: isVisible ? 1 : 0,
-    transform: isVisible ? "translateY(0)" : "translateY(30px)",
-    transition: `opacity ${duration}ms ease-out ${delay}ms, transform ${duration}ms ease-out ${delay}ms`,
+    opacity: 1,
+    transform: "translateY(0)",
     ...style,
   };
 
