@@ -1,11 +1,14 @@
 import React from "react";
 import { MusicItem } from "../../../utils/data";
+import { useAuth } from "../../../contexts/AuthContext";
 
 interface FavoritesListProps {
   items: MusicItem[];
+  loading?: boolean;
 }
 
-export const FavoritesList: React.FC<FavoritesListProps> = ({ items }) => {
+export const FavoritesList: React.FC<FavoritesListProps> = ({ items, loading = false }) => {
+  const { user } = useAuth();
   const favorites = items.filter((item) => item.favorite);
 
   return (
@@ -23,7 +26,24 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({ items }) => {
         id="favoritesList"
         className="space-y-2 md:space-y-3 overflow-y-auto max-h-[300px] md:max-h-[400px] pr-1 md:pr-2"
       >
-        {favorites.length === 0 ? (
+        {!user ? (
+          <div className="text-center py-6 md:py-8 text-slate-400">
+            <p className="text-sm md:text-base">Sign in to save favorites</p>
+            <p className="text-xs md:text-sm mt-2">
+              Your favorite tracks will be saved to your account
+            </p>
+          </div>
+        ) : loading ? (
+          <div className="text-center py-6 md:py-8">
+            <div className="inline-flex items-center">
+              <svg className="w-5 h-5 mr-3 animate-spin text-slate-400" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span className="text-sm text-slate-400">Loading favorites...</span>
+            </div>
+          </div>
+        ) : favorites.length === 0 ? (
           <div className="text-center py-6 md:py-8 text-slate-400">
             <p className="text-sm md:text-base">No favorites yet</p>
             <p className="text-xs md:text-sm mt-2">
