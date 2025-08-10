@@ -9,6 +9,8 @@ import { MusicPlayer } from "../components/MusicPlayer";
 import { animatePageLoad } from "../utils/musicAnimations";
 import { SearchBar } from "../components/SearchBar";
 import { MusicItem } from "../../../utils/data";
+import { supabase } from "../../../lib/supabase";
+import { useAuth } from "../../../contexts/AuthContext";
 import "../../../styles/music.css";
 
 interface MusicResponse {
@@ -32,6 +34,7 @@ interface MusicResponse {
 }
 
 const MusicComponent = () => {
+  const { user } = useAuth();
   const [sortBy, setSortBy] = useState<"recent" | "mood">("recent");
   const [selectedMood, setSelectedMood] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -51,6 +54,8 @@ const MusicComponent = () => {
   const [rateLimited, setRateLimited] = useState<boolean>(false);
   const [isMoodFilterMode, setIsMoodFilterMode] = useState<boolean>(false);
   const [moodPage, setMoodPage] = useState<number>(1);
+  const [userFavorites, setUserFavorites] = useState<Set<string>>(new Set());
+  const [loadingFavorites, setLoadingFavorites] = useState<boolean>(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const musicListRef = useRef<HTMLDivElement>(null);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -62,6 +67,38 @@ const MusicComponent = () => {
 
   const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "/api/music";
   const MIN_REQUEST_INTERVAL = 1000; // Minimum 1 second between requests
+
+  // Load user favorites from Supabase
+  useEffect(() => {
+    const loadFavorites = async () => {
+      if (!user) {
+        setUserFavorites(new Set());
+        setLoadingFavorites(false);
+        return;
+      }
+
+      setLoadingFavorites(true);
+      try {
+        const { data, error } = await supabase
+          .from('user_favorites')
+          .select('track_id')
+          .eq('user_id', user.id);
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error loading favorites:', error);
+        } else if (data) {
+          const favoriteIds = data.map(item => item.track_id);
+          setUserFavorites(new Set(favoriteIds));
+        }
+      } catch (err) {
+        console.error('Error loading favorites:', err);
+      } finally {
+        setLoadingFavorites(false);
+      }
+    };
+
+    loadFavorites();
+  }, [user]);
 
   const fetchMusicData = useCallback(async (newPage = 1, append = false, search = "", mood = "") => {
     // Prevent multiple simultaneous requests
@@ -177,7 +214,7 @@ const MusicComponent = () => {
       setRateLimited(false);
       isRequestingRef.current = false;
     }
-  }, []);
+  }, [userFavorites]);
 
   const filterMusic = () => {
     // When in search mode or mood filter mode, use server results directly
@@ -198,6 +235,7 @@ const MusicComponent = () => {
     fetchMusicData();
     animatePageLoad();
   }, []);
+
 
   useEffect(() => {
     filterMusic();
@@ -360,21 +398,41 @@ const MusicComponent = () => {
     setNowPlaying(item);
   };
 
-  const handleFavorite = (id: string, isFavorite: boolean) => {
-    const updatedAllMusic = allMusic.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            favorite: isFavorite,
-            category: isFavorite
-              ? [...item.category, "favorited"]
-              : item.category.filter((cat) => cat !== "favorited"),
+  const handleFavorite = async (id: string) => {
+    if (!user) {
+      toast.error('Please sign in to save favorites');
+      return;
+    }
+
+    try {
+      // Use the toggle_favorite function
+      const { data, error } = await supabase
+        .rpc('toggle_favorite', { p_track_id: id });
+
+      if (error) {
+        console.error('Error toggling favorite:', error);
+        toast.error('Failed to update favorite');
+        return;
+      }
+
+      if (data?.success) {
+        // Update local state
+        setUserFavorites(prev => {
+          const newFavorites = new Set(prev);
+          if (data.is_favorite) {
+            newFavorites.add(id);
+          } else {
+            newFavorites.delete(id);
           }
-        : item
-    );
-    setAllMusic(updatedAllMusic);
-    if (nowPlaying?.id === id) {
-      setNowPlaying({ ...nowPlaying, favorite: isFavorite });
+          return newFavorites;
+        });
+
+        // Show success message
+        toast.success(data.is_favorite ? 'Added to favorites' : 'Removed from favorites');
+      }
+    } catch (err) {
+      console.error('Error updating favorite:', err);
+      toast.error('Failed to update favorite');
     }
   };
 
@@ -416,9 +474,12 @@ const MusicComponent = () => {
     }
     
     // In search mode or mood filter mode, display all results; otherwise use filtered/paginated results
-    const itemsToDisplay = (isSearchMode || isMoodFilterMode) 
+    const itemsToDisplay = ((isSearchMode || isMoodFilterMode) 
       ? allMusic 
-      : filteredMusic.slice(0, displayedItems);
+      : filteredMusic.slice(0, displayedItems)).map(item => ({
+        ...item,
+        favorite: userFavorites.has(item.id)
+      }));
       
     if (itemsToDisplay.length === 0) {
       if (isSearchMode) {
@@ -445,7 +506,7 @@ const MusicComponent = () => {
         <MusicList
           items={itemsToDisplay}
           onPlay={handlePlay}
-          onFavorite={handleFavorite}
+          onFavorite={(id, _) => handleFavorite(id)}
           onCopyISRC={handleCopyISRC}
         />
         
@@ -609,15 +670,16 @@ const MusicComponent = () => {
           {/* Sidebar */}
           <div className="space-y-6 lg:col-span-3">
             <FavoritesList
-              items={allMusic.filter((item) => item.favorite)}
+              items={allMusic.filter((item) => userFavorites.has(item.id)).map(item => ({ ...item, favorite: true }))}
+              loading={loadingFavorites}
             />
             <CustomTrackRequest />
           </div>
         </div>
       </div>
       <MusicPlayer
-        currentTrack={nowPlaying}
-        onFavoriteToggle={handleFavorite}
+        currentTrack={nowPlaying ? {...nowPlaying, favorite: userFavorites.has(nowPlaying.id)} : null}
+        onFavoriteToggle={(id) => handleFavorite(id)}
         onUpdateDuration={handleUpdateDuration}
       />
     </div>
