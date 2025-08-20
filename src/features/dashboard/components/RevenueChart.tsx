@@ -11,6 +11,7 @@ import {
   Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { AnalyticsData } from '../../../services/analyticsService';
 
 ChartJS.register(
   CategoryScale,
@@ -28,13 +29,15 @@ interface RevenueChartProps {
   endDate?: Date;
   showReferred?: boolean;
   isLoading?: boolean;
+  analyticsData?: AnalyticsData | null;
 }
 
 const RevenueChart: React.FC<RevenueChartProps> = ({ 
   startDate = new Date('2024-09-01'),
   endDate = new Date('2025-03-07'),
   showReferred = true,
-  isLoading = false
+  isLoading = false,
+  analyticsData = null
 }) => {
   if (isLoading) {
     return (
@@ -50,6 +53,25 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
       </div>
     );
   }
+
+  // Use real analytics data if available, otherwise fall back to generated data
+  const getChartData = () => {
+    if (analyticsData && analyticsData.success && analyticsData.dailyData.length > 0) {
+      // Use real analytics data
+      const dates = analyticsData.dailyData.map(item => {
+        const date = new Date(item.date);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      });
+      
+      const views = analyticsData.dailyData.map(item => item.views);
+      const revenue = analyticsData.dailyData.map(item => item.revenue);
+      
+      return { dates, views, revenue };
+    } else {
+      // Fall back to generated data
+      return generateData(startDate, endDate, showReferred);
+    }
+  };
 
   const generateData = (start: Date, end: Date, includeReferred: boolean) => {
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
@@ -101,7 +123,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
     };
   };
 
-  const { dates, views, revenue } = generateData(startDate, endDate, showReferred);
+  const { dates, views, revenue } = getChartData();
 
   const formatValue = (value: number, isRevenue: boolean) => {
     if (isRevenue) {

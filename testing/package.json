@@ -1,0 +1,35 @@
+{
+  "name": "testing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "scrape": "node analytics-scraper.js",
+    "scrape:single": "node analytics-scraper.js single",
+    "scrape:batch": "node analytics-scraper.js batch",
+    "scrape:range": "node analytics-scraper.js range",
+    "supabase:scrape": "node supabase-scraper.js",
+    "supabase:single": "node supabase-scraper.js single",
+    "supabase:batch": "node supabase-scraper.js batch",
+    "supabase:range": "node supabase-scraper.js range",
+    "supabase:query": "node supabase-scraper.js query",
+    "cron:start": "node cron-scraper.js start",
+    "cron:stop": "node cron-scraper.js stop",
+    "cron:run-now": "node cron-scraper.js run-now",
+    "cron:status": "node cron-scraper.js status"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "csv-parse": "^6.1.0",
+    "unzipper": "^0.12.3",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3"
+  }
+}

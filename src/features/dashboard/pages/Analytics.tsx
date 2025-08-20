@@ -8,17 +8,23 @@ import VideoSearch from "../components/VideoSearch";
 import VideoTable from "../components/VideoTable";
 import { initSectionAnimations } from "../../../utils/animations";
 import FadeInUp from "../../../components/FadeInUp";
+import { analyticsService, AnalyticsData, ChannelInfo } from "../../../services/analyticsService";
+import toast from "react-hot-toast";
 
 const Analytics = () => {
   const [showReferred, setShowReferred] = useState(true);
   const [dateRange, setDateRange] = useState({
-    start: subDays(new Date(), 27),
-    end: new Date(),
+    start: subDays(new Date(), 1), // Latest: yesterday
+    end: subDays(new Date(), 1),   // Latest: yesterday
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [channels, setChannels] = useState<ChannelInfo[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<string>("all");
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample video data
+  // Sample video data (keeping this for now as it's not part of the analytics API)
   const videoData = [
     {
       id: "1",
@@ -31,14 +37,63 @@ const Analytics = () => {
     },
   ];
 
+  // Load channels on component mount
   useEffect(() => {
-    // Simulate data loading
+    loadChannels();
+  }, []);
+
+  // Load analytics data when date range or channel changes
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [dateRange, selectedChannel]);
+
+  const loadChannels = async () => {
+    try {
+      const response = await analyticsService.fetchChannels();
+      if (response.success) {
+        setChannels(response.channels);
+      }
+    } catch (error) {
+      console.error('Failed to load channels:', error);
+      toast.error('Failed to load channels');
+    }
+  };
+
+  const loadAnalyticsData = async () => {
     setIsLoading(true);
-    const timer = setTimeout(() => {
+    setError(null);
+    
+    try {
+      const channelId = selectedChannel === "all" ? undefined : selectedChannel;
+      
+      // Log the date range being requested for debugging
+      console.log('Requesting analytics for date range:', {
+        start: dateRange.start.toISOString().split('T')[0],
+        end: dateRange.end.toISOString().split('T')[0],
+        channel: channelId || 'all'
+      });
+      
+      const data = await analyticsService.fetchAnalyticsRange(
+        dateRange.start,
+        dateRange.end,
+        channelId
+      );
+      
+      if (data.success) {
+        setAnalyticsData(data);
+        console.log('Analytics data loaded successfully:', data);
+      } else {
+        setError('Failed to fetch analytics data');
+        console.error('Analytics API returned success: false');
+      }
+    } catch (error) {
+      console.error('Error loading analytics data:', error);
+      setError('Failed to load analytics data. Please try again.');
+      toast.error('Failed to load analytics data');
+    } finally {
       setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [showReferred, dateRange]);
+    }
+  };
 
   useEffect(() => {
     // Initialize animations after component mounts
@@ -57,6 +112,7 @@ const Analytics = () => {
   }, [isLoading]);
 
   const handleChannelChange = (channel: string) => {
+    setSelectedChannel(channel);
     setShowReferred(channel === "all");
   };
 
@@ -72,6 +128,47 @@ const Analytics = () => {
     setIsSearching(false);
   };
 
+  // Helper function to format numbers
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(1)}M`;
+    } else if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}K`;
+    }
+    return num.toString();
+  };
+
+  // Helper function to format currency
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  // Get analytics summary data
+  const getAnalyticsSummary = () => {
+    if (!analyticsData) {
+      return {
+        totalViews: 0,
+        totalPremiumViews: 0,
+        totalRevenue: 0,
+        averageRPM: 0,
+      };
+    }
+
+    return {
+      totalViews: analyticsData.summary.totalViews,
+      totalPremiumViews: analyticsData.summary.totalPremiumViews,
+      totalRevenue: analyticsData.summary.totalRevenue,
+      averageRPM: analyticsData.summary.averageRPM,
+    };
+  };
+
+  const summary = getAnalyticsSummary();
+
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-slate-200">
       <FadeInUp>
@@ -80,16 +177,32 @@ const Analytics = () => {
         <AnalyticsControls
           onChannelChange={handleChannelChange}
           onDateRangeChange={handleDateRangeChange}
+          channels={channels}
+          selectedChannel={selectedChannel}
+          currentDateRange={dateRange}
         />
 
         <div className="flex-1 overflow-auto">
           <div className="p-3 animate-section">
+            {/* Error Display */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-red-200">
+                <p className="text-sm">{error}</p>
+                <button 
+                  onClick={loadAnalyticsData}
+                  className="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
             {/* Metrics Grid */}
             <div className="grid grid-cols-2 gap-3 mb-3">
               {/* Total Views */}
               <MetricCard
                 title="Views"
-                value={showReferred ? "59M" : "45M"}
+                value={formatNumber(summary.totalViews)}
                 previousLabel="Previous period"
                 previousValue={showReferred ? "55M" : "42M"}
                 change={7.3}
@@ -100,7 +213,7 @@ const Analytics = () => {
               {/* Premium Views */}
               <MetricCard
                 title="Premium Views"
-                value={showReferred ? "6.62M" : "5.12M"}
+                value={formatNumber(summary.totalPremiumViews)}
                 previousLabel="Previous period"
                 previousValue={showReferred ? "6.12M" : "4.82M"}
                 change={8.2}
@@ -111,7 +224,7 @@ const Analytics = () => {
               {/* RPM */}
               <MetricCard
                 title="RPM"
-                value={showReferred ? "$0.13" : "$0.11"}
+                value={formatCurrency(summary.averageRPM)}
                 previousLabel="Previous period"
                 previousValue={showReferred ? "$0.12" : "$0.10"}
                 change={8.3}
@@ -122,7 +235,7 @@ const Analytics = () => {
               {/* Expected Revenue */}
               <MetricCard
                 title="Expected Revenue"
-                value={showReferred ? "$7,670" : "$5,850"}
+                value={formatCurrency(summary.totalRevenue)}
                 previousLabel="Previous period"
                 previousValue={showReferred ? "$6,600" : "$4,620"}
                 change={10.6}
@@ -139,6 +252,7 @@ const Analytics = () => {
                 endDate={dateRange.end}
                 showReferred={showReferred}
                 isLoading={isLoading}
+                analyticsData={analyticsData}
               />
             </div>
             <div className="animate-section">

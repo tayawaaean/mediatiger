@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { format, subDays, isSameDay, addMonths } from 'date-fns';
+import React from 'react'; // Added missing import
 
 const presets = [
-  { label: 'Last 7 days', days: 7 },
-  { label: 'Last 28 days', days: 28 },
-  { label: 'Last 90 days', days: 90 },
-  { label: 'Custom', days: 0 },
+  { label: 'Latest', days: 1, offset: 1 }, // Today minus 1 day
+  { label: 'Last 7 days', days: 7, offset: 0 },
+  { label: 'Last 28 days', days: 28, offset: 0 },
+  { label: 'Last 90 days', days: 90, offset: 0 },
+  { label: 'Custom', days: 0, offset: 0 },
 ];
 
 const generateMonthDays = (year: number, month: number) => {
@@ -24,14 +26,16 @@ const generateMonthDays = (year: number, month: number) => {
 
 export default function DateRangeSelector({
   onRangeChange,
+  currentDateRange,
 }: {
   onRangeChange: (start: Date, end: Date) => void;
+  currentDateRange: { start: Date; end: Date };
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [range, setRange] = useState({
-    label: 'Last 28 days',
-    start: subDays(new Date(), 27),
-    end: new Date(),
+    label: 'Latest',
+    start: subDays(new Date(), 1),
+    end: subDays(new Date(), 1),
   });
   const [showCustomPicker, setShowCustomPicker] = useState(false);
   const [customStart, setCustomStart] = useState<Date | null>(null);
@@ -39,21 +43,65 @@ export default function DateRangeSelector({
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
 
+  // Sync with parent component's date range
+  React.useEffect(() => {
+    // Determine which preset matches the current date range
+    const daysDiff = Math.ceil((currentDateRange.end.getTime() - currentDateRange.start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    let matchingPreset = presets.find(preset => {
+      if (preset.label === 'Custom') return false;
+      if (preset.label === 'Latest') {
+        return daysDiff === 1 && isSameDay(currentDateRange.start, subDays(new Date(), 1));
+      }
+      return preset.days === daysDiff;
+    });
+    
+    if (matchingPreset) {
+      setRange({
+        label: matchingPreset.label,
+        start: currentDateRange.start,
+        end: currentDateRange.end,
+      });
+    } else {
+      setRange({
+        label: 'Custom',
+        start: currentDateRange.start,
+        end: currentDateRange.end,
+      });
+    }
+  }, [currentDateRange.start, currentDateRange.end]);
+
+  // Initialize range on mount
+  React.useEffect(() => {
+    const daysDiff = Math.ceil((currentDateRange.end.getTime() - currentDateRange.start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    if (daysDiff === 1 && isSameDay(currentDateRange.start, subDays(new Date(), 1))) {
+      setRange({
+        label: 'Latest',
+        start: currentDateRange.start,
+        end: currentDateRange.end,
+      });
+    }
+  }, []);
+
   const monthDays = generateMonthDays(
     calendarMonth.getFullYear(),
     calendarMonth.getMonth()
   );
 
-  const handleSelect = async (preset: { label: string; days: number }) => {
+  const handleSelect = async (preset: { label: string; days: number; offset: number }) => {
     if (preset.label === 'Custom') {
       setShowCustomPicker(true);
       return;
     }
+    
     setIsLoading(true);
-    const end = new Date();
+    const end = subDays(new Date(), preset.offset);
     const start = subDays(end, preset.days - 1);
+    
     setRange({ label: preset.label, start, end });
     onRangeChange(start, end);
+    
     await new Promise((resolve) => setTimeout(resolve, 300)); // Simulate loading
     setIsLoading(false);
     setIsOpen(false);

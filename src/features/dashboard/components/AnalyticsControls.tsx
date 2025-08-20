@@ -1,14 +1,21 @@
 import React, { useState } from "react";
 import DateRangeSelector from "./DateRangeSelector";
+import { ChannelInfo } from "../../../services/analyticsService";
 
 interface AnalyticsControlsProps {
   onChannelChange: (channel: string) => void;
   onDateRangeChange: (startDate: Date, endDate: Date) => void;
+  channels: ChannelInfo[];
+  selectedChannel: string;
+  currentDateRange: { start: Date; end: Date };
 }
 
 const AnalyticsControls: React.FC<AnalyticsControlsProps> = ({
   onChannelChange,
   onDateRangeChange,
+  channels,
+  selectedChannel,
+  currentDateRange,
 }) => {
   const [showChannelDropdown, setShowChannelDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,6 +26,12 @@ const AnalyticsControls: React.FC<AnalyticsControlsProps> = ({
     await new Promise((resolve) => setTimeout(resolve, 300)); // Simulate loading
     setIsLoading(false);
     setShowChannelDropdown(false);
+  };
+
+  const getSelectedChannelName = () => {
+    if (selectedChannel === "all") return "All Channels";
+    const channel = channels.find(c => c.id === selectedChannel);
+    return channel ? channel.name : selectedChannel;
   };
 
   return (
@@ -37,7 +50,7 @@ const AnalyticsControls: React.FC<AnalyticsControlsProps> = ({
           }`}
           disabled={isLoading}
         >
-          All Channels
+          {getSelectedChannelName()}
           <span className="text-xs">▼</span>
         </button>
 
@@ -49,12 +62,33 @@ const AnalyticsControls: React.FC<AnalyticsControlsProps> = ({
             >
               All Channels
             </div>
+            {channels.map((channel) => (
+              <div
+                key={channel.id}
+                className="px-4 py-2 hover:bg-slate-700 cursor-pointer transition-all duration-200 border-t border-slate-700/50"
+                onClick={() => handleChannelSelect(channel.id)}
+              >
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={channel.thumbnail} 
+                    alt={channel.name}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <div>
+                    <div className="font-medium text-slate-200">{channel.name}</div>
+                    <div className="text-xs text-slate-400">
+                      {channel.status} • Approved {new Date(channel.approval_date).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
       {/* Date Selector */}
-      <DateRangeSelector onRangeChange={onDateRangeChange} />
+      <DateRangeSelector onRangeChange={onDateRangeChange} currentDateRange={currentDateRange} />
     </div>
   );
 };
