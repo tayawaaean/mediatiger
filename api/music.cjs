@@ -58,8 +58,7 @@ module.exports = async (req, res) => {
       console.log('POST request body:', body);
     }
 
-    const apiUrl = process.env.PLAYIST_API_URL || 'https://api.playist.studio/public/v1/music/list';
-    const apiKey = process.env.PLAYIST_API_KEY;
+    const apiUrl = process.env.PLAYIST_API_URL || 'http://18.142.174.87:3006/api/music';
 
     if (!apiKey) {
       console.error('API key not found');
