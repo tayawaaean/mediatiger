@@ -130,6 +130,7 @@ export interface Database {
           main_request_id: string | null
           created_at: string
           updated_at?: string | null
+          analytics_cid?: string | null
         }
         Insert: {
           id?: string
@@ -144,6 +145,7 @@ export interface Database {
           main_request_id?: string | null
           created_at?: string
           updated_at?: string
+          analytics_cid?: string | null
         }
         Update: {
           id?: string
@@ -158,6 +160,7 @@ export interface Database {
           main_request_id?: string | null
           created_at?: string
           updated_at?: string
+          analytics_cid?: string | null
         }
         Relationships: [
           {
