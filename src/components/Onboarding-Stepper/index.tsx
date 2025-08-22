@@ -74,6 +74,9 @@ export const handleFinalSubmit = async (
         youtube_links: channelInfo.youtubeLinks.filter(
           (link) => link.trim() !== ""
         ),
+        youtube_channel_name: null, // Will be populated when channels are verified
+        youtube_channel_thumbnail: null, // Will be populated when channels are verified
+        youtube_channel_metadata: null, // Will be populated when channels are verified
         status: "pending",
       },
     ]);

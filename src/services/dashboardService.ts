@@ -124,17 +124,60 @@ export const fetchDashboardStats = async (
 
     if (viewsError) throw viewsError;
 
-    const { data: requestData, error: requestError } = await supabase
+        // 🎯 Get approved channels using the SAME logic as Analytics component
+    // This ensures we count channels the same way as the channel dropdown
+    // 
+    // Logic from getUserChannels function:
+    // 1. Get approved user_requests (status = 'approved')
+    // 2. Get approved channels (status = 'approved' AND user_id = userId)
+    // 3. Count both main channels (from youtube_links) and individual channels
+    
+    // Get approved user request
+    const { data: userRequest, error: requestError } = await supabase
       .from("user_requests")
-      .select("youtube_links")
+      .select("youtube_links, status")
       .eq("user_id", userId)
+      .eq("status", "approved")
       .single();
-
-    if (requestError) throw requestError;
+    
+    if (requestError) {
+      console.error("❌ Error fetching approved user_requests:", requestError);
+      // If no approved user_request, return 0 channels
+      return {
+        monthlyViews: viewsData || 0,
+        linkedChannels: 0,
+      };
+    }
+    
+    // Get approved channels
+    const { data: approvedChannels, error: channelsError } = await supabase
+      .from("channels")
+      .select("id, channel_name, status")
+      .eq("user_id", userId)
+      .eq("status", "approved");
+    
+    if (channelsError) {
+      console.error("❌ Error fetching approved channels:", channelsError);
+      throw channelsError;
+    }
+    
+    // Count total approved channels
+    // This matches the logic in getUserChannels function from Analytics component
+    const mainChannelsCount = userRequest?.youtube_links?.length || 0;
+    const individualChannelsCount = approvedChannels?.length || 0;
+    const totalApprovedChannels = mainChannelsCount + individualChannelsCount;
+    
+    console.log("🔍 Channel count breakdown:", {
+      mainChannelsFromUserRequest: mainChannelsCount,
+      individualChannelsFromChannelsTable: individualChannelsCount,
+      totalApprovedChannels: totalApprovedChannels,
+      userRequestStatus: userRequest?.status,
+      approvedChannels: approvedChannels?.map(ch => ({ id: ch.id, name: ch.channel_name, status: ch.status }))
+    });
 
     return {
       monthlyViews: viewsData || 0,
-      linkedChannels: requestData?.youtube_links?.length || 0,
+      linkedChannels: totalApprovedChannels,
     };
   } catch (error) {
     console.error("Error fetching stats:", error);

@@ -6,6 +6,7 @@ import {
   TrendingDown,
   TrendingUp,
   Users as UsersIcon,
+  CheckCircle,
 } from "lucide-react";
 import React from "react";
 import { formatRelativeTime } from "../utils/dateUtils";
@@ -13,13 +14,15 @@ import { useLanguage } from "../contexts/LanguageContext"; // Update path as nee
 
 interface ActivityItem {
   id: string;
-  type: "view" | "subscriber" | "revenue" | "milestone";
+  type: "view" | "subscriber" | "revenue" | "milestone" | "channel_approval";
   title: string;
   description: string;
   timestamp: string;
   metadata?: {
     trend?: "up" | "down";
     amount?: number;
+    channelName?: string;
+    channelLink?: string;
   };
 }
 
@@ -37,7 +40,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
   const formatRelativeTimeWithLocale = (timestamp: string): string => {
     // You can modify the existing formatRelativeTime function to use currentLanguage.code
     // If you need to completely replace it, you can implement a custom version here
-    return formatRelativeTime(timestamp, currentLanguage.code);
+    return formatRelativeTime(timestamp);
   };
 
   // Function to translate titles and descriptions
@@ -101,6 +104,11 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       translatedDescription = translate("activity.achievementDescription")
           .replace('{count}', '1M');
     }
+    else if (activity.type === "channel_approval") {
+      // For channel approval - use the original description as it comes from the database
+      translatedTitle = "Channel Approved";
+      translatedDescription = activity.description;
+    }
 
     return { translatedTitle, translatedDescription };
   };
@@ -121,27 +129,32 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
                     className="bg-slate-700/50 rounded-lg p-4 flex items-start space-x-4"
                 >
                   <div
-                      className={`p-2 rounded-full ${
-                          activity.type === "view"
-                              ? "bg-blue-500/20"
-                              : activity.type === "subscriber"
-                                  ? "bg-green-500/20"
-                                  : activity.type === "revenue"
-                                      ? "bg-purple-500/20"
-                                      : "bg-indigo-500/20"
-                      }`}
+                    className={`p-2 rounded-full ${
+                      activity.type === "view"
+                        ? "bg-blue-500/20"
+                        : activity.type === "subscriber"
+                          ? "bg-green-500/20"
+                          : activity.type === "revenue"
+                            ? "bg-purple-500/20"
+                            : activity.type === "milestone"
+                              ? "bg-indigo-500/20"
+                              : "bg-emerald-500/20" // channel_approval
+                    }`}
                   >
                     {activity.type === "view" && (
-                        <Eye className="h-5 w-5 text-blue-400" />
+                      <Eye className="h-5 w-5 text-blue-400" />
                     )}
                     {activity.type === "subscriber" && (
-                        <UsersIcon className="h-5 w-5 text-green-400" />
+                      <UsersIcon className="h-5 w-5 text-green-400" />
                     )}
                     {activity.type === "revenue" && (
-                        <DollarSign className="h-5 w-5 text-purple-400" />
+                      <DollarSign className="h-5 w-5 text-purple-400" />
                     )}
                     {activity.type === "milestone" && (
-                        <Award className="h-5 w-5 text-indigo-400" />
+                      <Award className="h-5 w-5 text-indigo-400" />
+                    )}
+                    {activity.type === "channel_approval" && (
+                      <CheckCircle className="h-5 w-5 text-emerald-400" />
                     )}
                   </div>
                   <div className="flex-1">
@@ -153,30 +166,24 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
                     {formatRelativeTimeWithLocale(activity.timestamp)}
                   </span>
                     </div>
-                    <p className="text-slate-300 text-sm mt-1">
-                      {translatedDescription}
-                    </p>
-                    {activity.metadata?.trend && (
-                        <div
-                            className={`flex items-center mt-2 ${
-                                activity.metadata.trend === "up"
-                                    ? "text-green-400"
-                                    : "text-red-400"
-                            }`}
-                        >
-                          {activity.metadata.trend === "up" ? (
-                              <TrendingUp className="h-4 w-4 mr-1" />
-                          ) : (
-                              <TrendingDown className="h-4 w-4 mr-1" />
-                          )}
-                          <span className="text-sm">
-                      {activity.metadata.amount}%{" "}
-                            {activity.metadata.trend === "up"
-                                ? translate("activity.increase")
-                                : translate("activity.decrease")}
-                    </span>
+                    <div className="text-slate-300 text-sm mt-1">
+                      <p className="mb-2">
+                        {translatedDescription}
+                      </p>
+                      {activity.type === "channel_approval" && activity.metadata?.channelLink && (
+                        <div className="mt-2">
+                          <a 
+                            href={activity.metadata.channelLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-emerald-400 hover:text-emerald-300 text-xs underline"
+                          >
+                            🔗 View Channel
+                          </a>
                         </div>
-                    )}
+                      )}
+                    </div>
+                    {/* Removed trend display section */}
                   </div>
                 </div>
             );

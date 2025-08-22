@@ -32,23 +32,39 @@ export function useDashboardAuth(): DashboardAuthState {
     if (user) {
       setIsLoading(true);
       checkUserIfBanned(supabase, user, setIsBanned);
-      fetchUserRequest(supabase, user.id)
-        .then((data) => {
-          console.log("[useDashboardAuth] user data: ", data);
-          if (data.length == 0) {
+      
+      // Check both user_requests status AND if user has approved channels
+      Promise.all([
+        fetchUserRequest(supabase, user.id),
+        // Also check if user has approved channels
+        supabase
+          .from('channels')
+          .select('id, status')
+          .or(`user_id.eq.${user.id},main_request_id.eq.${user.id}`)
+          .eq('status', 'approved')
+      ])
+        .then(([requestData, channelsData]) => {
+          console.log("[useDashboardAuth] user request data: ", requestData);
+          console.log("[useDashboardAuth] user channels data: ", channelsData);
+          
+          if (requestData.length == 0) {
             setShowOnboarding(true);
             setIsLoading(false);
             return;
           }
-          if (data[0].status == "approved") {
+          
+          // Set hasChanel to true if user has approved status OR has approved channels
+          if (requestData[0].status == "approved" || (channelsData.data && channelsData.data.length > 0)) {
             setHasChanel(true);
+            console.log("[useDashboardAuth] Setting hasChanel to true - user approved or has approved channels");
           }
-          if (data[0].status == "rejected") {
-            setReason(data[0]?.rejection_reason);
+          
+          if (requestData[0].status == "rejected") {
+            setReason(requestData[0]?.rejection_reason);
             setIsRejected(true);
             setIsLoading(false);
           }
-          if (data[0].status === "pending") {
+          if (requestData[0].status === "pending") {
             setIsPending(true);
           }
         })

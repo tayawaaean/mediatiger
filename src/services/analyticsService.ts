@@ -15,6 +15,7 @@ export interface AnalyticsData {
     views: number;
     premiumViews: number;
     rpm: number;
+    premiumRpm?: number;
     revenue: number;
     hasData: boolean;
     dataSize: number;
@@ -24,6 +25,7 @@ export interface AnalyticsData {
     totalPremiumViews: number;
     totalRevenue: number;
     averageRPM: number;
+    premiumRPM?: number;
     dataPoints: number;
     dataAvailability: number;
     errors: number;

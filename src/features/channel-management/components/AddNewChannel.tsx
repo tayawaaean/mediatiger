@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../../contexts/AuthContext";
 import { supabase } from "../../../lib/supabase";
 import { useLanguage } from "../../../contexts/LanguageContext"; // Import language context
+import { validateChannelSubmission, getChannelValidationErrorMessage } from "../../../utils/channelValidation";
 
 interface NewChannelPopupProps {
   isOpen: boolean;
@@ -46,39 +47,27 @@ export default function NewChannelPopup({
   };
 
   const verifyChannel = async (channelUrl: string) => {
+    if (!channelUrl.trim()) return;
     setIsVerifying(true);
     try {
-      const { data: existingRequest, error: checkError } = await supabase
-          .from("user_requests")
-          .select("id")
-          .filter("youtube_links", "cs", `{"${channelUrl}"}`)
-          .filter("status", "eq", "approved")
-          .maybeSingle();
+      // Validate channel submission using utility function
+      const validationResult = await validateChannelSubmission(
+        channelUrl,
+        userId,
+        type
+      );
 
-      if (checkError) throw checkError;
-      const { data: existsInChannelsRequest } = await supabase
-          .from("channels")
-          .select("id")
-          .eq("link", channelUrl)
-          .eq("status", "approved")
-          .single();
-      const { data: alreadySubmitted } = await supabase
-          .from("channels")
-          .select("id")
-          .eq("link", channelUrl)
-          .eq("status", "pending")
-          .eq("user_id", userId)
-          .single();
-      if (alreadySubmitted) {
-        toast.error(translate("channel.alreadyPendingReview"));
-        return;
-      }
-      if (existingRequest || existsInChannelsRequest) {
-        toast.error(translate("channel.alreadyRegistered"));
-        setChannelInfo((prev) => ({
-          ...prev,
-          verifiedChannels: { ...prev.verifiedChannels, [channelUrl]: false },
-        }));
+      if (!validationResult.isValid) {
+        const errorMessage = getChannelValidationErrorMessage(validationResult.error!, translate);
+        toast.error(errorMessage);
+        
+        // Set verification status to false for invalid channels
+        if (validationResult.error === 'ALREADY_REGISTERED_BY_OTHER_USER') {
+          setChannelInfo((prev) => ({
+            ...prev,
+            verifiedChannels: { ...prev.verifiedChannels, [channelUrl]: false },
+          }));
+        }
         return;
       }
 
@@ -94,7 +83,12 @@ export default function NewChannelPopup({
       }));
 
       if (isVerified) {
-        toast.success(translate("channel.verificationSuccess"));
+        const channelName = validationResult.channelMetadata?.name || 'Channel';
+        if (validationResult.channelMetadata) {
+          toast.success(`${translate("channel.verificationSuccess")}: ${channelName}`);
+        } else {
+          toast.success(`${translate("channel.verificationSuccess")} (API data unavailable)`);
+        }
       } else {
         toast.error(translate("channel.verificationFailed"));
       }
@@ -132,13 +126,19 @@ export default function NewChannelPopup({
   };
 
   const handleSubmit = async () => {
-    const youtubeUrlRegex =
-        /^https:\/\/(?:www\.)?youtube\.com\/[@a-zA-Z0-9-_]+$/;
+    // Validate channel submission using utility function
+    const validationResult = await validateChannelSubmission(
+      channelInfo.youtubeLinks[0],
+      userId,
+      type
+    );
 
-    if (!youtubeUrlRegex.test(channelInfo.youtubeLinks[0])) {
-      toast.error(translate("channel.invalidUrl"));
+    if (!validationResult.isValid) {
+      const errorMessage = getChannelValidationErrorMessage(validationResult.error!, translate);
+      toast.error(errorMessage);
       return;
     }
+
     setIsSubmitting(true);
     try {
       // get main request id
@@ -152,6 +152,8 @@ export default function NewChannelPopup({
           {
             user_id: userId,
             link: channelInfo.youtubeLinks[0],
+            channel_name: validationResult.channelMetadata?.name || null,
+            thumbnail: validationResult.channelMetadata?.thumbnail || null,
             status: "pending",
             main_request_id: dataReqId?.id,
           },

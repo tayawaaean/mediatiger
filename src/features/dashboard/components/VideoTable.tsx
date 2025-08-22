@@ -8,11 +8,14 @@ interface Video {
   rpmGross: number;
   revenueGross: number;
   views: number;
+  cid?: string; // Channel ID
+  channelName?: string; // Channel name
 }
 
 interface VideoTableProps {
   data: Video[];
   isLoading?: boolean;
+  splitPercent?: number;
 }
 
 type SortField = "title" | "rpmGross" | "revenueGross" | "views";
@@ -38,12 +41,16 @@ const LoadingRow = () => (
   </tr>
 );
 
-const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
+const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false, splitPercent = 100 }) => {
   const [sortField, setSortField] = useState<SortField>("views");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isSorting, setIsSorting] = useState(false);
 
   const formatCurrency = (value: number) => {
+    // Handle NaN and invalid values
+    if (isNaN(value) || !isFinite(value)) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -53,15 +60,47 @@ const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
   };
 
   const formatNumber = (value: number) => {
+    // Handle NaN and invalid values
+    if (isNaN(value) || !isFinite(value)) {
+      return '0';
+    }
     return new Intl.NumberFormat("en-US").format(value);
   };
 
+  // Apply split percentage to video data
+  const applySplitToData = (videoData: Video[]): Video[] => {
+    if (splitPercent === 100) return videoData;
+    
+    return videoData.map(video => {
+      // Keep views and revenue ORIGINAL (unaffected by split)
+      // Only RPM will be calculated using the split-adjusted values
+      const adjustedViews = video.views; // Keep original views
+      const adjustedRevenue = video.revenueGross; // Keep original revenue
+      
+      // Calculate RPM using split-adjusted values for proper split representation
+      // Formula: RPM = (Revenue * Split% / Views) × 1000
+      const splitFactor = splitPercent / 100;
+      const splitAdjustedRevenue = adjustedRevenue * splitFactor;
+      const adjustedRpm = adjustedViews > 0 
+        ? Math.floor((splitAdjustedRevenue / adjustedViews) * 1000 * 100) / 100  // Round down to 2 decimal places
+        : 0;
+      
+      return {
+        ...video,
+        views: adjustedViews,
+        revenueGross: adjustedRevenue,
+        rpmGross: adjustedRpm
+      };
+    });
+  };
+
   const calculateTotals = () => {
-    return data.reduce(
+    // Use adjusted data for totals calculation
+    return adjustedData.reduce(
       (acc, video) => ({
-        rpmGross: acc.rpmGross + video.rpmGross,
-        revenueGross: acc.revenueGross + video.revenueGross,
-        views: acc.views + video.views,
+        rpmGross: acc.rpmGross + (isNaN(video.rpmGross) ? 0 : video.rpmGross),
+        revenueGross: acc.revenueGross + (isNaN(video.revenueGross) ? 0 : video.revenueGross),
+        views: acc.views + (isNaN(video.views) ? 0 : video.views),
       }),
       {
         rpmGross: 0,
@@ -99,7 +138,33 @@ const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
     return null;
   };
 
-  const sortedData = [...data].sort((a, b) => {
+  // Apply split percentage to data before sorting
+  const adjustedData = applySplitToData(data);
+  
+  // Debug RPM calculations
+  if (splitPercent !== 100 && adjustedData.length > 0) {
+    console.log('🔍 RPM calculation debug:', {
+      splitPercent,
+      sampleVideo: {
+        original: {
+          views: data[0]?.views,
+          revenue: data[0]?.revenueGross,
+          rpm: data[0]?.rpmGross
+        },
+        adjusted: {
+          views: adjustedData[0]?.views,
+          revenue: adjustedData[0]?.revenueGross,
+          rpm: adjustedData[0]?.rpmGross
+        },
+        note: 'Views and revenue kept original, only RPM affected by split',
+        rpmCalculation: adjustedData[0]?.views > 0 
+          ? `(${adjustedData[0]?.revenueGross * (splitPercent / 100)} / ${adjustedData[0]?.views}) * 1000 = ${((adjustedData[0]?.revenueGross * (splitPercent / 100)) / adjustedData[0]?.views * 1000).toFixed(4)}`
+          : 'N/A'
+      }
+    });
+  }
+  
+  const sortedData = [...adjustedData].sort((a, b) => {
     const multiplier = sortDirection === "asc" ? 1 : -1;
     if (sortField === "title") {
       return multiplier * a.title.localeCompare(b.title);
@@ -110,8 +175,17 @@ const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
   });
 
   const totals = calculateTotals();
-  const avgRpmGross =
-    totals.views > 0 ? (totals.revenueGross / totals.views) * 1000 : 0;
+  
+  // Calculate average RPM using the correct formula and round down
+  const avgRpmGross = totals.views > 0 
+    ? Math.floor((totals.revenueGross / totals.views) * 1000 * 100) / 100  // Round down to 2 decimal places
+    : 0;
+  
+  // Add split percentage indicator
+  const splitIndicator = splitPercent !== 100 ? ` (${splitPercent}% split)` : '';
+  
+  // Ensure avgRpmGross is not NaN
+  const safeAvgRpmGross = isNaN(avgRpmGross) ? 0 : avgRpmGross;
 
   return (
     <div className="mt-6 bg-slate-800/50 rounded-lg overflow-hidden">
@@ -121,22 +195,22 @@ const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-slate-700/50">
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-400">
-                  <button
-                    onClick={() => handleSort("title")}
-                    className="flex items-center gap-1 hover:text-slate-200 transition-colors"
-                    disabled={isLoading || isSorting}
-                  >
-                    VIDEO
-                    <span
-                      className={
-                        isSorting && sortField === "title" ? "animate-spin" : ""
-                      }
-                    >
-                      {getSortIcon("title")}
-                    </span>
-                  </button>
-                </th>
+                                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-400">
+                                        <button
+                       onClick={() => handleSort("title")}
+                       className="flex items-center gap-1 hover:text-slate-200 transition-colors"
+                       disabled={isLoading || isSorting}
+                     >
+                       VIDEO & CHANNEL{splitIndicator}
+                       <span
+                         className={
+                           isSorting && sortField === "title" ? "animate-spin" : ""
+                         }
+                       >
+                         {getSortIcon("title")}
+                       </span>
+                     </button>
+                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-400">
                   <button
                     onClick={() => handleSort("rpmGross")}
@@ -170,7 +244,7 @@ const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
               <tr className="border-b border-slate-700/50 bg-slate-800/30">
                 <td className="px-6 py-4 text-sm font-semibold">Total</td>
                 <td className="px-6 py-4 text-left text-sm">
-                  {formatCurrency(avgRpmGross)}
+                  {formatCurrency(safeAvgRpmGross)}
                 </td>
                 <td className="px-6 py-4 text-left text-sm">
                   {formatCurrency(totals.revenueGross)}
@@ -191,20 +265,23 @@ const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
                     key={video.id}
                     className="border-b border-slate-700/50 hover:bg-slate-800/30 transition-colors"
                   >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {video.thumbnail && (
-                          <img
-                            src={video.thumbnail}
-                            alt=""
-                            className="w-12 h-12 rounded object-cover"
-                          />
-                        )}
-                        <span className="text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
-                          {video.title}
-                        </span>
-                      </div>
-                    </td>
+                                         <td className="px-6 py-4">
+                       <div className="flex flex-col gap-1">
+                         <span className="text-sm text-blue-400 hover:text-blue-300 cursor-pointer font-medium">
+                           {video.title}
+                         </span>
+                         {video.channelName && (
+                           <span className="text-xs text-slate-400">
+                             📺 {video.channelName}
+                           </span>
+                         )}
+                         {video.cid && !video.channelName && (
+                           <span className="text-xs text-slate-400">
+                             🆔 {video.cid.slice(0, 8)}...
+                           </span>
+                         )}
+                       </div>
+                     </td>
                     <td className="px-6 py-4 text-left text-sm">
                       {formatCurrency(video.rpmGross)}
                     </td>
@@ -223,12 +300,17 @@ const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
       </div>
       {/* Card layout for mobile */}
       <div className="block md:hidden">
-        {/* Total row as card */}
-        <div className="bg-slate-800/30 border-b border-slate-700/50 p-4 flex flex-col gap-2">
-          <div className="flex justify-between text-xs text-slate-400 font-semibold">
-            <span>Total</span>
-            <span>RPM: {formatCurrency(avgRpmGross)}</span>
-          </div>
+                 {/* Total row as card */}
+         <div className="bg-slate-800/30 border-b border-slate-700/50 p-4 flex flex-col gap-2">
+           {splitPercent !== 100 && (
+             <div className="text-xs text-slate-400 text-center mb-2">
+               📊 Showing {splitPercent}% split adjusted data
+             </div>
+           )}
+           <div className="flex justify-between text-xs text-slate-400 font-semibold">
+             <span>Total</span>
+             <span>RPM: {formatCurrency(safeAvgRpmGross)}</span>
+           </div>
           <div className="flex justify-between text-xs text-slate-400">
             <span>Revenue: {formatCurrency(totals.revenueGross)}</span>
             <span>Views: {formatNumber(totals.views)}</span>
@@ -242,22 +324,25 @@ const VideoTable: React.FC<VideoTableProps> = ({ data, isLoading = false }) => {
           </>
         ) : (
           sortedData.map((video) => (
-            <div
-              key={video.id}
-              className="border-b border-slate-700/50 hover:bg-slate-800/30 transition-colors p-4 flex flex-col gap-2"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                {video.thumbnail && (
-                  <img
-                    src={video.thumbnail}
-                    alt=""
-                    className="w-12 h-12 rounded object-cover"
-                  />
-                )}
-                <span className="text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
-                  {video.title}
-                </span>
-              </div>
+                         <div
+               key={video.id}
+               className="border-b border-slate-700/50 hover:bg-slate-800/30 transition-colors p-4 flex flex-col gap-2"
+             >
+               <div className="flex flex-col gap-1 mb-2">
+                 <span className="text-sm text-blue-400 hover:text-blue-300 cursor-pointer font-medium">
+                   {video.title}
+                 </span>
+                 {video.channelName && (
+                   <span className="text-xs text-slate-400">
+                     📺 {video.channelName}
+                   </span>
+                 )}
+                 {video.cid && !video.channelName && (
+                   <span className="text-xs text-slate-400">
+                     🆔 {video.cid.slice(0, 8)}...
+                   </span>
+                 )}
+               </div>
               <div className="flex flex-wrap gap-2 text-xs text-slate-400">
                 <span>
                   <span className="font-semibold">RPM:</span>{" "}

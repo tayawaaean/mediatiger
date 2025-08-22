@@ -1,4 +1,73 @@
 import { supabase } from "../lib/supabase";
+import { updateUserRequestMetadata } from "../utils/channelValidation";
+
+/**
+ * Fetches YouTube channel metadata (name and thumbnail) from YouTube API
+ * @param channelUrl - The YouTube channel URL
+ * @returns Promise with channel name and thumbnail, or null if failed
+ */
+async function fetchYouTubeChannelMetadata(channelUrl: string): Promise<{ name: string; thumbnail: string; metadata: any } | null> {
+  try {
+    // Extract channel handle from URL
+    const channelHandle = channelUrl.match(/youtube\.com\/(@[^\/]+)/)?.[1];
+    if (!channelHandle) {
+      console.warn('Could not extract channel handle from URL:', channelUrl);
+      return null;
+    }
+
+    // Get YouTube API key from environment
+    const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+    if (!YOUTUBE_API_KEY) {
+      console.warn('YouTube API key not found, returning null');
+      return null;
+    }
+
+    // Fetch real channel data from YouTube API
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${channelHandle}&key=${YOUTUBE_API_KEY}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`YouTube API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const channel = data?.items?.[0];
+    
+    if (!channel || channel.id?.kind !== 'youtube#channel') {
+      console.warn('No channel found for:', channelHandle);
+      return null;
+    }
+
+    const snippet = channel.snippet;
+    const channelName = snippet?.title || channelHandle.replace('@', '') + ' Channel';
+    
+    // Use the default thumbnail (88x88) as specified
+    const thumbnailUrl = snippet?.thumbnails?.default?.url ||
+                        `https://via.placeholder.com/88x88/FF0000/FFFFFF?text=${encodeURIComponent(channelHandle)}`;
+
+    // Store additional metadata
+    const metadata = {
+      channelId: channel.id.channelId,
+      description: snippet?.description || '',
+      publishedAt: snippet?.publishedAt,
+      country: snippet?.country,
+      customUrl: snippet?.customUrl,
+      thumbnails: snippet?.thumbnails
+    };
+
+    console.log('Fetched channel metadata:', { name: channelName, thumbnail: thumbnailUrl, metadata });
+    
+    return {
+      name: channelName,
+      thumbnail: thumbnailUrl,
+      metadata
+    };
+  } catch (error) {
+    console.error('Error fetching YouTube channel metadata:', error);
+    return null;
+  }
+}
 
 export const verifyChannel = async (
   channelUrl: string,
@@ -26,7 +95,7 @@ export const verifyChannel = async (
         "error",
         "channel-exists"
       );
-      setChannelInfo((prev) => ({
+      setChannelInfo((prev: any) => ({
         ...prev,
         verifiedChannels: {
           ...prev.verifiedChannels,
@@ -36,6 +105,26 @@ export const verifyChannel = async (
       return;
     }
 
+    // Fetch YouTube channel metadata
+    const channelMetadata = await fetchYouTubeChannelMetadata(channelUrl);
+    
+    // Update user_requests with channel metadata if available
+    if (channelMetadata) {
+      const success = await updateUserRequestMetadata(
+        userId,
+        channelUrl,
+        channelMetadata.name,
+        channelMetadata.thumbnail,
+        channelMetadata.metadata
+      );
+      
+      if (success) {
+        console.log('Successfully stored channel metadata for:', channelUrl);
+      } else {
+        console.warn('Failed to store channel metadata for:', channelUrl);
+      }
+    }
+
     // Simulate API call to check channel description
     // In production, this would be a real API call to YouTube's API
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -43,7 +132,7 @@ export const verifyChannel = async (
     // For demo purposes, randomly verify
     const isVerified = true;
 
-    setChannelInfo((prev) => ({
+    setChannelInfo((prev: any) => ({
       ...prev,
       verifiedChannels: {
         ...prev.verifiedChannels,
@@ -52,8 +141,9 @@ export const verifyChannel = async (
     }));
 
     if (isVerified) {
+      const channelName = channelMetadata?.name || 'Channel';
       showUniqueToast(
-        "Channel verified successfully!",
+        `Channel verified successfully! ${channelName}`,
         "success",
         "channel-verified"
       );

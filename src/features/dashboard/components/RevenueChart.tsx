@@ -27,7 +27,6 @@ ChartJS.register(
 interface RevenueChartProps {
   startDate?: Date;
   endDate?: Date;
-  showReferred?: boolean;
   isLoading?: boolean;
   analyticsData?: AnalyticsData | null;
 }
@@ -35,7 +34,6 @@ interface RevenueChartProps {
 const RevenueChart: React.FC<RevenueChartProps> = ({ 
   startDate = new Date('2024-09-01'),
   endDate = new Date('2025-03-07'),
-  showReferred = true,
   isLoading = false,
   analyticsData = null
 }) => {
@@ -54,7 +52,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
     );
   }
 
-  // Use real analytics data if available, otherwise fall back to generated data
+  // Use real analytics data if available, otherwise show empty chart
   const getChartData = () => {
     if (analyticsData && analyticsData.success && analyticsData.dailyData.length > 0) {
       // Use real analytics data
@@ -68,62 +66,32 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
       
       return { dates, views, revenue };
     } else {
-      // Fall back to generated data
-      return generateData(startDate, endDate, showReferred);
+      // Show empty chart when no data is available
+      return { dates: [], views: [], revenue: [] };
     }
   };
 
-  const generateData = (start: Date, end: Date, includeReferred: boolean) => {
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    const dates = Array.from({ length: days }, (_, i) => {
-      const date = new Date(start);
-      date.setDate(date.getDate() + i);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
 
-    // Base values for scaling
-    const baseMonthlyViews = 59000000; // 59M views
-    const baseMonthlyRevenue = 7670; // $7,670
-
-    // Calculate daily averages
-    const avgDailyViews = baseMonthlyViews / 30;
-    const avgDailyRevenue = baseMonthlyRevenue / 30;
-
-    // Generate daily data with natural variations
-    const viewsBase = Array.from({ length: days }, (_, index) => {
-      // Add weekly pattern (higher on weekends)
-      const dayOfWeek = (index % 7);
-      const weekendMultiplier = dayOfWeek >= 5 ? 1.2 : 1;
-      
-      // Add monthly pattern (gradual increase towards end of month)
-      const dayOfMonth = index % 30;
-      const monthProgress = dayOfMonth / 30;
-      const monthlyTrend = 0.9 + (monthProgress * 0.2);
-
-      // Random daily variation (±10%)
-      const dailyVariation = 0.9 + (Math.random() * 0.2);
-
-      // Combine all factors
-      const finalMultiplier = weekendMultiplier * monthlyTrend * dailyVariation;
-      
-      return Math.round(avgDailyViews * finalMultiplier * (includeReferred ? 1 : 0.75));
-    });
-
-    // Revenue follows similar patterns but with slightly different variations
-    const revenueBase = viewsBase.map(views => {
-      const rpm = 0.13; // Base RPM
-      const variationFactor = 0.95 + (Math.random() * 0.1); // ±5% RPM variation
-      return Math.round((views * rpm * variationFactor) / 1000);
-    });
-
-    return {
-      dates,
-      views: viewsBase,
-      revenue: revenueBase
-    };
-  };
 
   const { dates, views, revenue } = getChartData();
+
+  // Show no data message when chart is empty
+  if (dates.length === 0) {
+    return (
+      <div className="relative h-80 w-full bg-slate-800 rounded-xl p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-slate-400 text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-semibold text-white mb-2">No Analytics Data</h3>
+          <p className="text-slate-400 text-sm">
+            {analyticsData?.channel && analyticsData.channel !== 'all' 
+              ? `No data available for the selected channel in this date range.`
+              : 'No analytics data available for the selected date range.'
+            }
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const formatValue = (value: number, isRevenue: boolean) => {
     if (isRevenue) {

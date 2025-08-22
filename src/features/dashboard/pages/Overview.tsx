@@ -1,5 +1,4 @@
 import FadeInUp from "../../../components/FadeInUp";
-import { PerformanceTrends } from "../../../components/PerformanceTrends";
 import { RealtimePerformance } from "../../../components/RealtimePerformance";
 import { RecentActivity } from "../../../components/RecentActivity";
 import { ExtendedUser } from "../../../types/user";
@@ -12,6 +11,7 @@ interface OverviewProps {
   user: ExtendedUser;
   linkedChannels: number;
   monthlyViews: number;
+  monthlyRevenue: number;
   realtimeViews: {
     current: number;
     last24h: number;
@@ -19,21 +19,15 @@ interface OverviewProps {
     last7Days: number;
   };
   recentActivity: ActivityItem[];
-  performanceData: {
-    labels: string[];
-    views: number[];
-    engagement: number[];
-    revenue: number[];
-  };
 }
 
 export default function Overview({
   user,
   linkedChannels,
   monthlyViews,
+  monthlyRevenue,
   realtimeViews,
   recentActivity,
-  performanceData,
 }: OverviewProps) {
   return (
     <div className="h-full w-full overflow-auto scrollbar-hide">
@@ -41,6 +35,7 @@ export default function Overview({
         <DashboardCards
           linkedChannels={linkedChannels}
           monthlyViews={monthlyViews}
+          monthlyRevenue={monthlyRevenue}
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 relative z-[1]">
           <Announcements preventAnimation />
@@ -48,7 +43,6 @@ export default function Overview({
           <MonthlyGoals user={user} />
           <RecentActivity recentActivity={recentActivity} />
 
-          <PerformanceTrends performanceData={performanceData} />
         </div>
       </FadeInUp>
     </div>

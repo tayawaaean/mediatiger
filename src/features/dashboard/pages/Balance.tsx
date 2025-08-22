@@ -243,7 +243,7 @@ const BalanceSection = () => {
         handleSubmitData={handleSubmit}
         user={user}
         hasContract={hasContract}
-        currentBalance={1}
+        currentBalance={0}
       />
     </div>
   );

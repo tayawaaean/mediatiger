@@ -12,6 +12,7 @@ interface DashboardContentProps {
   user: ExtendedUser;
   linkedChannels: number;
   monthlyViews: number;
+  monthlyRevenue: number;
   realtimeViews: {
     current: number;
     last24h: number;
@@ -19,12 +20,6 @@ interface DashboardContentProps {
     last7Days: number;
   };
   recentActivity: ActivityItem[];
-  performanceData: {
-    labels: string[];
-    views: number[];
-    engagement: number[];
-    revenue: number[];
-  };
 }
 
 export function DashboardContent({
@@ -32,9 +27,9 @@ export function DashboardContent({
   user,
   linkedChannels,
   monthlyViews,
+  monthlyRevenue,
   realtimeViews,
   recentActivity,
-  performanceData,
 }: DashboardContentProps) {
   if (activeSection === "overview") {
     return (
@@ -42,9 +37,9 @@ export function DashboardContent({
         user={user}
         linkedChannels={linkedChannels}
         monthlyViews={monthlyViews}
+        monthlyRevenue={monthlyRevenue}
         realtimeViews={realtimeViews}
         recentActivity={recentActivity}
-        performanceData={performanceData}
       />
     );
   }

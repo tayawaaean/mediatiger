@@ -2,6 +2,7 @@ import { BanIcon, Check, Edit2, X as Close } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import FadeInUp from "../components/FadeInUp";
+import { useAuth } from "../contexts/AuthContext";
 
 // UserRow type for users returned by get_users RPC
 type UserRow = {
@@ -21,6 +22,9 @@ type UserRow = {
 };
 
 const UsersPanel: React.FC = () => {
+  const { isAdmin } = useAuth();
+  const canEditSplit = isAdmin();
+
   const [users, setUsers] = useState<UserRow[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -30,6 +34,11 @@ const UsersPanel: React.FC = () => {
   const [banList, setBanList] = useState<string[]>([]);
   const [isEditingSplit, setIsEditingSplit] = React.useState(false);
   const [splitValue, setSplitValue] = React.useState("50");
+  
+  // Debug: Log when splitValue changes
+  useEffect(() => {
+    console.log('🔄 Split value state changed to:', splitValue);
+  }, [splitValue]);
 
   // Updated to use filteredUsers for pagination
   const filteredUsers = React.useMemo(() => {
@@ -93,6 +102,41 @@ const UsersPanel: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Load split from user_requests when a user is selected
+  const loadSplit = async () => {
+    if (!selectedUser?.user_id) return;
+    
+    console.log('🔍 Loading split for user:', selectedUser.user_id);
+    
+    const { data, error } = await supabase
+      .from("user_requests")
+      .select("split_percent")
+      .eq("user_id", selectedUser.user_id)
+      .single();
+
+    console.log('📊 Split data response:', { data, error, split_percent: data?.split_percent });
+
+    if (!error && data && data.split_percent !== null && data.split_percent !== undefined) {
+      // Check if the value is actually a valid number
+      const splitValue = Number(data.split_percent);
+      if (!isNaN(splitValue) && splitValue >= 0 && splitValue <= 100) {
+        console.log('✅ Setting split value to:', splitValue);
+        setSplitValue(String(splitValue));
+      } else {
+        console.log('⚠️ Invalid split value, defaulting to 50:', splitValue);
+        setSplitValue("50");
+      }
+    } else {
+      console.log('❌ No split data found, defaulting to 50');
+      setSplitValue("50");
+    }
+  };
+
+  useEffect(() => {
+    loadSplit();
+    setIsEditingSplit(false);
+  }, [selectedUser?.user_id]);
 
   const deleteUser = async (user: UserRow) => {
     try {
@@ -164,9 +208,63 @@ const UsersPanel: React.FC = () => {
     }
   }
 
-  const handleSplitSubmit = () => {
-    // Here you would typically make an API call to update the split
+  const handleSplitSubmit = async () => {
+    if (!canEditSplit || !selectedUser?.user_id) {
+      console.log('❌ Cannot edit split:', { canEditSplit, userId: selectedUser?.user_id });
+      setIsEditingSplit(false);
+      return;
+    }
+
+    const value = Math.max(0, Math.min(100, Number(splitValue) || 0));
+    console.log('🔧 Updating split for user:', selectedUser.user_id, 'to value:', value);
+
+    const { data, error } = await supabase
+      .from("user_requests")
+      .update({ split_percent: value })
+      .eq("user_id", selectedUser.user_id)
+      .select('split_percent'); // Return the updated value
+
+    console.log('📊 Split update response:', { data, error, updatedSplit: data?.[0]?.split_percent });
+
+    if (error) {
+      console.error("❌ Failed to update split_percent:", error);
+      return;
+    }
+
+    // Verify the update was successful
+    if (data && data[0]?.split_percent === value) {
+      console.log('✅ Split updated successfully to:', value);
+      setSplitValue(String(value));
+      
+      // Refresh the split value to ensure UI is in sync with database
+      setTimeout(() => {
+        loadSplit();
+      }, 100);
+    } else {
+      console.log('⚠️ Split update may not have succeeded, expected:', value, 'got:', data?.[0]?.split_percent);
+    }
+    
     setIsEditingSplit(false);
+  };
+
+  // Debug function to check database state
+  const debugDatabaseState = async () => {
+    if (!selectedUser?.user_id) return;
+    
+    console.log('🔍 Debugging database state for user:', selectedUser.user_id);
+    
+    // Check user_requests table
+    const { data: userRequests, error: userRequestsError } = await supabase
+      .from("user_requests")
+      .select("*")
+      .eq("user_id", selectedUser.user_id);
+    
+    console.log('📊 user_requests data:', { userRequests, userRequestsError });
+    
+    // Check if there are multiple records
+    if (userRequests && userRequests.length > 1) {
+      console.log('⚠️ Multiple user_requests records found:', userRequests);
+    }
   };
 
   return (
@@ -427,7 +525,7 @@ const UsersPanel: React.FC = () => {
                 </div>
 
                 <div className="text-right">
-                  {isEditingSplit ? (
+                  {canEditSplit && isEditingSplit ? (
                     <div className="flex items-center space-x-2">
                       <input
                         type="number"
@@ -441,12 +539,14 @@ const UsersPanel: React.FC = () => {
                         <button
                           onClick={handleSplitSubmit}
                           className="rounded bg-green-500/20 p-1 text-green-400 hover:bg-green-500/30"
+                          title="Save split"
                         >
                           <Check size={14} />
                         </button>
                         <button
                           onClick={() => setIsEditingSplit(false)}
                           className="rounded bg-red-500/20 p-1 text-red-400 hover:bg-red-500/30"
+                          title="Cancel edit"
                         >
                           <Close size={14} />
                         </button>
@@ -457,12 +557,35 @@ const UsersPanel: React.FC = () => {
                       <div className="text-3xl font-bold text-blue-400">
                         {splitValue}%
                       </div>
-                      <button
-                        onClick={() => setIsEditingSplit(true)}
-                        className="absolute -right-6 top-1/2 -translate-y-1/2 rounded p-1 opacity-0 transition-opacity hover:bg-gray-700 group-hover:opacity-100"
-                      >
-                        <Edit2 size={14} className="text-gray-400" />
-                      </button>
+                      <div className="flex items-center space-x-1">
+                        {canEditSplit && (
+                          <button
+                            onClick={() => setIsEditingSplit(true)}
+                            className="rounded p-1 opacity-0 transition-opacity hover:bg-gray-700 group-hover:opacity-100"
+                            title="Edit split"
+                          >
+                            <Edit2 size={14} className="text-gray-400" />
+                          </button>
+                        )}
+                        <button
+                          onClick={loadSplit}
+                          className="rounded p-1 opacity-0 transition-opacity hover:bg-gray-700 group-hover:opacity-100"
+                          title="Refresh split from database"
+                        >
+                          <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={debugDatabaseState}
+                          className="rounded p-1 opacity-0 transition-opacity hover:bg-gray-700 group-hover:opacity-100"
+                          title="Debug database state"
+                        >
+                          <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   )}
                   <div className="text-sm text-gray-400">Current Split</div>

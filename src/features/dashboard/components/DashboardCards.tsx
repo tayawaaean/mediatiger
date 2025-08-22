@@ -4,11 +4,13 @@ import { useLanguage } from "../../../contexts/LanguageContext"; // Adjust path 
 
 interface DashboardCardsProps {
   monthlyViews: number;
+  monthlyRevenue: number;
   linkedChannels: number;
 }
 
 export const DashboardCards: React.FC<DashboardCardsProps> = ({
   monthlyViews,
+  monthlyRevenue,
   linkedChannels,
 }) => {
   // Get translate function from language context
@@ -53,6 +55,9 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({
             <p className="text-lg sm:text-2xl font-semibold text-white">
               {linkedChannels.toLocaleString(currentLanguage.code)}
             </p>
+            <p className="text-xs text-slate-500">
+              Approved channels only
+            </p>
           </div>
         </div>
       </div>
@@ -72,9 +77,9 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({
               {new Intl.NumberFormat(currentLanguage.code, {
                 style: "currency",
                 currency: "USD",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }).format(156000)}
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(monthlyRevenue)}
             </p>
           </div>
         </div>

@@ -57,6 +57,15 @@ export interface Database {
           youtube_link: string
           status: string
           created_at: string
+          updated_at: string
+          website: string | null
+          youtube_channel: string | null
+          youtube_links: string[] | null
+          rejection_reason: string | null
+          reviewed_by: string | null
+          youtube_channel_name: string | null
+          youtube_channel_thumbnail: string | null
+          youtube_channel_metadata: any | null
         }
         Insert: {
           id?: string
@@ -65,9 +74,18 @@ export interface Database {
           other_interest?: string | null
           name: string
           email: string
-          youtube_link: string
+          youtube_link?: string
           status?: string
           created_at?: string
+          updated_at?: string
+          website?: string | null
+          youtube_channel?: string | null
+          youtube_links?: string[] | null
+          rejection_reason?: string | null
+          reviewed_by?: string | null
+          youtube_channel_name?: string | null
+          youtube_channel_thumbnail?: string | null
+          youtube_channel_metadata?: any | null
         }
         Update: {
           id?: string
@@ -79,12 +97,79 @@ export interface Database {
           youtube_link?: string
           status?: string
           created_at?: string
+          updated_at?: string
+          website?: string | null
+          youtube_channel?: string | null
+          youtube_links?: string[] | null
+          rejection_reason?: string | null
+          reviewed_by?: string | null
+          youtube_channel_name?: string | null
+          youtube_channel_thumbnail?: string | null
+          youtube_channel_metadata?: any | null
         }
         Relationships: [
           {
             foreignKeyName: "user_requests_user_id_fkey"
             columns: ["user_id"]
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      channels: {
+        Row: {
+          id: string
+          user_id: string
+          link: string
+          channel_name: string | null
+          thumbnail: string | null
+          type: string | null
+          status: string
+          viewed_by: string | null
+          reason: string | null
+          main_request_id: string | null
+          created_at: string
+          updated_at?: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          link: string
+          channel_name?: string | null
+          thumbnail?: string | null
+          type?: string | null
+          status?: string
+          viewed_by?: string | null
+          reason?: string | null
+          main_request_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          link?: string
+          channel_name?: string | null
+          thumbnail?: string | null
+          type?: string | null
+          status?: string
+          viewed_by?: string | null
+          reason?: string | null
+          main_request_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channels_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channels_main_request_id_fkey"
+            columns: ["main_request_id"]
+            referencedRelation: "user_requests"
             referencedColumns: ["id"]
           }
         ]

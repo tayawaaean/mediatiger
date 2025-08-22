@@ -16,12 +16,23 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { AffiliateProgram } from '../../../components/refferalMusic/AffiliateProgram';
 import FadeInUp from '../../../components/FadeInUp';
 interface Channel {
-  url: string;
-  views: number;
-  monthlyViews: number;
-  subscribers: number;
-  growth: number;
-  status?: string;
+  id: string;
+  user_id: string;
+  link: string;
+  channel_name: string | null;
+  thumbnail: string | null;
+  type: string | null;
+  status: string;
+  viewed_by: string | null;
+  reason: string | null;
+  main_request_id: string | null;
+  created_at: string;
+  updated_at?: string;
+  url?: string; // Keep for backward compatibility
+  views?: number;
+  monthlyViews?: number;
+  subscribers?: number;
+  growth?: number;
   profileImage?: string;
   title?: string;
 }
@@ -69,6 +80,13 @@ export default function ChannelManagement() {
 
       if (requestError) throw requestError;
 
+      // Only proceed if the user request is approved
+      if (requestData?.status !== 'approved') {
+        setError(translate('channels.requestNotApproved'));
+        setIsLoading(false);
+        return;
+      }
+
       const youtubeLinks = requestData?.youtube_links || [];
       if (youtubeLinks.length === 0) {
         setError(translate('channels.noChannelsLinked'));
@@ -76,10 +94,12 @@ export default function ChannelManagement() {
         return;
       }
 
+      // ✅ FIX: Fetch ALL channels (including pending, approved, rejected) - not just approved ones
       const { data: channelsData, error: channelsError } = await supabase
         .from('channels')
         .select('*')
-        .eq('user_id', user?.id);
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
 
       if (channelsError) throw channelsError;
 
@@ -91,9 +111,59 @@ export default function ChannelManagement() {
 
       if (viewsError) throw viewsError;
 
+      console.log('Channels data from database:', channelsData);
+      console.log('Views data:', viewsData);
+      console.log('📊 Channel statuses found:', channelsData?.map(c => ({ 
+        link: c.link, 
+        status: c.status, 
+        channel_name: c.channel_name 
+      })));
+      
       const mainChannel = await Promise.all(
         youtubeLinks.map(async (url: string) => {
-          const { profileImage, title } = await getChannelInfo(url);
+          // Check if we already have this channel in our database with metadata
+          const existingChannel = channelsData?.find(c => c.link === url);
+          
+          let profileImage = '';
+          let title = 'Unknown';
+          let channelStatus = 'pending'; // Default status for main channels
+          
+          if (existingChannel?.thumbnail && existingChannel?.channel_name) {
+            // Use stored data from channels table
+            profileImage = existingChannel.thumbnail;
+            title = existingChannel.channel_name;
+            channelStatus = existingChannel.status; // ✅ Use status from channels table
+          } else if (requestData?.youtube_channel_thumbnail && requestData?.youtube_channel_name) {
+            // Use stored data from user_requests table
+            profileImage = requestData.youtube_channel_thumbnail;
+            title = requestData.youtube_channel_name;
+            channelStatus = requestData.status; // ✅ Use status from user_requests table
+          } else {
+            // Try API call if no stored data, but don't fail if it doesn't work
+            try {
+              const { profileImage: apiImage, title: apiTitle } = await getChannelInfo(url);
+              profileImage = apiImage || '';
+              title = apiTitle || 'Unknown Channel';
+              channelStatus = requestData?.status || 'pending'; // ✅ Use user_request status as fallback
+            } catch (error) {
+              console.warn('Failed to fetch channel info from API:', error);
+              profileImage = '';
+              title = 'Unknown Channel';
+              channelStatus = requestData?.status || 'pending'; // ✅ Use user_request status as fallback
+            }
+          }
+
+          console.log(`🔍 Channel ${url} status logic:`, {
+            url,
+            existingChannel: existingChannel ? {
+              status: existingChannel.status,
+              thumbnail: !!existingChannel.thumbnail,
+              channel_name: !!existingChannel.channel_name
+            } : null,
+            userRequestStatus: requestData?.status,
+            finalStatus: channelStatus,
+            source: existingChannel ? 'channels_table' : 'user_requests_table'
+          });
 
           const channelViews =
             viewsData?.filter((v) => v.channel_id === url) || [];
@@ -109,7 +179,7 @@ export default function ChannelManagement() {
             monthlyViews: currentMonthViews,
             subscribers: Math.floor(Math.random() * 1000000),
             growth,
-            status: 'approved',
+            status: channelStatus, // ✅ Use the properly determined status
             profileImage,
             title,
           };
@@ -121,7 +191,7 @@ export default function ChannelManagement() {
         status: string;
       }
 
-      const otherChannels = (channelsData || []).map((data: ChannelData) => {
+      const otherChannels = (channelsData || []).map((data: Channel) => {
         const url = data?.link;
         const channelViews =
           viewsData?.filter((v) => v.channel_id === url) || [];
@@ -131,16 +201,31 @@ export default function ChannelManagement() {
           ? ((currentMonthViews - lastMonthViews) / lastMonthViews) * 100
           : 0;
         return {
-          url,
+          ...data, // Include all database fields
+          url, // Keep for backward compatibility
           views: channelViews.reduce((sum, v) => sum + v.views, 0),
           monthlyViews: currentMonthViews,
           subscribers: Math.floor(Math.random() * 1000000),
           growth,
-          status: data.status,
+          profileImage: data.thumbnail || '', // Use thumbnail from database, empty string if null
+          title: data.channel_name || 'Unknown Channel', // Use channel_name from database, fallback if null
         };
       });
 
       setChannels([...mainChannel, ...otherChannels]);
+      console.log('🎯 Final channels array set:', [...mainChannel, ...otherChannels].map(c => ({ 
+        url: c.url, 
+        status: c.status, 
+        title: c.title 
+      })));
+      
+      // ✅ Status distribution summary
+      const statusCounts = [...mainChannel, ...otherChannels].reduce((acc, channel) => {
+        acc[channel.status] = (acc[channel.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      console.log('📊 Channel status distribution:', statusCounts);
       setError(null);
     } catch (error) {
       console.error('Error fetching channels:', error);
@@ -299,7 +384,7 @@ export default function ChannelManagement() {
                             </span>
                           </div>
                           <p className="text-sm text-slate-400">
-                            {channel.monthlyViews.toLocaleString()}{' '}
+                            {(channel.monthlyViews || 0).toLocaleString()}{' '}
                             {translate('channels.viewsThisMonth')}
                           </p>
                         </div>

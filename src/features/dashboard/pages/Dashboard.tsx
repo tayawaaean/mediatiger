@@ -109,10 +109,10 @@ export default function Dashboard(): JSX.Element {
     activeSection,
     setActiveSection,
     monthlyViews,
+    monthlyRevenue,
     linkedChannels,
     recentActivity,
     realtimeViews,
-    performanceData,
   } = useDashboardData(user, hasChanel);
 
   if (isLoading) {
@@ -258,9 +258,9 @@ export default function Dashboard(): JSX.Element {
                 user={user}
                 linkedChannels={linkedChannels}
                 monthlyViews={monthlyViews}
+                monthlyRevenue={monthlyRevenue}
                 realtimeViews={realtimeViews}
                 recentActivity={recentActivity}
-                performanceData={performanceData}
               />
             </div>
           )}
