@@ -59,6 +59,7 @@ module.exports = async (req, res) => {
     }
 
     const apiUrl = process.env.PLAYIST_API_URL || 'http://18.142.174.87:3006/api/music';
+    const apiKey = process.env.PLAYIST_API_KEY;
 
     if (!apiKey) {
       console.error('API key not found');

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAnalyticsApiUrl, getChannelsApiUrl, getDailyAnalyticsApiUrl } from '../lib/api';
 
 export interface AnalyticsData {
   success: boolean;
@@ -58,9 +59,16 @@ class AnalyticsService {
   private directURL: string;
 
   constructor() {
-    // Try proxy first, fallback to direct URL
-    this.baseURL = '/apis';
-    this.directURL = 'http://18.142.174.87:3001';
+    // Use proxy URLs for development, direct URLs for production
+    const isDevelopment = import.meta.env.DEV;
+    this.baseURL = isDevelopment ? '/api' : '/apis';  // Use Vite proxy in development
+    this.directURL = 'http://18.142.174.87:3006';
+    
+    console.log('AnalyticsService initialized:', {
+      environment: isDevelopment ? 'DEVELOPMENT' : 'PRODUCTION',
+      baseURL: this.baseURL,
+      directURL: this.directURL
+    });
   }
 
   /**

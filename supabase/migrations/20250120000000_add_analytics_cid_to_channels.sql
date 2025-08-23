@@ -35,3 +35,4 @@ BEGIN
   RAISE NOTICE 'Migration completed successfully!';
   RAISE NOTICE 'Channels table now has analytics_cid column for analytics data linking';
 END $$;
+

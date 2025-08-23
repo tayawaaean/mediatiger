@@ -12,6 +12,7 @@ import { MusicItem } from "../../../utils/data";
 import { supabase } from "../../../lib/supabase";
 import { useAuth } from "../../../contexts/AuthContext";
 import "../../../styles/music.css";
+import { getMusicApiUrl } from '../../../lib/api';
 
 interface MusicResponse {
   success: boolean;
@@ -65,7 +66,21 @@ const MusicComponent = () => {
   const requestQueueRef = useRef<boolean>(false);
   const isRequestingRef = useRef<boolean>(false);
 
-  const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "/api/music";
+  // Use proxy URLs for development, direct URLs for production
+  const isDevelopment = import.meta.env.DEV;
+  const API_URL_MUSIC_LIST = isDevelopment 
+    ? '/api/music'  // Use Vite proxy in development
+    : (import.meta.env.VITE_MUSIC_API_URL || "https://c898bc11be3c.ngrok-free.app/api/music");
+  
+  // Debug logging for API URL
+  console.log('Environment:', isDevelopment ? 'DEVELOPMENT' : 'PRODUCTION');
+  console.log('API URL configured:', API_URL_MUSIC_LIST);
+  console.log('Environment variables:', {
+    VITE_MUSIC_API_URL: import.meta.env.VITE_MUSIC_API_URL,
+    VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    NODE_ENV: import.meta.env.NODE_ENV,
+    DEV: import.meta.env.DEV
+  });
   const MIN_REQUEST_INTERVAL = 1000; // Minimum 1 second between requests
 
   // Load user favorites from Supabase
@@ -194,6 +209,18 @@ const MusicComponent = () => {
     } catch (err) {
       setError("Failed to fetch music from backend");
       if (axios.isAxiosError(err)) {
+        console.error('Axios error details:', {
+          message: err.message,
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          data: err.response?.data,
+          config: {
+            url: err.config?.url,
+            method: err.config?.method,
+            headers: err.config?.headers
+          }
+        });
+        
         switch (err.response?.status) {
           case 429:
             setError("Rate limit exceeded. Please try again later.");
@@ -203,11 +230,16 @@ const MusicComponent = () => {
               "Access denied. Contact support to check IP whitelisting."
             );
             break;
+          case 0:
+            setError("Network error. Check if server is running and CORS is configured.");
+            break;
           default:
-            setError("Network error. Check configuration or contact support.");
+            setError(`Network error (${err.response?.status || 'unknown'}). Check configuration or contact support.`);
         }
+      } else {
+        console.error('Non-axios error:', err);
+        setError("Unexpected error occurred. Please check console for details.");
       }
-      console.error(err);
     } finally {
       setLoading(false);
       setLoadingMore(false);
