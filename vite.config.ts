@@ -23,4 +23,12 @@ export default defineConfig({
       },
     },
   },
+  // Add build-time proxy configuration for Vercel
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
 });

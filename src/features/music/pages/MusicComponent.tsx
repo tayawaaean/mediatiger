@@ -65,7 +65,7 @@ const MusicComponent = () => {
   const requestQueueRef = useRef<boolean>(false);
   const isRequestingRef = useRef<boolean>(false);
 
-  const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "http://18.142.174.87:3006/api/music";
+  const API_URL_MUSIC_LIST = import.meta.env.VITE_MUSIC_API_URL || "/api/music";
   const MIN_REQUEST_INTERVAL = 1000; // Minimum 1 second between requests
 
   // Load user favorites from Supabase
