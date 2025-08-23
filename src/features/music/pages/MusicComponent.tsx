@@ -70,7 +70,7 @@ const MusicComponent = () => {
   const isDevelopment = import.meta.env.DEV;
   const API_URL_MUSIC_LIST = isDevelopment 
     ? '/api/music'  // Use Vite proxy in development
-    : (import.meta.env.VITE_MUSIC_API_URL || "https://c898bc11be3c.ngrok-free.app/api/music");
+    : (import.meta.env.VITE_MUSIC_API_URL || '/apis/music'); // Use Vercel proxy in production
   
   // Debug logging for API URL
   console.log('Environment:', isDevelopment ? 'DEVELOPMENT' : 'PRODUCTION');
