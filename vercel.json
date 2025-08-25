@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "http://18.142.174.87:3006/api/$1"
+      "destination": "https://18.142.174.87:3000/api/$1"
     },
     {
       "source": "/apis/(.*)",
-      "destination": "http://18.142.174.87:3006/api/$1"
+      "destination": "https://18.142.174.87:3006/api/$1"
     }
   ],
   "headers": [

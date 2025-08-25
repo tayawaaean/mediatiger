@@ -1,7 +1,7 @@
 // Centralized API configuration
 export const API_CONFIG = {
   // Base URLs
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://18.142.174.87:3006',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://18.142.174.87:3000',
   
   // API endpoints
   ENDPOINTS: {
@@ -57,8 +57,8 @@ export function getMusicApiUrl(): string {
     // In development, use the Vite proxy
     return '/api/music';
   } else {
-    // In production, use environment variable or fallback to proxy
-    return import.meta.env.VITE_MUSIC_API_URL || getApiUrl('MUSIC', true);
+    // In production, use the new HTTPS server directly
+    return import.meta.env.VITE_MUSIC_API_URL || 'https://18.142.174.87:3000/api/music';
   }
 }
 
